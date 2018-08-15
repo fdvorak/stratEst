@@ -8,8 +8,8 @@ Description: Implements variants of the strategy estimation method.
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
-LinkingTo: Rcpp
-Imports: Rcpp
+LinkingTo: Rcpp, RcppArmadillo
+Imports: Rcpp, RcppArmadillo
 RoxygenNote: 6.0.1
 Suggests: testthat
 Depends: R (>= 2.10)
