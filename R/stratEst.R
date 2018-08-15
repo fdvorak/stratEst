@@ -24,6 +24,7 @@
 #' @param lcr.tol A vector
 #' @param lcr.max A vector
 #' @param bs.samples A vector
+#' @return The return.
 #' @export
 stratEst <- function( data, strategies, shares, covariates, cluster, response = "mixed", r.responses = "no", r.trembles = "global", select = "no", crit = "BIC", se = "yes", outer.runs = 10, outer.tol = 0, outer.max = 1000, inner.runs = 100, inner.tol = 0, inner.max = 10, lcr.runs = 1000, lcr.tol = 0, lcr.max = 1000, bs.samples = 1000 ){
   if( missing(data) ) {

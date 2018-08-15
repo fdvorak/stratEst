@@ -53,6 +53,9 @@ stratEst(data, strategies, shares, covariates, cluster, response = "mixed",
 
 \item{bs.samples}{A vector}
 }
+\value{
+The return.
+}
 \description{
 A function
 }
