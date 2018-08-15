@@ -237,10 +237,6 @@ arma::field<arma::mat> stratEst_EM(arma::cube& output_cube, arma::cube& sum_outp
 // Main Function
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//' The stratEst function
-//'
-//' @param data The data matrix.
-//' @export
 // [[Rcpp::export]]
 List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec shares, arma::mat covariates, arma::vec cluster, std::string response = "mixed", std::string r_responses = "no", std::string r_trembles = "global", std::string select = "no", std::string crit = "BIC", std::string SE = "yes", int outer_runs = 10, double outer_tol_eval = 0, int outer_max_eval = 1000, int inner_runs = 100, double inner_tol_eval = 0, int inner_max_eval = 100, int LCR_runs = 100, int LCR_tol_eval = 0, int LCR_max_eval = 1000, int BS_samples = 1000, int newton_stepsize = 1, double penalty = 0) {
 

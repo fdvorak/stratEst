@@ -1,10 +1,31 @@
 # R function stratEst
 
+#' A function
 #' @useDynLib stratEst
 #' @importFrom Rcpp sourceCpp
+#' @param data A datat matrix.
+#' @param strategies A matrix identifying the strategies.
+#' @param shares A vector of shares
+#' @param covariates A vector
+#' @param cluster A vector
+#' @param response A vector
+#' @param r.responses A vector
+#' @param r.trembles A vector
+#' @param select A vector
+#' @param crit A vector
+#' @param se A vector
+#' @param outer.runs A number
+#' @param outer.tol A number
+#' @param outer.max A vector
+#' @param inner.runs A vector
+#' @param inner.tol A vector
+#' @param inner.max A vector
+#' @param lcr.runs A vector
+#' @param lcr.tol A vector
+#' @param lcr.max A vector
+#' @param bs.samples A vector
 #' @export
-
-stratEst <- function( data, strategies, shares, covariates, cluster, response = "mixed", r.responses = "no", r.trembles = "global", select = "no", crit = "BIC", se = "yes", outer.runs = 10, outer.tol = 0, outer.max = 1000, inner.runs = 100, inner.tol = 0, inner.max = 10, lcr.runs = 1000, lcr.tol = 0, lcr.max = 1000, bs.samples = 1000, newton.stepsize = 1 , penalty = 0 ){
+stratEst <- function( data, strategies, shares, covariates, cluster, response = "mixed", r.responses = "no", r.trembles = "global", select = "no", crit = "BIC", se = "yes", outer.runs = 10, outer.tol = 0, outer.max = 1000, inner.runs = 100, inner.tol = 0, inner.max = 10, lcr.runs = 1000, lcr.tol = 0, lcr.max = 1000, bs.samples = 1000 ){
   if( missing(data) ) {
     stop("data not supplied")
   }
@@ -63,6 +84,9 @@ stratEst <- function( data, strategies, shares, covariates, cluster, response = 
   if ( crit != "AIC" & crit != "BIC" & crit != "ICL" ){
     stop("crit has to be one of the following: \"AIC\", \"BIC\", or \"ICL\". Default is \"BIC\".");
   }
+
+  newton.stepsize = 1
+  penalty = 0
 
   stratEst.output <- stratEst_cpp( data, strategies, shares, covariates, cluster, response, r.responses, r.trembles, select, crit, se, outer.runs, outer.tol, outer.max, inner.runs, inner.tol, inner.max, lcr.runs, lcr.tol, lcr.max, bs.samples, newton.stepsize, penalty )
   return(stratEst.output)
