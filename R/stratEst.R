@@ -42,7 +42,7 @@ stratEst <- function( data, strategies, shares, covariates, cluster, response = 
     n_outputs = sum( unique( data[,5] ) != 0 )
     strat_states = rep(c(1:n_inputs),k)
     response_par = matrix(NA,n_inputs*k,n_outputs)
-    transition_mat = rep(1,n_inputs*k) %*% t.default(c(1:n_inputs))
+    transition_mat = rep(1,n_inputs*k) %*% t.default(c(2:n_inputs))
     strategies <- cbind(strat_states,response_par,transition_mat)
   }
   if( missing(shares) ) {
