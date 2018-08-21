@@ -2,4 +2,4 @@
 
 export(stratEst)
 importFrom(Rcpp,sourceCpp)
-useDynLib(stratEst)
+useDynLib(stratEst,.registration = TRUE)
