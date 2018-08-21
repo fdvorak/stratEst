@@ -6,9 +6,52 @@
 
 using namespace Rcpp;
 
+// rcpparma_hello_world
+arma::mat rcpparma_hello_world();
+RcppExport SEXP _stratEst_rcpparma_hello_world() {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    rcpp_result_gen = Rcpp::wrap(rcpparma_hello_world());
+    return rcpp_result_gen;
+END_RCPP
+}
+// rcpparma_outerproduct
+arma::mat rcpparma_outerproduct(const arma::colvec& x);
+RcppExport SEXP _stratEst_rcpparma_outerproduct(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::colvec& >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(rcpparma_outerproduct(x));
+    return rcpp_result_gen;
+END_RCPP
+}
+// rcpparma_innerproduct
+double rcpparma_innerproduct(const arma::colvec& x);
+RcppExport SEXP _stratEst_rcpparma_innerproduct(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::colvec& >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(rcpparma_innerproduct(x));
+    return rcpp_result_gen;
+END_RCPP
+}
+// rcpparma_bothproducts
+Rcpp::List rcpparma_bothproducts(const arma::colvec& x);
+RcppExport SEXP _stratEst_rcpparma_bothproducts(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::colvec& >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(rcpparma_bothproducts(x));
+    return rcpp_result_gen;
+END_RCPP
+}
 // stratEst_cpp
-List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec shares, arma::mat covariates, arma::vec cluster, std::string response, std::string r_responses, std::string r_trembles, std::string select, std::string crit, std::string SE, int outer_runs, double outer_tol_eval, int outer_max_eval, int inner_runs, double inner_tol_eval, int inner_max_eval, int LCR_runs, int LCR_tol_eval, int LCR_max_eval, int BS_samples, int newton_stepsize, double penalty);
-RcppExport SEXP _stratEst_stratEst_cpp(SEXP dataSEXP, SEXP strategiesSEXP, SEXP sharesSEXP, SEXP covariatesSEXP, SEXP clusterSEXP, SEXP responseSEXP, SEXP r_responsesSEXP, SEXP r_tremblesSEXP, SEXP selectSEXP, SEXP critSEXP, SEXP SESEXP, SEXP outer_runsSEXP, SEXP outer_tol_evalSEXP, SEXP outer_max_evalSEXP, SEXP inner_runsSEXP, SEXP inner_tol_evalSEXP, SEXP inner_max_evalSEXP, SEXP LCR_runsSEXP, SEXP LCR_tol_evalSEXP, SEXP LCR_max_evalSEXP, SEXP BS_samplesSEXP, SEXP newton_stepsizeSEXP, SEXP penaltySEXP) {
+List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec shares, arma::mat covariates, bool LCR, arma::vec cluster, std::string response, std::string r_responses, std::string r_trembles, std::string select, std::string crit, std::string SE, int outer_runs, double outer_tol_eval, int outer_max_eval, int inner_runs, double inner_tol_eval, int inner_max_eval, int LCR_runs, int LCR_tol_eval, int LCR_max_eval, int BS_samples, int newton_stepsize, double penalty);
+RcppExport SEXP _stratEst_stratEst_cpp(SEXP dataSEXP, SEXP strategiesSEXP, SEXP sharesSEXP, SEXP covariatesSEXP, SEXP LCRSEXP, SEXP clusterSEXP, SEXP responseSEXP, SEXP r_responsesSEXP, SEXP r_tremblesSEXP, SEXP selectSEXP, SEXP critSEXP, SEXP SESEXP, SEXP outer_runsSEXP, SEXP outer_tol_evalSEXP, SEXP outer_max_evalSEXP, SEXP inner_runsSEXP, SEXP inner_tol_evalSEXP, SEXP inner_max_evalSEXP, SEXP LCR_runsSEXP, SEXP LCR_tol_evalSEXP, SEXP LCR_max_evalSEXP, SEXP BS_samplesSEXP, SEXP newton_stepsizeSEXP, SEXP penaltySEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -16,6 +59,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< arma::mat >::type strategies(strategiesSEXP);
     Rcpp::traits::input_parameter< arma::vec >::type shares(sharesSEXP);
     Rcpp::traits::input_parameter< arma::mat >::type covariates(covariatesSEXP);
+    Rcpp::traits::input_parameter< bool >::type LCR(LCRSEXP);
     Rcpp::traits::input_parameter< arma::vec >::type cluster(clusterSEXP);
     Rcpp::traits::input_parameter< std::string >::type response(responseSEXP);
     Rcpp::traits::input_parameter< std::string >::type r_responses(r_responsesSEXP);
@@ -35,13 +79,17 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type BS_samples(BS_samplesSEXP);
     Rcpp::traits::input_parameter< int >::type newton_stepsize(newton_stepsizeSEXP);
     Rcpp::traits::input_parameter< double >::type penalty(penaltySEXP);
-    rcpp_result_gen = Rcpp::wrap(stratEst_cpp(data, strategies, shares, covariates, cluster, response, r_responses, r_trembles, select, crit, SE, outer_runs, outer_tol_eval, outer_max_eval, inner_runs, inner_tol_eval, inner_max_eval, LCR_runs, LCR_tol_eval, LCR_max_eval, BS_samples, newton_stepsize, penalty));
+    rcpp_result_gen = Rcpp::wrap(stratEst_cpp(data, strategies, shares, covariates, LCR, cluster, response, r_responses, r_trembles, select, crit, SE, outer_runs, outer_tol_eval, outer_max_eval, inner_runs, inner_tol_eval, inner_max_eval, LCR_runs, LCR_tol_eval, LCR_max_eval, BS_samples, newton_stepsize, penalty));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_stratEst_stratEst_cpp", (DL_FUNC) &_stratEst_stratEst_cpp, 23},
+    {"_stratEst_rcpparma_hello_world", (DL_FUNC) &_stratEst_rcpparma_hello_world, 0},
+    {"_stratEst_rcpparma_outerproduct", (DL_FUNC) &_stratEst_rcpparma_outerproduct, 1},
+    {"_stratEst_rcpparma_innerproduct", (DL_FUNC) &_stratEst_rcpparma_innerproduct, 1},
+    {"_stratEst_rcpparma_bothproducts", (DL_FUNC) &_stratEst_rcpparma_bothproducts, 1},
+    {"_stratEst_stratEst_cpp", (DL_FUNC) &_stratEst_stratEst_cpp, 24},
     {NULL, NULL, 0}
 };
 
