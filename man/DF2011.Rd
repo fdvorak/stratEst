@@ -11,12 +11,12 @@
   ...
 }}
 \source{
-\url{http://www.aer.info/}
+\url{https://www.aeaweb.org/articles?id=10.1257/aer.101.1.411}
 }
 \usage{
 DF2011
 }
 \description{
-A dataset containing observations of the repeated prisonner's dilemma.
+A dataset containing observations of the repeated prisonner's dilemma. zip file dal_bo_2010a_data.txt
 }
 \keyword{datasets}

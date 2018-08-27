@@ -67,30 +67,38 @@ stratEst <- function( data, strategies, shares, covariates, cluster, response = 
     stop("data not supplied")
   }
   data_frame <- as.data.frame(data)
-  subjectID <- data_frame$subjectID
+  id <- data_frame$id
   supergame <- data_frame$supergame
   period <- data_frame$period
-  matchID <- data_frame$matchID
+  group <- data_frame$group
   cooperation <- data_frame$cooperation
+  if( is.null(cooperation) ) {
+    cooperation <- data_frame$coop
+  }
+  other_cooperation <- data_frame$other_cooperation
+  if( is.null(other_cooperation) ) {
+    other_cooperation <- data_frame$o_coop
+  }
   input <- data_frame$input
   output <- data_frame$output
-  if( is.null(subjectID) ) {
-    stop("data does not contain the variable: subjectID")
+
+  if( is.null(id) ) {
+    stop("data does not contain the variable: id (id)")
   }
   if( is.null(supergame) ) {
-    stop("data does not contain the variable: supergame")
+    stop("data does not contain the variable: supergame (match)")
   }
   if( is.null(period) ) {
-    stop("data does not contain the variable: period")
+    stop("data does not contain the variable: period (round)")
   }
-  if( ( is.null(input) == F |  is.null(output) == F ) & ( is.null(matchID) == F |  is.null(cooperation) == F )  ){
-      stop("make sure data either contains the variables matchID and cooperation or the variables input and output")
+  if( ( is.null(input) == F |  is.null(output) == F ) & ( is.null(group) == F |  is.null(cooperation) == F )  ){
+      stop("make sure data either contains the variables group and cooperation or the variables input and output")
   }
-  if( is.null(cooperation) == F & is.null(matchID) ) {
-    stop("if data contains the variable cooperation, it must contain the variable matchID")
+  if( is.null(cooperation) == F & is.null(group) & is.null(other_cooperation) ) {
+    stop("if data contains the variable cooperation, it must contain the variable group or other_cooperation")
   }
-  if( is.null(matchID) == F & is.null(cooperation) ) {
-    stop("if data contains the variable matchID, it must contain the variable cooperation")
+  if( is.null(group) == F & is.null(cooperation) ) {
+    stop("if data contains the variable group, it must contain the variable cooperation")
   }
   if( is.null(output) == F & is.null(input)  ){
     stop("if data contains the variable output, it must contain the variable input")
@@ -101,27 +109,11 @@ stratEst <- function( data, strategies, shares, covariates, cluster, response = 
   if( missing(strategies) ) {
     stop("strategies not supplied")
   }
-  #check strategies
-  if( is.matrix(strategies) == F ){
-    k = strategies
-    n_inputs = length( unique( data[,4] ) )
-    n_outputs = sum( unique( data[,5] ) != 0 )
-    strat_states = rep(c(1:n_inputs),k)
-    response_par = matrix(NA,n_inputs*k,n_outputs)
-    transition_mat = rep(1,n_inputs*k) %*% t.default(c(2:n_inputs))
-    strategies <- cbind(strat_states,response_par,transition_mat)
-  }
-  #check shares
-  if( missing(shares) ) {
-    k = sum( as.numeric( strategies[,1] == 1 ) )
-    shares = rep( NA , k )
-  }
   # check covariates
   if( missing(covariates) ) {
     covariates = matrix(0,1,1)
     LCR = FALSE
-  }
-  else{
+  } else{
     LCR = TRUE
   }
   # check cluster
@@ -177,10 +169,67 @@ stratEst <- function( data, strategies, shares, covariates, cluster, response = 
   newton.stepsize = 1
   penalty = 0
 
-  # prepare data
-  if( is.null(input) == F ){
-    data <- cbind(subjectID,supergame,period,input,output)
+  if( is.null(cooperation) == F & is.null(other_cooperation) ) {
+    output = cooperation
+    input = rep(NA,length(output))
+    input[(period == 1)] = 0
+    unique_ids = unique(id)
+
+    for (i in 1:length(unique_ids)) {
+      unique_sg = unique(supergame[id==unique_ids[i]])
+      for (j in 1:length(unique_sg)){                       # for each supergame
+        hist = output[supergame == unique_sg[j] & id == unique_ids[i]]  # own history as own choices
+        same_group = unique(group[supergame == unique_sg[j] & id == unique_ids[i]])
+        p_hist = output[ group == same_group & id != unique_ids[i] ]
+        if ( max(period[supergame == unique_sg[j] & id == unique_ids[i]]) >= 2 ){
+          for (k in 2:max(period[supergame == unique_sg[j] & id == unique_ids[i]])){                                    # state notation: own_choice, signal about other's choice, other's choice, signal about own choice going out to partner
+            input[ id == unique_ids[i] & supergame == unique_sg[j] & period == k ] =  1*hist[k-1]*p_hist[k-1] + 2*hist[k-1]*(1 - p_hist[k-1]) +3*(1 - hist[k-1])*p_hist[k-1] + 4*(1 - hist[k-1])*(1 -p_hist[k-1])                      # CC state
+          }
+        }
+      }
+    }
   }
+  else if( is.null(cooperation) == F & is.null(other_cooperation) == F ){
+
+    output = cooperation
+    p_output = other_cooperation
+    input = rep(NA,length(output))
+    input[(period == 1)] = 0
+    unique_ids = unique(id)
+
+    for (i in 1:length(unique_ids)) {
+      unique_sg = unique(supergame[id==unique_ids[i]])
+      for (j in 1:length(unique_sg)){                       # for each supergame
+        hist = output[supergame == unique_sg[j] & id == unique_ids[i]]                                                 # own history as own choices
+        p_hist = p_output[supergame == unique_sg[j] & id == unique_ids[i]]
+        if ( max(period[supergame == unique_sg[j] & id == unique_ids[i]]) >= 2 ){
+          for (k in 2:max(period[supergame == unique_sg[j] & id == unique_ids[i]])){                                    # state notation: own_choice, signal about other's choice, other's choice, signal about own choice going out to partner
+            input[id == unique_ids[i] & supergame == unique_sg[j] & period == k ] =  1*hist[k-1]*p_hist[k-1] + 2*hist[k-1]*(1 - p_hist[k-1]) +3*(1 - hist[k-1])*p_hist[k-1] + 4*(1 - hist[k-1])*(1 -p_hist[k-1])                      # CC state
+          }
+        }
+      }
+    }
+  }
+
+  #check strategies
+  if( is.matrix(strategies) == F ){
+    k = strategies
+    n_inputs = length( unique( input ) )
+    n_outputs = sum( unique( output ) != 0 )
+    strat_states = rep(c(1:n_inputs),k)
+    response_par = matrix(NA,n_inputs*k,n_outputs)
+    transition_mat = rep(1,n_inputs*k) %*% t.default(c(2:n_inputs))
+    strategies <- cbind(strat_states,response_par,transition_mat)
+  }
+  #check shares
+  if( missing(shares) ) {
+    k = sum( as.numeric( strategies[,1] == 1 ) )
+    shares = rep( NA , k )
+  }
+
+  # prepare data
+  data <- cbind(id,supergame,period,input,output)
+
   stratEst.output <- stratEst_cpp( data, strategies, shares, covariates, LCR, cluster, response, r.responses, r.trembles, select, crit, se, outer.runs, outer.tol, outer.max, inner.runs, inner.tol, inner.max, lcr.runs, lcr.tol, lcr.max, bs.samples, newton.stepsize, penalty )
   return(stratEst.output)
 }

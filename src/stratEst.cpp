@@ -966,7 +966,7 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec shares, arma::
   arma::vec cluster_id_vec( num_ids , arma::fill::zeros );
   bool CL = cluster.n_elem > 1;
   if( CL ){
-    SE = "BS";
+    SE = "bs";
     arma::uvec zeros_cluster = find( cluster <= 0 );
     int num_zeros_cluster = zeros_cluster.n_elem;
     if ( num_zeros_cluster != 0 ){
@@ -1710,7 +1710,7 @@ R_SE = stratEst_SE( output_cube, sum_outputs_cube, strat_id, covariate_mat, R(0,
 // standard erros via bootstrap
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-if( SE == "BS" ){
+if( SE == "bs" ){
   int BS_samples_shares = BS_samples;
   int BS_samples_responses = BS_samples;
   int BS_samples_trembles = BS_samples;
@@ -1892,7 +1892,7 @@ if( SE == "BS" ){
   arma::mat final_SE_trembles = R_SE(2,0);
   arma::mat final_SE_coefficients = R_SE(3,0);
   arma::mat final_convergence = R_SE(4,0);
-  if( SE == "BS" && LCR == false ){
+  if( SE == "bs" && LCR == false ){
     if( num_shares_to_est > 0 ){
       final_SE_shares = BS_shares_SE;
     }

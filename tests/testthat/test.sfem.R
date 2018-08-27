@@ -1,0 +1,46 @@
+library(stratEst)
+
+test_that("SFEM for treatment 1, Dal Bo & Frechette 2011",  {
+  strats <- rbind(ALLD,ALLC,GRIM,TFT,T2,WSLS)
+  # treatment 1
+  sfem1 <- stratEst(DF2011[DF2011[,1]==1,],strats,select = "strategies", crit ="aic", se= "bs")
+  estimated_shares <- round(sfem1$shares,3)
+  estimated_ses <- round(sfem1$shares_SE,2)
+  estimated_trembles_ses <- round(sfem1$trembles_SE,2)
+  expect_equal(0.920,estimated_shares[1])
+  expect_equal(0.080,estimated_shares[2])
+  expect_equal(0.04,estimated_ses[1])
+  expect_equal(0.04,estimated_ses[2])
+  expect_equal(0.02,estimated_trembles_ses[1])
+  # treatment 2
+  sfem2 <- stratEst(DF2011[DF2011[,1]==2,],strats,select = "strategies", crit ="aic")
+  estimated_shares <- round(sfem2$shares,3)
+  expect_equal(0.783,estimated_shares[1])
+  expect_equal(0.078,estimated_shares[2])
+  expect_equal(0.040,estimated_shares[3])
+  expect_equal(0.098,estimated_shares[4])
+  # treatment 3
+  sfem3 <- stratEst(DF2011[DF2011[,1]==3,],strats,select = "strategies", crit ="aic")
+  estimated_shares <- round(sfem3$shares,3)
+  expect_equal(0.533,estimated_shares[1])
+  expect_equal(0.072,estimated_shares[2])
+  expect_equal(0.395,estimated_shares[3])
+  # treatment 4
+  sfem4 <- stratEst(DF2011[DF2011[,1]==4,],strats,select = "strategies", crit ="aic")
+  estimated_shares <- round(sfem4$shares,3)
+  expect_equal(0.648,estimated_shares[1])
+  expect_equal(0.352,estimated_shares[2])
+  # treatment 5
+  sfem5 <- stratEst(DF2011[DF2011[,1]==5,],strats,select = "strategies", crit ="aic")
+  estimated_shares <- round(sfem5$shares,3)
+  expect_equal(0.109,estimated_shares[1])
+  expect_equal(0.296,estimated_shares[2])
+  expect_equal(0.267,estimated_shares[3])
+  expect_equal(0.327,estimated_shares[4])
+  # treatment 6
+  sfem6 <- stratEst(DF2011[DF2011[,1]==6,],strats,select = "strategies", crit ="aic")
+  estimated_shares <- round(sfem6$shares,3)
+  expect_equal(0.076,estimated_shares[1])
+  expect_equal(0.606,estimated_shares[2])
+  expect_equal(0.319,estimated_shares[3])
+})
