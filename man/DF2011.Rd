@@ -3,15 +3,15 @@
 \docType{data}
 \name{DF2011}
 \alias{DF2011}
-\title{Dal Bo and Frechette data.}
-\format{A data frame with 53940 rows and 10 variables:
+\title{Data of Dal Bo and Frechette (2011)}
+\format{A data frame with 7358 rows and 6 variables:
 \describe{
-  \item{treatment}{treatment of the experiment}
-  \item{id}{id of participant}
-  \item{supergame}{supergame number}
-  \item{period}{period of the supergame}
-  \item{cooperation}{dummy which is one if the participant cooperated in the current period}
-  \item{other_cooperation}{dummy which is one if the partner cooperated in the current period}
+  \item{treatment}{A treatment identifier of the experiment.}
+  \item{id}{Variable which identifies a participant.}
+  \item{supergame}{The supergame number.}
+  \item{period}{The period of the supergame.}
+  \item{cooperation}{A dummy variable  which is one if the participant cooperated in the current period.}
+  \item{other_cooperation}{A dummy variable which is one if the partner in the current match cooperated in the current period.}
 }}
 \source{
 \url{https://www.aeaweb.org/articles?id=10.1257/aer.101.1.411}
@@ -20,6 +20,6 @@
 DF2011
 }
 \description{
-A dataset containing observations of the repeated prisonner's dilemma. zip file dal_bo_2010a_data.txt
+A dataset with observations from the repeated prisonner's dilemma experiment of Dal Bo and Frechette (2011).
 }
 \keyword{datasets}

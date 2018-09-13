@@ -1430,7 +1430,7 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec shares, arma::
             LL_inner_min = LL_inner_temp(0,0);
           }
         }
-
+        Rcpp::checkUserInterrupt();
         arma::mat pre_eval_vec = R_inner(9,0);
         R_outer = stratEst_EM( output_cube, sum_outputs_cube, strat_id, R_inner(0,0), R_inner(1,0), R_inner(2,0), R_inner(3,0), R_inner(4,0), shares_to_est, indices_responses, indices_trembles, responses_to_sum, response, pre_eval_vec(0,0) , outer_tol_eval, outer_max_eval );
         arma::mat LL_outer_mat = R_outer(LL_index,0);
@@ -1716,6 +1716,7 @@ if( SE == "bs" ){
   int BS_samples_trembles = BS_samples;
   // int BS_samples_coefficients = BS_samples;
   for (int i = 0; i < BS_samples; i++) {
+    Rcpp::checkUserInterrupt();
     arma::mat iter( 1 , 1 , arma::fill::zeros );
     iter.fill(i);
     iter.print("BS sample: ");
