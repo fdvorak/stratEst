@@ -2,7 +2,7 @@
 % Please edit documentation in R/stratEst.R
 \name{stratEst}
 \alias{stratEst}
-\title{The estimation function for strategy estimation}
+\title{Estimation function for strategy estimation}
 \usage{
 stratEst(data, strategies, shares, covariates, cluster, response = "mixed",
   r.responses = "no", r.trembles = "global", select = "no",
@@ -63,10 +63,11 @@ The function returns a list with the following elements.
 \item{response.mat}{Matrix which contains the estimates of the response probabilities for the columns of the strategy matrix which represent the response probabilities.}
 \item{tremble.mat}{Matrix which contains the estimates of the tremble probabilities for the columns of the strategy matrix which represent the response probabilities.}
 \item{coefficient.mat}{Matrix which contains the latent class regression coefficients of strategies in columns. Note that the coefficients of the first strategy are one by definition.}
-\item{ll.val}{The log-Likelihood value corresponding to the reported estimates. Bigger values indicate a better fit of the model to the data.}
+\item{loglike}{The log-Likelihood value corresponding to the reported estimates. Bigger values indicate a better fit of the model to the data.}
 \item{crit.val}{The value of the selection criterion defined under \code{crit}. Bigger values indicate a better fit of the model.}
 \item{eval}{Number of iterations of the solver. The reported number is the sum of iterations performed in the inner and the outer run which led to the reported estimates.}
 \item{tol.val}{The tolerance value in the last iteration.}
+\item{entropy}{Entropy of the assignments.}
 \item{assignments}{Matrix which contains the posterior probability assignments of individuals to strategies. The rows of the matrix correspond to the ID sorted in ascending order beginning with the individual with the lowest ID. The columns correspond to the strategies, starting with the first strategy defined in the strategy matrix in column one.}
 \item{priors}{Matrix which contains the individual prior probabilities of individuals as predicted by the covariate vectors of the individuals. The rows correspond to the ID sorted in ascending order beginning with the individual with the lowest ID. The columns correspond to the strategies, starting with the first strategy defined in the strategy matrix.}
 \item{shares.se}{Column vector which contains the standard errors of the estimated shares. The elements correspond to the vector of estimates.}
@@ -76,7 +77,7 @@ The function returns a list with the following elements.
 \item{convergence}{Row vector which reports the maximum value of the score vector of the shares as the first element, responses as the second element, trembles as the third element, and LCR coefficients as the forth element. Small values indicate convergence of the algorithm to a (local) maximum.}
 }
 \description{
-Estimates variants of the strategy estimation method.
+Performs variants of the strategy estimation method.
 }
 \details{
 The \pkg{stratEst} package can be used to characterize the behavior of participants of an economic experiment as a mixture of individual strategies. The central estimation function \code{stratEst()} returns maximum-likelihood estimates for the population shares and response parameters of a set of candidate strategies. Candidate strategies can be supplied by the user in the form of deterministic finite-state automata which allows to customize strategies for many different games. The number and the complexity of strategies can be restricted by the user or selected based on information criteria. stratEst also features latent class regression to assess the influence of covariates on strategy choice. The strategy estimation method characterizes the behavior of participants as a mixture of individual strategies. Strategies are complete action plans which define a behavioral response for every situation which can be encountered by a player in a game. The strategy estimation method was introduced by (Dal Bo & Frechette 2011) to estimate the relative frequency of a fixed set of pure strategies in the indefinitely repeated prisoner's dilemma. Breitmoser (2015) extended the method to the estimation of behavior strategies. Strategies are characterized by structural assumptions that map all possible situations of a game into finite set of strategy-specific states. This allows to estimate strategies even when the number of possible situations in a game is infinite. The parameters of the candidate strategies can be defined by the user based on theory. This allows to tailor strategies to the experimental game at hand and guarantees to conduct strategy estimation beyond the prisoner's dilemma. The function can be used to perform strategy estimation for the large set of strategies which can be defined as deterministic finite-state automata. The candidate strategies used in the estimation can be customized by the user which allows to specify strategy parameters based on theory. This feature allows to define a reasonable set of candidate strategies for most experimental games with discrete choices.
@@ -86,8 +87,10 @@ The \pkg{stratEst} package uses the EM algorithm (Dempster, Laird & Rubin 1977) 
 }
 \examples{
 ## Replication of Dal Bo and Frechette (2011), Table 7 on page 424
-## Results for the treatment with delta = 1/2 and R = 40 (column 3 of Table 7)
-#' stratEst(DF2011,5)
+## Results for the first treatment with delta = 1/2 and R = 32 (column 1 of Table 7)
+data <- DF2011[DF2011$treatment == 1,]
+strats <- rbind(ALLD,ALLC,GRIM,TFT,T2,WSLS)
+stratEst(data,strats)
 }
 \references{
 Breitmoser, Y. (2015): Cooperation, but no reciprocity: Individual strategies in the repeated prisoner's dilemma, \emph{American Economic Review}, 105, 2882-2910.

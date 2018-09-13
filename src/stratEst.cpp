@@ -1,5 +1,5 @@
-#include <RcppArmadilloExtensions/sample.h>
-// [[Rcpp::depends(RcppArmadillo)]]
+#define ARMA_NO_DEBUG
+#include <RcppArmadillo.h>
 using namespace Rcpp;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1011,8 +1011,8 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec shares, arma::
       arma::vec rounds_sbj = round_vec( find( id_vec == i && match_vec == unique_matches_sbj(j) ) );
       arma::vec unique_rounds_sbj = unique( rounds_sbj );
       int num_rounds_sbj_match = unique_rounds_sbj.n_elem;
-      for(int k = 0; k < num_rounds_sbj_match; k++) {
-        sorted_data.row( line ) = data.rows( find( data.col(0) == i && data.col(1) == j+1 && data.col(2) == k+1 ) );
+      for(int l = 0; l < num_rounds_sbj_match; l++) {
+        sorted_data.row( line ) = data.rows( find( data.col(0) == i && data.col(1) == j+1 && data.col(2) == l+1 ) );
         line = line + 1;
       }
     }
@@ -1903,7 +1903,7 @@ if( SE == "bs" ){
       final_SE_trembles = BS_trembles_SE;
     }
   }
-  List S = List::create( Named("shares") = final_shares, Named("strategies") = final_strategies, Named("responses") = final_responses, Named("trembles") = final_trembles,  Named("coefficients") = final_coefficients, Named("response_mat") = final_response_mat, Named("tremble_mat") = final_tremble_mat, Named("coefficient_mat") =  final_coefficient_mat, Named("LL") = final_LL, Named("info_criterion") = final_crit, Named("nfeval") = final_eval, Named("eps") = final_eps, Named("entropy_k") = final_E, Named("assignment") = final_i_class, Named("indiviual priors") = final_individual_priors, Named("shares_SE") = final_SE_shares, Named("responses_SE") = final_SE_responses, Named("trembles_SE") = final_SE_trembles, Named("coefficients_SE") = final_SE_coefficients, Named("convergence") = final_convergence );
+  List S = List::create( Named("shares") = final_shares, Named("strategies") = final_strategies, Named("responses") = final_responses, Named("trembles") = final_trembles,  Named("coefficients") = final_coefficients, Named("response.mat") = final_response_mat, Named("tremble.mat") = final_tremble_mat, Named("coefficient.mat") =  final_coefficient_mat, Named("loglike") = final_LL, Named("crit.val") = final_crit, Named("eval") = final_eval, Named("tol.val") = final_eps, Named("entropy") = final_E, Named("assignments") = final_i_class, Named("priors") = final_individual_priors, Named("shares.se") = final_SE_shares, Named("responses.se") = final_SE_responses, Named("trembles.se") = final_SE_trembles, Named("coefficients.se") = final_SE_coefficients, Named("convergence") = final_convergence );
   return(S);
 }
 

@@ -83,6 +83,40 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// transform_cpp
+arma::vec transform_cpp(arma::vec id, arma::vec supergame, arma::vec period, arma::vec group, arma::vec output, arma::vec input, arma::vec unique_ids);
+RcppExport SEXP _stratEst_transform_cpp(SEXP idSEXP, SEXP supergameSEXP, SEXP periodSEXP, SEXP groupSEXP, SEXP outputSEXP, SEXP inputSEXP, SEXP unique_idsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::vec >::type id(idSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type supergame(supergameSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type period(periodSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type group(groupSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type output(outputSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type input(inputSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type unique_ids(unique_idsSEXP);
+    rcpp_result_gen = Rcpp::wrap(transform_cpp(id, supergame, period, group, output, input, unique_ids));
+    return rcpp_result_gen;
+END_RCPP
+}
+// transform_pd_cpp
+arma::vec transform_pd_cpp(arma::vec id, arma::vec supergame, arma::vec period, arma::vec output, arma::vec p_output, arma::vec input, arma::vec unique_ids);
+RcppExport SEXP _stratEst_transform_pd_cpp(SEXP idSEXP, SEXP supergameSEXP, SEXP periodSEXP, SEXP outputSEXP, SEXP p_outputSEXP, SEXP inputSEXP, SEXP unique_idsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::vec >::type id(idSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type supergame(supergameSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type period(periodSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type output(outputSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type p_output(p_outputSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type input(inputSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type unique_ids(unique_idsSEXP);
+    rcpp_result_gen = Rcpp::wrap(transform_pd_cpp(id, supergame, period, output, p_output, input, unique_ids));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_stratEst_rcpparma_hello_world", (DL_FUNC) &_stratEst_rcpparma_hello_world, 0},
@@ -90,6 +124,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_stratEst_rcpparma_innerproduct", (DL_FUNC) &_stratEst_rcpparma_innerproduct, 1},
     {"_stratEst_rcpparma_bothproducts", (DL_FUNC) &_stratEst_rcpparma_bothproducts, 1},
     {"_stratEst_stratEst_cpp", (DL_FUNC) &_stratEst_stratEst_cpp, 24},
+    {"_stratEst_transform_cpp", (DL_FUNC) &_stratEst_transform_cpp, 7},
+    {"_stratEst_transform_pd_cpp", (DL_FUNC) &_stratEst_transform_pd_cpp, 7},
     {NULL, NULL, 0}
 };
 

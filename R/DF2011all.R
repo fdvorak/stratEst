@@ -4,12 +4,14 @@
 #'
 #' @format A data frame with 53940 rows and 10 variables:
 #' \describe{
-#'   \item{treatment}{treatment of the experiment}
+#'   \item{coop}{cooperation}
+#'   \item{date}{date of the session}
+#'   \item{delta}{discount factor of treatment}
+#'   \item{group}{group id of matches}
 #'   \item{id}{id of participant}
-#'   \item{supergame}{supergame number}
 #'   \item{period}{period of the supergame}
-#'   \item{cooperation}{dummy which is one if the participant cooperated in the current period}
-#'   \item{other_cooperation}{dummy which is one if the partner cooperated in the current period}
+#'   \item{r}{stage game parameter of treatment}
+#'   \item{supergame}{supergame number}
 #' }
 #' @source \url{https://www.aeaweb.org/articles?id=10.1257/aer.101.1.411}
-"DF2011"
+"DF2011all"

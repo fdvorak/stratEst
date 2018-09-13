@@ -21,3 +21,11 @@ stratEst_cpp <- function(data, strategies, shares, covariates, LCR, cluster, res
     .Call(`_stratEst_stratEst_cpp`, data, strategies, shares, covariates, LCR, cluster, response, r_responses, r_trembles, select, crit, SE, outer_runs, outer_tol_eval, outer_max_eval, inner_runs, inner_tol_eval, inner_max_eval, LCR_runs, LCR_tol_eval, LCR_max_eval, BS_samples, newton_stepsize, penalty)
 }
 
+transform_cpp <- function(id, supergame, period, group, output, input, unique_ids) {
+    .Call(`_stratEst_transform_cpp`, id, supergame, period, group, output, input, unique_ids)
+}
+
+transform_pd_cpp <- function(id, supergame, period, output, p_output, input, unique_ids) {
+    .Call(`_stratEst_transform_pd_cpp`, id, supergame, period, output, p_output, input, unique_ids)
+}
+

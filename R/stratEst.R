@@ -1,4 +1,4 @@
-#' The estimation function for strategy estimation
+#' Estimation function for strategy estimation
 #' @useDynLib stratEst,.registration = TRUE
 #' @importFrom Rcpp sourceCpp
 #' @param data A matrix with five columns which contains the data for the estimation in a long format. Each row in data represents one observation of one individual. The first column of the data matrix contains an ID variable which identifies the observations of the same participant across rows. The second column contains a variable which indicates the supergame number of the observation. If the game was only played once, all entries in the second column equal one. The third column contains a variable which indicates the round number of an observation. If only one round was played, all entries in the third column equal one. The fourth columns contain the inputs and the fifth column the outputs for the current round. The fourth and fifth columns may also contain zeros. Zeros have the following implications. In the input column a zero indicates that no input was observed in the current round and strategy responses are determined by the start state. A zero in the output column indicates that the output falls into some reference category. The response probabilities for the reference category are not estimated. Instead the remaining response probabilities are the remaining probabilities after subtracting the response probabilities of all other outputs from one.
@@ -32,10 +32,11 @@
 #' \item{response.mat}{Matrix which contains the estimates of the response probabilities for the columns of the strategy matrix which represent the response probabilities.}
 #' \item{tremble.mat}{Matrix which contains the estimates of the tremble probabilities for the columns of the strategy matrix which represent the response probabilities.}
 #' \item{coefficient.mat}{Matrix which contains the latent class regression coefficients of strategies in columns. Note that the coefficients of the first strategy are one by definition.}
-#' \item{ll.val}{The log-Likelihood value corresponding to the reported estimates. Bigger values indicate a better fit of the model to the data.}
+#' \item{loglike}{The log-Likelihood value corresponding to the reported estimates. Bigger values indicate a better fit of the model to the data.}
 #' \item{crit.val}{The value of the selection criterion defined under \code{crit}. Bigger values indicate a better fit of the model.}
 #' \item{eval}{Number of iterations of the solver. The reported number is the sum of iterations performed in the inner and the outer run which led to the reported estimates.}
 #' \item{tol.val}{The tolerance value in the last iteration.}
+#' \item{entropy}{Entropy of the assignments.}
 #' \item{assignments}{Matrix which contains the posterior probability assignments of individuals to strategies. The rows of the matrix correspond to the ID sorted in ascending order beginning with the individual with the lowest ID. The columns correspond to the strategies, starting with the first strategy defined in the strategy matrix in column one.}
 #' \item{priors}{Matrix which contains the individual prior probabilities of individuals as predicted by the covariate vectors of the individuals. The rows correspond to the ID sorted in ascending order beginning with the individual with the lowest ID. The columns correspond to the strategies, starting with the first strategy defined in the strategy matrix.}
 #' \item{shares.se}{Column vector which contains the standard errors of the estimated shares. The elements correspond to the vector of estimates.}
@@ -43,7 +44,7 @@
 #' \item{trembles.se}{Column vector which contains the standard errors of the reported trembles. The elements correspond to the vector of estimates.}
 #' \item{coefficients.se}{Column vector which contains the standard errors of the reported coefficients. The elements correspond to the vector of estimates.}
 #' \item{convergence}{Row vector which reports the maximum value of the score vector of the shares as the first element, responses as the second element, trembles as the third element, and LCR coefficients as the forth element. Small values indicate convergence of the algorithm to a (local) maximum.}
-#' @description Estimates variants of the strategy estimation method.
+#' @description Performs variants of the strategy estimation method.
 #' @details The \pkg{stratEst} package can be used to characterize the behavior of participants of an economic experiment as a mixture of individual strategies. The central estimation function \code{stratEst()} returns maximum-likelihood estimates for the population shares and response parameters of a set of candidate strategies. Candidate strategies can be supplied by the user in the form of deterministic finite-state automata which allows to customize strategies for many different games. The number and the complexity of strategies can be restricted by the user or selected based on information criteria. stratEst also features latent class regression to assess the influence of covariates on strategy choice. The strategy estimation method characterizes the behavior of participants as a mixture of individual strategies. Strategies are complete action plans which define a behavioral response for every situation which can be encountered by a player in a game. The strategy estimation method was introduced by (Dal Bo & Frechette 2011) to estimate the relative frequency of a fixed set of pure strategies in the indefinitely repeated prisoner's dilemma. Breitmoser (2015) extended the method to the estimation of behavior strategies. Strategies are characterized by structural assumptions that map all possible situations of a game into finite set of strategy-specific states. This allows to estimate strategies even when the number of possible situations in a game is infinite. The parameters of the candidate strategies can be defined by the user based on theory. This allows to tailor strategies to the experimental game at hand and guarantees to conduct strategy estimation beyond the prisoner's dilemma. The function can be used to perform strategy estimation for the large set of strategies which can be defined as deterministic finite-state automata. The candidate strategies used in the estimation can be customized by the user which allows to specify strategy parameters based on theory. This feature allows to define a reasonable set of candidate strategies for most experimental games with discrete choices.
 #' @references
 #' Breitmoser, Y. (2015): Cooperation, but no reciprocity: Individual strategies in the repeated prisoner's dilemma, \emph{American Economic Review}, 105, 2882-2910.
@@ -57,8 +58,10 @@
 #' Sanderson, C. and R. Curtin (2016): Armadillo: a template-based C++ library for linear algebra. \emph{Journal of Open Source Software}, 1-26.
 #' @examples
 #' ## Replication of Dal Bo and Frechette (2011), Table 7 on page 424
-#' ## Results for the treatment with delta = 1/2 and R = 40 (column 3 of Table 7)
-#' #' stratEst(DF2011,5)
+#' ## Results for the first treatment with delta = 1/2 and R = 32 (column 1 of Table 7)
+#' data <- DF2011[DF2011$treatment == 1,]
+#' strats <- rbind(ALLD,ALLC,GRIM,TFT,T2,WSLS)
+#' stratEst(data,strats)
 #' @export
 stratEst <- function( data, strategies, shares, covariates, cluster, response = "mixed", r.responses = "no", r.trembles = "global", select = "no", crit = "bic", se = "yes", outer.runs = 10, outer.tol = 0, outer.max = 1000, inner.runs = 100, inner.tol = 0, inner.max = 10, lcr.runs = 1000, lcr.tol = 0, lcr.max = 1000, bs.samples = 1000 ){
   # crude argument checks
@@ -152,9 +155,6 @@ stratEst <- function( data, strategies, shares, covariates, cluster, response = 
   if ( select != "no" & select != "strategies" & select != "responses"  & select != "trembles" & select != "both" & select != "all" ){
     stop("select has to be one of the following: \"no\", \"strategies\", \"responses\", \"trembles\", \"both\", or \"all\". Default is \"no\".");
   }
-  if ( ( select == "strategies" | select == "all" ) && k == 1 ){
-    stop("strategies cannot be selected if there is only one strategy.");
-  }
   # check crit
   if ( crit != "aic" & crit != "bic" & crit != "icl" ){
     stop("crit has to be one of the following: \"aic\", \"bic\", or \"icl\". Default is \"bic\".");
@@ -164,71 +164,41 @@ stratEst <- function( data, strategies, shares, covariates, cluster, response = 
     stop("Number of bootstrap samples must be a positive integer. Default is 1000.");
   }
 
-
   # for future use
   newton.stepsize = 1
   penalty = 0
 
-  if( is.null(cooperation) == F & is.null(other_cooperation) ) {
-    output = cooperation
-    input = rep(NA,length(output))
-    input[(period == 1)] = 0
-    unique_ids = unique(id)
-
-    for (i in 1:length(unique_ids)) {
-      unique_sg = unique(supergame[id==unique_ids[i]])
-      for (j in 1:length(unique_sg)){                       # for each supergame
-        hist = output[supergame == unique_sg[j] & id == unique_ids[i]]  # own history as own choices
-        same_group = unique(group[supergame == unique_sg[j] & id == unique_ids[i]])
-        p_hist = output[ group == same_group & id != unique_ids[i] ]
-        if ( max(period[supergame == unique_sg[j] & id == unique_ids[i]]) >= 2 ){
-          for (k in 2:max(period[supergame == unique_sg[j] & id == unique_ids[i]])){                                    # state notation: own_choice, signal about other's choice, other's choice, signal about own choice going out to partner
-            input[ id == unique_ids[i] & supergame == unique_sg[j] & period == k ] =  1*hist[k-1]*p_hist[k-1] + 2*hist[k-1]*(1 - p_hist[k-1]) +3*(1 - hist[k-1])*p_hist[k-1] + 4*(1 - hist[k-1])*(1 -p_hist[k-1])                      # CC state
-          }
-        }
-      }
-    }
-  }
-  else if( is.null(cooperation) == F & is.null(other_cooperation) == F ){
-
-    output = cooperation
-    p_output = other_cooperation
-    input = rep(NA,length(output))
-    input[(period == 1)] = 0
-    unique_ids = unique(id)
-
-    for (i in 1:length(unique_ids)) {
-      unique_sg = unique(supergame[id==unique_ids[i]])
-      for (j in 1:length(unique_sg)){                       # for each supergame
-        hist = output[supergame == unique_sg[j] & id == unique_ids[i]]                                                 # own history as own choices
-        p_hist = p_output[supergame == unique_sg[j] & id == unique_ids[i]]
-        if ( max(period[supergame == unique_sg[j] & id == unique_ids[i]]) >= 2 ){
-          for (k in 2:max(period[supergame == unique_sg[j] & id == unique_ids[i]])){                                    # state notation: own_choice, signal about other's choice, other's choice, signal about own choice going out to partner
-            input[id == unique_ids[i] & supergame == unique_sg[j] & period == k ] =  1*hist[k-1]*p_hist[k-1] + 2*hist[k-1]*(1 - p_hist[k-1]) +3*(1 - hist[k-1])*p_hist[k-1] + 4*(1 - hist[k-1])*(1 -p_hist[k-1])                      # CC state
-          }
-        }
-      }
-    }
+  # transform PD data into inout output data structure
+  if( is.null(cooperation) == FALSE ){
+    data <- transform_pd( data_frame )
+    input <- data[,4]
+    output <- data[,5]
+  }else{
+    # prepare data
+    data <- cbind(id,supergame,period,input,output)
   }
 
   #check strategies
   if( is.matrix(strategies) == F ){
-    k = strategies
+    n_strats = strategies
     n_inputs = length( unique( input ) )
     n_outputs = sum( unique( output ) != 0 )
-    strat_states = rep(c(1:n_inputs),k)
-    response_par = matrix(NA,n_inputs*k,n_outputs)
-    transition_mat = rep(1,n_inputs*k) %*% t.default(c(2:n_inputs))
+    strat_states = rep(c(1:n_inputs),n_strats)
+    response_par = matrix(NA,n_inputs*n_strats,n_outputs)
+    transition_mat = rep(1,n_inputs*n_strats) %*% t.default(c(2:n_inputs))
     strategies <- cbind(strat_states,response_par,transition_mat)
+  }
+  else{
+    n_strats = sum( as.numeric( strategies[,1] == 1 ) )
+  }
+  if ( ( select == "strategies" | select == "all" ) && n_strats == 1 ){
+    stop("strategies cannot be selected if there is only one strategy.");
   }
   #check shares
   if( missing(shares) ) {
-    k = sum( as.numeric( strategies[,1] == 1 ) )
-    shares = rep( NA , k )
+    shares = rep( NA , n_strats )
   }
 
-  # prepare data
-  data <- cbind(id,supergame,period,input,output)
 
   stratEst.output <- stratEst_cpp( data, strategies, shares, covariates, LCR, cluster, response, r.responses, r.trembles, select, crit, se, outer.runs, outer.tol, outer.max, inner.runs, inner.tol, inner.max, lcr.runs, lcr.tol, lcr.max, bs.samples, newton.stepsize, penalty )
   return(stratEst.output)
