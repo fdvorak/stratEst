@@ -19,9 +19,12 @@
 \url{https://www.aeaweb.org/articles?id=10.1257/aer.101.1.411}
 }
 \usage{
-DF2011LCR
+data(DF2011LCR)
 }
 \description{
 A dataset to set up to perform latent class regression on the repeated prisonner's dilemma experiment by Dal Bo and Frechette.
+}
+\references{
+Dal Bo, P. and G. R. Frechette (2011): The evolution of cooperation in innitely repeated games: Experimental evidence, \emph{American Economic Review}, 101, 411-429.
 }
 \keyword{datasets}

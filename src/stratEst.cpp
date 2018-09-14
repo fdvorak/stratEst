@@ -57,7 +57,7 @@ arma::field<arma::mat> stratEst_EM(arma::cube& output_cube, arma::cube& sum_outp
 
   while (  eval < max_eval+eval_pre && eps != tol_eval && eps != arma::datum::nan ) {
     eval++;
-
+    Rcpp::checkUserInterrupt();
     // parameters are assigned to updated parameter values
     shares = new_shares;
     trembles = new_trembles;
