@@ -1212,7 +1212,9 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec shares, arma::
   int kill_start = 0;
 
   // start strategies loop
+  //Rcout<<"start estimation procedure\n";
   for (int K = k; K > 0; K--) {
+    Rcout<< "estimate model with " << K << " strategies\n";
     int killed = 0;
     for (int kill = kill_start; kill <= K; kill++) {
       arma::vec survived = survivors( find( survivors != 0 ) );
@@ -1360,13 +1362,17 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec shares, arma::
 
       // outer runs (index ro)
       for (int ro = 0; ro < outer_runs; ro++) {
-
         arma::field<arma::mat> R_inner(20,1);
         double LL_inner_min = 0;
 
         // inner runs (index ri)
         for (int ri = 0; ri < inner_runs; ri++) {
-
+          if( kill == 0 ){
+            Rcout<< "complete model (" << ro+1  << "/" << ri+1 << ")     \r";
+          }
+          else{
+            Rcout<< "nested model " << kill <<  " (" << ro+1  << "/" << ri+1 << ")     \r";
+          }
           //random starting points
           arma::vec start_shares = share_vec;
           if( num_shares_to_est > 0 ){
@@ -1610,8 +1616,9 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec shares, arma::
       survivors( find( survivors == survived( killed - 1 ) ) ).fill(0);
       kill_start = 1;
     }
-
+  Rcout<< "\nDONE\n";
   } // end strategy selection loop
+
 
   //store fused objects
   arma::cube output_cube = R_output_cube( arma::span( 0 , R_num_rows_strategies - 1 ) , arma::span::all , arma::span::all );
@@ -1633,6 +1640,7 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec shares, arma::
   arma::field<arma::mat> R_LCR(19,1);
 
   if( LCR ){
+    Rcout<<"estimate latent-class regression model\n";
     //initialize empty coefficients
     int num_coefficients_to_est = ( covariate_mat.n_cols * (k-1) );
     arma::vec R_shares = R(0,0);
@@ -1642,6 +1650,7 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec shares, arma::
     LL_inner_min.fill( arma::datum::inf );
     // inner runs (index ri)
     for (int ri = 0; ri < LCR_runs; ri++) {
+      Rcout<< "lcr run " << ri+1  << " (of " << LCR_runs << ")     \r";
       arma::vec start_coefficients( num_coefficients_to_est , arma::fill::zeros );
       arma::mat coefficient_mat( covariate_mat.n_cols , k-1 , arma::fill::zeros );
       //initialize empty coefficients
@@ -1672,6 +1681,7 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec shares, arma::
         LL_inner_min(0,0) = LL_inner_temp(0,0);
       }
     }
+    Rcout<< "\nDONE\n";
   }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1703,7 +1713,6 @@ arma::mat estimated_coefficients_BS( num_coefficients_to_est , 1 , arma::fill::z
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 arma::field<arma::mat> R_SE(5,1);
-
 R_SE = stratEst_SE( output_cube, sum_outputs_cube, strat_id, covariate_mat, R(0,0), R(1,0), R(2,0), R(13,0), R(3,0), R(4,0), R(14,0), R(12,0), R(18,0), R(16,0), R(17,0), R(15,0), num_shares_to_est, indices_responses, indices_trembles, response, R(19,0), CL, cluster_id_vec, LCR );
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1715,11 +1724,10 @@ if( SE == "bs" ){
   int BS_samples_responses = BS_samples;
   int BS_samples_trembles = BS_samples;
   // int BS_samples_coefficients = BS_samples;
+  Rcout<<"start boostrap procedure\n";
   for (int i = 0; i < BS_samples; i++) {
     Rcpp::checkUserInterrupt();
-    arma::mat iter( 1 , 1 , arma::fill::zeros );
-    iter.fill(i);
-    iter.print("BS sample: ");
+    Rcout<< "sample " << i+1 << " (of " << BS_samples <<")\r";
     arma::field<arma::mat> R_LCR_BS(20,1);
     arma::field<arma::mat> R_NO_LCR_BS(13,1);
 
@@ -1846,7 +1854,9 @@ if( SE == "bs" ){
   if( BS_samples_trembles/BS_samples < 0.9 ){
     BS_trembles_SE.fill(-1);
   }
+  std::cout<< "\nDONE\n";
 }
+
 
 
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1904,7 +1914,13 @@ if( SE == "bs" ){
       final_SE_trembles = BS_trembles_SE;
     }
   }
-  List S = List::create( Named("shares") = final_shares, Named("strategies") = final_strategies, Named("responses") = final_responses, Named("trembles") = final_trembles,  Named("coefficients") = final_coefficients, Named("response.mat") = final_response_mat, Named("tremble.mat") = final_tremble_mat, Named("coefficient.mat") =  final_coefficient_mat, Named("loglike") = final_LL, Named("crit.val") = final_crit, Named("eval") = final_eval, Named("tol.val") = final_eps, Named("entropy") = final_E, Named("assignments") = final_i_class, Named("priors") = final_individual_priors, Named("shares.se") = final_SE_shares, Named("responses.se") = final_SE_responses, Named("trembles.se") = final_SE_trembles, Named("coefficients.se") = final_SE_coefficients, Named("convergence") = final_convergence );
+  std::cout<< "\n\n";
+  std::cout<< "-----------------------------------------------------------\n";
+  std::cout<< "-----------------------------------------------------------\n";
+  std::cout<< "ESTIMATION RESULTS \n";
+  std::cout<< "-----------------------------------------------------------\n";
+  std::cout<< "-----------------------------------------------------------\n\n";
+  List S = List::create( Named("shares") = final_shares, Named("strategies") = final_strategies, Named("responses") = final_responses, Named("trembles") = final_trembles,  Named("coefficients") = final_coefficients, Named("response.mat") = final_response_mat, Named("tremble.mat") = final_tremble_mat, Named("coefficient.mat") =  final_coefficient_mat, Named("loglike") = -final_LL, Named("crit.val") = final_crit, Named("eval") = final_eval, Named("tol.val") = final_eps, Named("entropy") = final_E, Named("assignments") = final_i_class, Named("priors") = final_individual_priors, Named("shares.se") = final_SE_shares, Named("responses.se") = final_SE_responses, Named("trembles.se") = final_SE_trembles, Named("coefficients.se") = final_SE_coefficients, Named("convergence") = final_convergence );
   return(S);
 }
 
