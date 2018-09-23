@@ -22,6 +22,7 @@
 #' @param lcr.tol Positive number which stets the tolerance of the continuation condition of the Latent Class Regression runs. The iterative algorithm stops if the relative decrease of the log-likelihood is smaller than \code{lcr.tol}. Default is 0.
 #' @param lcr.max Positive integer which stets the maximum number of iterations of the Latent Class Regression EM runs. The iterative algorithm stops if it did not converge after \code{lcr.max} iterations. Default is 1000.
 #' @param bs.samples Positive integer which sets the number of bootstrap samples drawn with replacement.
+#' @param print.messages Logical, if \code{TRUE} messages are printed which illustrate the status of the estimation process.
 #' @note The strategy estimation method was introduced by (Dal Bo & Frechette 2011) to estimate the relative frequency of a fixed set of pure strategies in the indefinitely repeated prisoner's dilemma. Breitmoser (2015) extended the method to the estimation of behavior strategies. The \pkg{stratEst} package uses the EM algorithm (Dempster, Laird & Rubin 1977) and the Newton-Raphson method to obtain maximum-likelihood estimates for the population shares and response parameters of a set of candidate strategies. The package builds on other software contributions of the R community. To increase speed the estimation procedures, the package uses integration of C++ and R achieved by the Rcpp package (Eddelbuettel & Francois 2011) and the open source linear algebra library for the C++ language RppArmadillo (Sanderson & Curtin 2016).
 #' @return The function returns a list with the following elements.
 #' \item{shares}{Column vector which contains the estimates of population shares for the strategies. The first element corresponds to the first strategy defined in the strategy matrix, the second element to corresponds to the second strategy and to on. Can be used as input object of the estimation function.}
@@ -49,7 +50,7 @@
 #' @references
 #' Breitmoser, Y. (2015): Cooperation, but no reciprocity: Individual strategies in the repeated prisoner's dilemma, \emph{American Economic Review}, 105, 2882-2910.
 #'
-#' Dal Bo, P. and G. R. Frechette (2011): The evolution of cooperation in innitely repeated games: Experimental evidence, \emph{American Economic Review}, 101, 411-429.
+#' Dal Bo, P. and G. R. Frechette (2011): The evolution of cooperation in infinitely repeated games: Experimental evidence, \emph{American Economic Review}, 101, 411-429.
 #'
 #' Dempster, A., N. Laird, and D. B. Rubin (1977): Maximum likelihood from incomplete data via the EM algorithm," \emph{Journal of the Royal Statistical Society Series B}, 39, 1-38.
 #'
@@ -59,11 +60,18 @@
 #' @examples
 #' ## Replication of Dal Bo and Frechette (2011), Table 7 on page 424
 #' ## Results for the first treatment with delta = 1/2 and R = 32 (column 1 of Table 7)
-#' data <- DF2011[DF2011[,1] == 1,]
+#' data <- DF2011[DF2011$treatment == 1,]
 #' strats <- rbind(ALLD,ALLC,GRIM,TFT,T2,WSLS)
 #' stratEst(data,strats)
+#'
+#' ## Latent class regression with data from Dal Bo and Frechette (2011)
+#' ## For the two treatments with R = 32, introduce a dummy which is one if delta = 3/4
+#' data <- DF2011[DF2011$treatment == 1 | DF2011$treatment == 4,]
+#' strats <- rbind(ALLD,ALLC,GRIM,TFT,T2,WSLS)
+#' covar <- as.matrix(as.numeric(data$treatment == 4 ))
+#' stratEst(data,strats,covariates = covar,select="strategies")
 #' @export
-stratEst <- function( data, strategies, shares, covariates, cluster, response = "mixed", r.responses = "no", r.trembles = "global", select = "no", crit = "bic", se = "yes", outer.runs = 10, outer.tol = 0, outer.max = 1000, inner.runs = 100, inner.tol = 0, inner.max = 10, lcr.runs = 1000, lcr.tol = 0, lcr.max = 1000, bs.samples = 1000 ){
+stratEst <- function( data, strategies, shares, covariates, cluster, response = "mixed", r.responses = "no", r.trembles = "global", select = "no", crit = "bic", se = "yes", outer.runs = 10, outer.tol = 0, outer.max = 1000, inner.runs = 100, inner.tol = 0, inner.max = 10, lcr.runs = 1000, lcr.tol = 0, lcr.max = 1000, bs.samples = 1000, print.messages = TRUE ){
   # crude argument checks
   # check data
   if( missing(data) ) {
@@ -200,7 +208,7 @@ stratEst <- function( data, strategies, shares, covariates, cluster, response = 
   }
 
 
-  stratEst.output <- stratEst_cpp( data, strategies, shares, covariates, LCR, cluster, response, r.responses, r.trembles, select, crit, se, outer.runs, outer.tol, outer.max, inner.runs, inner.tol, inner.max, lcr.runs, lcr.tol, lcr.max, bs.samples, newton.stepsize, penalty )
+  stratEst.output <- stratEst_cpp( data, strategies, shares, covariates, LCR, cluster, response, r.responses, r.trembles, select, crit, se, outer.runs, outer.tol, outer.max, inner.runs, inner.tol, inner.max, lcr.runs, lcr.tol, lcr.max, bs.samples, newton.stepsize, penalty, print.messages )
   return(stratEst.output)
 }
 

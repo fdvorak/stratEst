@@ -778,7 +778,7 @@ arma::field<arma::mat> stratEst_SE(arma::cube& output_cube, arma::cube& sum_outp
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // [[Rcpp::export]]
-List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec shares, arma::mat covariates, bool LCR, arma::vec cluster, std::string response = "mixed", std::string r_responses = "no", std::string r_trembles = "global", std::string select = "no", std::string crit = "bic", std::string SE = "yes", int outer_runs = 10, double outer_tol_eval = 0, int outer_max_eval = 1000, int inner_runs = 100, double inner_tol_eval = 0, int inner_max_eval = 100, int LCR_runs = 100, int LCR_tol_eval = 0, int LCR_max_eval = 1000, int BS_samples = 1000, int newton_stepsize = 1, double penalty = 0) {
+List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec shares, arma::mat covariates, bool LCR, arma::vec cluster, std::string response = "mixed", std::string r_responses = "no", std::string r_trembles = "global", std::string select = "no", std::string crit = "bic", std::string SE = "yes", int outer_runs = 10, double outer_tol_eval = 0, int outer_max_eval = 1000, int inner_runs = 100, double inner_tol_eval = 0, int inner_max_eval = 100, int LCR_runs = 100, int LCR_tol_eval = 0, int LCR_max_eval = 1000, int BS_samples = 1000, int newton_stepsize = 1, double penalty = 0, bool print_messages = true ) {
 
   arma::field<arma::mat> R(20,1);
   int rows_data = data.n_rows;
@@ -791,6 +791,12 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec shares, arma::
   arma::vec n_ones( rows_data , 1 , arma::fill::ones );
   int LL_index = 5;
   int crit_index = 7;
+  if( crit == "aic" ){
+    crit_index = 6;
+  }
+  else if ( crit == "icl" ){
+    crit_index = 8;
+  }
   arma::vec complete_share_vec = shares;
   arma::mat failed_inner_runs( 1, 1 , arma::fill::zeros );
   arma::mat failed_outer_runs( 1, 1 , arma::fill::zeros );
@@ -1212,9 +1218,10 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec shares, arma::
   int kill_start = 0;
 
   // start strategies loop
-  //Rcout<<"start estimation procedure\n";
   for (int K = k; K > 0; K--) {
-    Rcout<< "estimate model with " << K << " strategies\n";
+    if( print_messages == true ){
+      Rcout<< "model with " << K << " strategies\n";
+    }
     int killed = 0;
     for (int kill = kill_start; kill <= K; kill++) {
       arma::vec survived = survivors( find( survivors != 0 ) );
@@ -1367,11 +1374,18 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec shares, arma::
 
         // inner runs (index ri)
         for (int ri = 0; ri < inner_runs; ri++) {
-          if( kill == 0 ){
-            Rcout<< "complete model (" << ro+1  << "/" << ri+1 << ")     \r";
-          }
-          else{
-            Rcout<< "nested model " << kill <<  " (" << ro+1  << "/" << ri+1 << ")     \r";
+          if( print_messages == true ){
+            if( kill == 0 ){
+              if( select == "strategies" || select == "all" ){
+                Rcout<< "estimate complete model (" << ro+1  << "/" << ri+1 << ")     \r";
+              }
+              else{
+                Rcout<< "estimate model (" << ro+1  << "/" << ri+1 << ")     \r";
+              }
+            }
+            else{
+              Rcout<< "estimate nested model " << kill <<  " (" << ro+1  << "/" << ri+1 << ")     \r";
+            }
           }
           //random starting points
           arma::vec start_shares = share_vec;
@@ -1460,12 +1474,6 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec shares, arma::
       arma::mat new_indices_trembles = indices_trembles;
 
       if( select != "no" && select != "strategies" && ( num_responses_to_est > 1 || num_trembles_to_est > 1 ) ){
-        if( crit == "aic" ){
-          int crit_index = crit_index - 1;
-        }
-        else if ( crit == "icl" ){
-          int crit_index = crit_index + 1;
-        }
         arma::field<arma::mat> R_temp(20,1);
         arma::field<arma::mat> R_fused(20,1);
         R_fused = R_k;
@@ -1569,6 +1577,11 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec shares, arma::
       // check if R_k is better than current best R
       arma::mat crit_selected = R_k( crit_index , 0 );
       crit_selected.replace( arma::datum::nan , arma::datum::inf );
+      if( print_messages == true && ( select == "strategies" || select == "all" ) ){
+        Rcout<< "\n";
+        Rcout<< crit << ": " << crit_selected(0,0);
+        Rcout<< "\n";
+      }
       if ( crit_selected(0,0) < crit_selected_min(0,0) || ( K == k && kill == 0 ) ){
         R = R_k;
         killed = kill;
@@ -1590,14 +1603,36 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec shares, arma::
         arma::vec all_strats = survivors( find( survivors != 0 ) );
         arma::vec shares_strats = R(0,0);
         int num_strats = shares_strats.n_elem;
+        int num_zero_share = 0;
+        int first_zero_share = 0;
         for (int s = 0; s < num_strats; s++){
-          if( shares_strats(s) < 0.001 ){
+          if( shares_strats(s) < 0.01 ){
+            num_zero_share = num_zero_share + 1;
             killed = s;
             survivors( find( survivors == all_strats( killed ) ) ).fill(0);
             K = K - 1;      // reduce number of strategies
             killed = 0;     // s already killed
             kill = -1;      // start all over again with reduced set
+            if( print_messages == true && num_zero_share == 1 ){
+              first_zero_share = s+1;
+              Rcout<< "\r";
+              Rcout<< "eliminate strategy " << s+1 << " (no share)";
+            }
+            else if( print_messages == true && num_zero_share == 2 ){
+              Rcout<< "\r";
+              Rcout<< "eliminate strategies " << first_zero_share << ", " << s+1;
+            }
+            else if( print_messages == true && num_zero_share > 2 ){
+              Rcout<< ", " << s+1;
+            }
           }
+        }
+        if( print_messages == true && kill == -1 ){
+          if( num_zero_share > 1 ){
+            Rcout<< " (no shares)";
+          }
+          Rcout<< "\nDONE\n";
+          Rcout<< "model with " << K << " strategies\n";
         }
       }
 
@@ -1605,6 +1640,10 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec shares, arma::
 
     if( killed == 0 || ( ( select != "strategies" && select != "all" ) )){
       K = 0;
+      if( print_messages == true && (select == "strategies" || select == "all") ){
+        Rcout<< "\r";
+        Rcout<< "end of strategy selection: no strategy can be eliminated";
+      }
     }
     else if ( K <= 2 ){
       arma::vec survived = survivors( find( survivors != 0 ) );
@@ -1615,8 +1654,14 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec shares, arma::
       arma::vec survived = survivors( find( survivors != 0 ) );
       survivors( find( survivors == survived( killed - 1 ) ) ).fill(0);
       kill_start = 1;
+      if( print_messages == true ){
+        Rcout<< "\r";
+        Rcout<< "eliminate strategy " << killed << " (info criterion)";
+      }
     }
-  Rcout<< "\nDONE\n";
+    if( print_messages == true ){
+       Rcout<< "\nDONE\n";
+    }
   } // end strategy selection loop
 
 
@@ -1640,7 +1685,9 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec shares, arma::
   arma::field<arma::mat> R_LCR(19,1);
 
   if( LCR ){
-    Rcout<<"estimate latent-class regression model\n";
+    if( print_messages == true ){
+      Rcout<<"estimate latent-class regression model\n";
+    }
     //initialize empty coefficients
     int num_coefficients_to_est = ( covariate_mat.n_cols * (k-1) );
     arma::vec R_shares = R(0,0);
@@ -1650,7 +1697,9 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec shares, arma::
     LL_inner_min.fill( arma::datum::inf );
     // inner runs (index ri)
     for (int ri = 0; ri < LCR_runs; ri++) {
-      Rcout<< "lcr run " << ri+1  << " (of " << LCR_runs << ")     \r";
+      if( print_messages == true ){
+        Rcout<< "lcr run " << ri+1  << " (of " << LCR_runs << ")     \r";
+      }
       arma::vec start_coefficients( num_coefficients_to_est , arma::fill::zeros );
       arma::mat coefficient_mat( covariate_mat.n_cols , k-1 , arma::fill::zeros );
       //initialize empty coefficients
@@ -1681,7 +1730,9 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec shares, arma::
         LL_inner_min(0,0) = LL_inner_temp(0,0);
       }
     }
+    if( print_messages == true ){
     Rcout<< "\nDONE\n";
+    }
   }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1724,10 +1775,14 @@ if( SE == "bs" ){
   int BS_samples_responses = BS_samples;
   int BS_samples_trembles = BS_samples;
   // int BS_samples_coefficients = BS_samples;
-  Rcout<<"start boostrap procedure\n";
+  if( print_messages == true ){
+    Rcout<<"start boostrap procedure\n";
+  }
   for (int i = 0; i < BS_samples; i++) {
     Rcpp::checkUserInterrupt();
-    Rcout<< "sample " << i+1 << " (of " << BS_samples <<")\r";
+    if( print_messages == true ){
+      Rcout<< "sample " << i+1 << " (of " << BS_samples <<")\r";
+    }
     arma::field<arma::mat> R_LCR_BS(20,1);
     arma::field<arma::mat> R_NO_LCR_BS(13,1);
 
@@ -1884,13 +1939,7 @@ if( SE == "bs" ){
   arma::mat final_response_mat = R(3,0);
   arma::mat final_tremble_mat = R(4,0);
   arma::mat final_LL =  R(5,0);
-  arma::mat final_crit = R(7,0);
-  if( crit == "aic"){
-    final_crit = R(6,0);
-  }
-  else if( crit == "icl"){
-    final_crit = R(8,0);
-  }
+  arma::mat final_crit = R(crit_index,0);
   arma::mat final_eval = R(9,0);
   arma::mat final_eps = R(10,0);
   arma::mat final_E = R(11,0);
@@ -1914,12 +1963,12 @@ if( SE == "bs" ){
       final_SE_trembles = BS_trembles_SE;
     }
   }
-  std::cout<< "\n\n";
-  std::cout<< "-----------------------------------------------------------\n";
-  std::cout<< "-----------------------------------------------------------\n";
-  std::cout<< "ESTIMATION RESULTS \n";
-  std::cout<< "-----------------------------------------------------------\n";
-  std::cout<< "-----------------------------------------------------------\n\n";
+  // std::cout<< "\n\n";
+  // std::cout<< "-----------------------------------------------------------\n";
+  // std::cout<< "-----------------------------------------------------------\n";
+  // std::cout<< "ESTIMATION RESULTS \n";
+  // std::cout<< "-----------------------------------------------------------\n";
+  // std::cout<< "-----------------------------------------------------------\n\n";
   List S = List::create( Named("shares") = final_shares, Named("strategies") = final_strategies, Named("responses") = final_responses, Named("trembles") = final_trembles,  Named("coefficients") = final_coefficients, Named("response.mat") = final_response_mat, Named("tremble.mat") = final_tremble_mat, Named("coefficient.mat") =  final_coefficient_mat, Named("loglike") = -final_LL, Named("crit.val") = final_crit, Named("eval") = final_eval, Named("tol.val") = final_eps, Named("entropy") = final_E, Named("assignments") = final_i_class, Named("priors") = final_individual_priors, Named("shares.se") = final_SE_shares, Named("responses.se") = final_SE_responses, Named("trembles.se") = final_SE_trembles, Named("coefficients.se") = final_SE_coefficients, Named("convergence") = final_convergence );
   return(S);
 }

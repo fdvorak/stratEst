@@ -8,7 +8,8 @@ stratEst(data, strategies, shares, covariates, cluster, response = "mixed",
   r.responses = "no", r.trembles = "global", select = "no",
   crit = "bic", se = "yes", outer.runs = 10, outer.tol = 0,
   outer.max = 1000, inner.runs = 100, inner.tol = 0, inner.max = 10,
-  lcr.runs = 1000, lcr.tol = 0, lcr.max = 1000, bs.samples = 1000)
+  lcr.runs = 1000, lcr.tol = 0, lcr.max = 1000, bs.samples = 1000,
+  print.messages = TRUE)
 }
 \arguments{
 \item{data}{A matrix with five columns which contains the data for the estimation in a long format. Each row in data represents one observation of one individual. The first column of the data matrix contains an ID variable which identifies the observations of the same participant across rows. The second column contains a variable which indicates the supergame number of the observation. If the game was only played once, all entries in the second column equal one. The third column contains a variable which indicates the round number of an observation. If only one round was played, all entries in the third column equal one. The fourth columns contain the inputs and the fifth column the outputs for the current round. The fourth and fifth columns may also contain zeros. Zeros have the following implications. In the input column a zero indicates that no input was observed in the current round and strategy responses are determined by the start state. A zero in the output column indicates that the output falls into some reference category. The response probabilities for the reference category are not estimated. Instead the remaining response probabilities are the remaining probabilities after subtracting the response probabilities of all other outputs from one.}
@@ -52,6 +53,8 @@ stratEst(data, strategies, shares, covariates, cluster, response = "mixed",
 \item{lcr.max}{Positive integer which stets the maximum number of iterations of the Latent Class Regression EM runs. The iterative algorithm stops if it did not converge after \code{lcr.max} iterations. Default is 1000.}
 
 \item{bs.samples}{Positive integer which sets the number of bootstrap samples drawn with replacement.}
+
+\item{print.messages}{Logical, if \code{TRUE} messages are printed which illustrate the status of the estimation process.}
 }
 \value{
 The function returns a list with the following elements.
@@ -88,14 +91,21 @@ The strategy estimation method was introduced by (Dal Bo & Frechette 2011) to es
 \examples{
 ## Replication of Dal Bo and Frechette (2011), Table 7 on page 424
 ## Results for the first treatment with delta = 1/2 and R = 32 (column 1 of Table 7)
-data <- DF2011[DF2011[,1] == 1,]
+data <- DF2011[DF2011$treatment == 1,]
 strats <- rbind(ALLD,ALLC,GRIM,TFT,T2,WSLS)
 stratEst(data,strats)
+
+## Latent class regression with data from Dal Bo and Frechette (2011)
+## For the two treatments with R = 32, introduce a dummy which is one if delta = 3/4
+data <- DF2011[DF2011$treatment == 1 | DF2011$treatment == 4,]
+strats <- rbind(ALLD,ALLC,GRIM,TFT,T2,WSLS)
+covar <- as.matrix(as.numeric(data$treatment == 4 ))
+stratEst(data,strats,covariates = covar,select="strategies")
 }
 \references{
 Breitmoser, Y. (2015): Cooperation, but no reciprocity: Individual strategies in the repeated prisoner's dilemma, \emph{American Economic Review}, 105, 2882-2910.
 
-Dal Bo, P. and G. R. Frechette (2011): The evolution of cooperation in innitely repeated games: Experimental evidence, \emph{American Economic Review}, 101, 411-429.
+Dal Bo, P. and G. R. Frechette (2011): The evolution of cooperation in infinitely repeated games: Experimental evidence, \emph{American Economic Review}, 101, 411-429.
 
 Dempster, A., N. Laird, and D. B. Rubin (1977): Maximum likelihood from incomplete data via the EM algorithm," \emph{Journal of the Royal Statistical Society Series B}, 39, 1-38.
 
