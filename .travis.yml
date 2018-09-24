@@ -3,6 +3,7 @@
 os:
   - linux
   - osx
+osx_image: xcode10
 language: R
 sudo: false
 cache: packages
