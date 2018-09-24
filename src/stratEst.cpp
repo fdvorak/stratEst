@@ -1910,7 +1910,7 @@ if( SE == "bs" ){
     BS_trembles_SE.fill(-1);
   }
   if( print_messages == true ){
-    std::cout<< "\nDONE\n";
+    Rcout<< "\nDONE\n";
   }
 }
 
