@@ -1909,7 +1909,9 @@ if( SE == "bs" ){
   if( BS_samples_trembles/BS_samples < 0.9 ){
     BS_trembles_SE.fill(-1);
   }
-  std::cout<< "\nDONE\n";
+  if( print_messages == true ){
+    std::cout<< "\nDONE\n";
+  }
 }
 
 

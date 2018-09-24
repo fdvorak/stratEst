@@ -5,7 +5,7 @@ test_that("SFEM for treatment 1, Dal Bo & Frechette 2011",  {
   strats <- rbind(ALLD,ALLC,GRIM,TFT,T2,WSLS)
   # treatment 1
   set.seed(1)
-  sfem1 <- stratEst(DF2011[DF2011[,1]==1,],strats,select = "strategies", crit ="aic", se= "bs")
+  sfem1 <- stratEst(DF2011[DF2011[,1]==1,],strats,select = "strategies", crit ="aic", se= "bs",print.messages = F)
   estimated_shares <- round(sfem1$shares,3)
   estimated_trembles <- round(sfem1$trembles,3)
   estimated_ses <- round(sfem1$shares.se,3)
