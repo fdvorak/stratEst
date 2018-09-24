@@ -34,6 +34,8 @@ test_that("systematic tests",  {
   expect_equal(2,length(select_strategies_bic$shares))
   select_strategies_icl <- stratEst(DF2011[DF2011[,1]==6,],3,select = "strategies", crit ="icl",print.messages = F)
   expect_equal(2,length(select_strategies_icl$shares))
+  select_strategies_min <- stratEst(DF2011[DF2011[,1]==6,],4,select = "strategies",min.strategies = 3, crit ="icl",print.messages = F)
+  expect_equal(3,length(select_strategies_min$shares))
   select_trembles_global <- stratEst(DF2011[DF2011[,1]==6,],3,response="pure",r.trembles = "global",select = "trembles", crit ="icl",print.messages = F)
   expect_equal(4,length(select_trembles_global$trembles))
   select_responses_global <- stratEst(DF2011[DF2011[,1]==6,],3,r.responses = "global",select = "responses", crit ="icl",print.messages = F)

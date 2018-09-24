@@ -778,7 +778,10 @@ arma::field<arma::mat> stratEst_SE(arma::cube& output_cube, arma::cube& sum_outp
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // [[Rcpp::export]]
-List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec shares, arma::mat covariates, bool LCR, arma::vec cluster, std::string response = "mixed", std::string r_responses = "no", std::string r_trembles = "global", std::string select = "no", std::string crit = "bic", std::string SE = "yes", int outer_runs = 10, double outer_tol_eval = 0, int outer_max_eval = 1000, int inner_runs = 100, double inner_tol_eval = 0, int inner_max_eval = 100, int LCR_runs = 100, int LCR_tol_eval = 0, int LCR_max_eval = 1000, int BS_samples = 1000, int newton_stepsize = 1, double penalty = 0, bool print_messages = true ) {
+List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec shares, arma::mat covariates, bool LCR, arma::vec cluster, std::string response = "mixed", std::string r_responses = "no", std::string r_trembles = "global", std::string select = "no", int min_strategies = 1 , std::string crit = "bic", std::string SE = "yes", int outer_runs = 10, double outer_tol_eval = 0, int outer_max_eval = 1000, int inner_runs = 100, double inner_tol_eval = 0, int inner_max_eval = 100, int LCR_runs = 100, int LCR_tol_eval = 0, int LCR_max_eval = 1000, int BS_samples = 1000, bool print_messages = true ) {
+  // future development
+  int newton_stepsize = 1;
+  double penalty = 0;
 
   arma::field<arma::mat> R(20,1);
   int rows_data = data.n_rows;
@@ -1596,7 +1599,7 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec shares, arma::
         R_indices_trembles( arma::span( 0 , num_rows_response_mat - 1 ) , arma::span::all ) = indices_trembles;
         R_responses_to_sum( arma::span( 0 , num_rows_response_mat - 1 ) , arma::span::all ) = responses_to_sum;
       }
-      if( ( select != "strategies" && select != "all" ) || K == 1 ){
+      if( ( ( select != "strategies" && select != "all" ) || K <= min_strategies + 1  ) || K == 1 ){
         kill = K+1;
       }
       if( kill == 0 && ( select == "strategies" || select == "all" ) ){
@@ -1606,7 +1609,7 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec shares, arma::
         int num_zero_share = 0;
         int first_zero_share = 0;
         for (int s = 0; s < num_strats; s++){
-          if( shares_strats(s) < 0.01 ){
+          if( shares_strats(s) < 0.01 && K > min_strategies ){
             num_zero_share = num_zero_share + 1;
             killed = s;
             survivors( find( survivors == all_strats( killed ) ) ).fill(0);
@@ -1638,12 +1641,21 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec shares, arma::
 
     } // end kill loop
 
+    if( K <= min_strategies + 1 ){
+      killed = 0;
+    }
     if( killed == 0 || ( ( select != "strategies" && select != "all" ) )){
-      K = 0;
       if( print_messages == true && (select == "strategies" || select == "all") ){
         Rcout<< "\r";
+      }
+      if( K != min_strategies ){
         Rcout<< "end of strategy selection: no strategy can be eliminated";
       }
+      else{
+        Rcout<< "end of strategy selection: minimum number of strategies reached";
+
+      }
+      K = 0;
     }
     else if ( K <= 2 ){
       arma::vec survived = survivors( find( survivors != 0 ) );

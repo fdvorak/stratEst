@@ -10,6 +10,7 @@
 #' @param r.responses A string which can be set to \code{"no"}, \code{"strategies"}, \code{"states"} or \code{"global"}. If set to \code{"strategies"}, the estimation function estimates strategies with one strategy specific vector of responses in every state of the strategy. If set to \code{"states"}, one state specific vector of responses is estimated for each state. If set to \code{"global"}, a single vector of responses is estimated which applies in every state of each strategy. Default is \code{"no"}.
 #' @param r.trembles String which can be set to \code{"no"}, \code{"strategies"}, \code{"states"} or \code{"global"}. If set to \code{"strategies"}, the estimation unction estimates strategies with one strategy specific tremble probability. If set to  \code{"states"}, one state specific tremble probability is estimated for each state. If set to \code{"global"}, a single tremble is estimated which applies in every state of each strategy. Default is \code{"global"}.
 #' @param select String which can be set to \code{"no"}, \code{"strategies"}, \code{"responses"}, \code{"trembles"}, \code{"both"}, and \code{"all"}. If set to \code{"strategies"}, \code{"responses"}, \code{"trembles"}, the number of strategies, responses, trembles respectively are selected based on the selection criterion specified in option \code{"crit"}. If set to \code{"both"}, the number of responses and trembles are selected. If set to \code{"all"}, the number of strategies, responses, and trembles are selected. Note that the selection of responses and trembles occurs within the scope of the restriction set to these parameters (E.g. if \code{r.responses} is set to \code{"strategies"}, \code{select = "responses"} will select responses within each strategy). Default is \code{"no"}.
+#' @param min.strategies Integer which specifies the minimum number of strategies for strategy selection. The selection procedure stops if the minimum is reached.
 #' @param crit String which can be set to \code{"bic"}, \code{"aic"} or \code{"icl"}. If set to \code{"bic"}, model selection based on the Bayesian Information criterion is performed. If set to \code{"aic"}, the Akaike Information criterion is used. If set to \code{"icl"} the Integrated Classification Likelihood criterion is used. Default is \code{"bic"}.
 #' @param se String which can be set to \code{"no"}, \code{"yes"} or \code{"bs"}. If set to \code{"no"}, standard errors are not reported. If set to \code{"yes"}, analytic standard errors are reported. If set to \code{"bs"}, bootstrapped standard errors are reported for responses and trembles. Default is \code{"yes"}.
 #' @param outer.runs Positive integer which stets the number of outer runs of the solver. Default is 10.
@@ -71,7 +72,7 @@
 #' covar <- as.matrix(as.numeric(data$treatment == 4 ))
 #' stratEst(data,strats,covariates = covar,select="strategies")
 #' @export
-stratEst <- function( data, strategies, shares, covariates, cluster, response = "mixed", r.responses = "no", r.trembles = "global", select = "no", crit = "bic", se = "yes", outer.runs = 10, outer.tol = 0, outer.max = 1000, inner.runs = 100, inner.tol = 0, inner.max = 10, lcr.runs = 1000, lcr.tol = 0, lcr.max = 1000, bs.samples = 1000, print.messages = TRUE ){
+stratEst <- function( data, strategies, shares, covariates, cluster, response = "mixed", r.responses = "no", r.trembles = "global", select = "no", min.strategies = 1, crit = "bic", se = "yes", outer.runs = 10, outer.tol = 0, outer.max = 1000, inner.runs = 100, inner.tol = 0, inner.max = 10, lcr.runs = 1000, lcr.tol = 0, lcr.max = 1000, bs.samples = 1000, print.messages = TRUE ){
   # crude argument checks
   # check data
   if( missing(data) ) {
@@ -176,7 +177,7 @@ stratEst <- function( data, strategies, shares, covariates, cluster, response = 
   newton.stepsize = 1
   penalty = 0
 
-  # transform PD data into inout output data structure
+  # transform PD data into input output data structure
   if( is.null(cooperation) == FALSE ){
     data <- transform_pd( data_frame )
     input <- data[,4]
@@ -202,13 +203,16 @@ stratEst <- function( data, strategies, shares, covariates, cluster, response = 
   if ( ( select == "strategies" | select == "all" ) && n_strats == 1 ){
     stop("strategies cannot be selected if there is only one strategy.");
   }
+  if ( n_strats <= min.strategies && ( select == "strategies" || select == "all" ) ){
+    stop("the number of strategies supplied cannot be smaller or equal to the minimum number strategies when performing strategy selection.");
+  }
   #check shares
   if( missing(shares) ) {
     shares = rep( NA , n_strats )
   }
 
 
-  stratEst.output <- stratEst_cpp( data, strategies, shares, covariates, LCR, cluster, response, r.responses, r.trembles, select, crit, se, outer.runs, outer.tol, outer.max, inner.runs, inner.tol, inner.max, lcr.runs, lcr.tol, lcr.max, bs.samples, newton.stepsize, penalty, print.messages )
+  stratEst.output <- stratEst_cpp( data, strategies, shares, covariates, LCR, cluster, response, r.responses, r.trembles, select, min.strategies, crit, se, outer.runs, outer.tol, outer.max, inner.runs, inner.tol, inner.max, lcr.runs, lcr.tol, lcr.max, bs.samples, print.messages )
   return(stratEst.output)
 }
 

@@ -6,10 +6,10 @@
 \usage{
 stratEst(data, strategies, shares, covariates, cluster, response = "mixed",
   r.responses = "no", r.trembles = "global", select = "no",
-  crit = "bic", se = "yes", outer.runs = 10, outer.tol = 0,
-  outer.max = 1000, inner.runs = 100, inner.tol = 0, inner.max = 10,
-  lcr.runs = 1000, lcr.tol = 0, lcr.max = 1000, bs.samples = 1000,
-  print.messages = TRUE)
+  min.strategies = 1, crit = "bic", se = "yes", outer.runs = 10,
+  outer.tol = 0, outer.max = 1000, inner.runs = 100, inner.tol = 0,
+  inner.max = 10, lcr.runs = 1000, lcr.tol = 0, lcr.max = 1000,
+  bs.samples = 1000, print.messages = TRUE)
 }
 \arguments{
 \item{data}{A matrix with five columns which contains the data for the estimation in a long format. Each row in data represents one observation of one individual. The first column of the data matrix contains an ID variable which identifies the observations of the same participant across rows. The second column contains a variable which indicates the supergame number of the observation. If the game was only played once, all entries in the second column equal one. The third column contains a variable which indicates the round number of an observation. If only one round was played, all entries in the third column equal one. The fourth columns contain the inputs and the fifth column the outputs for the current round. The fourth and fifth columns may also contain zeros. Zeros have the following implications. In the input column a zero indicates that no input was observed in the current round and strategy responses are determined by the start state. A zero in the output column indicates that the output falls into some reference category. The response probabilities for the reference category are not estimated. Instead the remaining response probabilities are the remaining probabilities after subtracting the response probabilities of all other outputs from one.}
@@ -29,6 +29,8 @@ stratEst(data, strategies, shares, covariates, cluster, response = "mixed",
 \item{r.trembles}{String which can be set to \code{"no"}, \code{"strategies"}, \code{"states"} or \code{"global"}. If set to \code{"strategies"}, the estimation unction estimates strategies with one strategy specific tremble probability. If set to  \code{"states"}, one state specific tremble probability is estimated for each state. If set to \code{"global"}, a single tremble is estimated which applies in every state of each strategy. Default is \code{"global"}.}
 
 \item{select}{String which can be set to \code{"no"}, \code{"strategies"}, \code{"responses"}, \code{"trembles"}, \code{"both"}, and \code{"all"}. If set to \code{"strategies"}, \code{"responses"}, \code{"trembles"}, the number of strategies, responses, trembles respectively are selected based on the selection criterion specified in option \code{"crit"}. If set to \code{"both"}, the number of responses and trembles are selected. If set to \code{"all"}, the number of strategies, responses, and trembles are selected. Note that the selection of responses and trembles occurs within the scope of the restriction set to these parameters (E.g. if \code{r.responses} is set to \code{"strategies"}, \code{select = "responses"} will select responses within each strategy). Default is \code{"no"}.}
+
+\item{min.strategies}{Integer which specifies the minimum number of strategies for strategy selection. The selection procedure stops if the minimum is reached.}
 
 \item{crit}{String which can be set to \code{"bic"}, \code{"aic"} or \code{"icl"}. If set to \code{"bic"}, model selection based on the Bayesian Information criterion is performed. If set to \code{"aic"}, the Akaike Information criterion is used. If set to \code{"icl"} the Integrated Classification Likelihood criterion is used. Default is \code{"bic"}.}
 
