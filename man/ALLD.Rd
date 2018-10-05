@@ -18,7 +18,7 @@
 data(ALLD)
 }
 \description{
-Matrix represention of the prisoner's dilemma strategy which always plays D.
+Matrix representation of the prisoner's dilemma strategy which always plays D.
 }
 \examples{
 strategies <- rbind(ALLD,ALLC,TFT,GRIM,PTFT)

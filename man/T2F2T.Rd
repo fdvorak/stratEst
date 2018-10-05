@@ -18,7 +18,7 @@
 data(T2F2T)
 }
 \description{
-Matrix represention of the prisoner's dilemma strategy which plays C unless partner played 2 consecutive Ds in the last 3 rounds (2 rounds of punishment if partner plays D twice in a row).
+Matrix representation of the prisoner's dilemma strategy which plays C unless partner played 2 consecutive Ds in the last 3 rounds (2 rounds of punishment if partner plays D twice in a row).
 }
 \examples{
 strategies <- rbind(T2F2T,GRIM,ALLD,ALLC,TFT)

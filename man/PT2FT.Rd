@@ -18,7 +18,7 @@
 data(PT2FT)
 }
 \description{
-Matrix represention of the prisoner's dilemma strategy which plays C if both players played C in the last 2 rounds, both players played D in the last 2 rounds, or both players played D 2 rounds ago and C last round. Otherwise play D.
+Matrix representation of the prisoner's dilemma strategy which plays C if both players played C in the last 2 rounds, both players played D in the last 2 rounds, or both players played D 2 rounds ago and C last round. Otherwise play D.
 }
 \examples{
 strategies <- rbind(PT2FT,GRIM,ALLD,ALLC,TFT)

@@ -18,7 +18,7 @@
 data(DC)
 }
 \description{
-Matrix represention of the prisoner's dilemma strategy which starts with D, then alternates between C and D.
+Matrix representation of the prisoner's dilemma strategy which starts with D, then alternates between C and D.
 }
 \examples{
 strategies <- rbind(DC,ALLD,ALLC,TFT,GRIM)

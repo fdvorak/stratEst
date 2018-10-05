@@ -18,7 +18,7 @@
 data(SGRIM)
 }
 \description{
-Matrix represention of the semi grim strategy (Breitmoser 2015). The strategy plays C if both players played C, and D if both players played D. If one player played D and the other C, play C with some probability.
+Matrix representation of the semi grim strategy (Breitmoser 2015). The strategy plays C if both players played C, and D if both players played D. If one player played D and the other C, play C with some probability.
 }
 \examples{
 strategies <- rbind(SGRIM,GRIM,ALLD,ALLC,TFT)

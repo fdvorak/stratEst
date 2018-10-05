@@ -9,7 +9,7 @@
 data(WSLS)
 }
 \description{
-Matrix represention of the prisoner's dilemma strategy which plays C if both players chose the same move last round, otherwise it plays D.
+Matrix representation of the prisoner's dilemma strategy which plays C if both players chose the same move last round, otherwise it plays D.
 }
 \details{
 #' @format A matrix with 1 row and 6 columns:

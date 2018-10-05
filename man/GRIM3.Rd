@@ -18,7 +18,7 @@
 data(GRIM3)
 }
 \description{
-Matrix represention of the prisoner's dilemma strategy which plays C until 3 consecutive rounds occur in which either player played D, then play D forever.
+Matrix representation of the prisoner's dilemma strategy which plays C until 3 consecutive rounds occur in which either player played D, then play D forever.
 }
 \examples{
 strategies <- rbind(GRIM3,GRIM,ALLD,ALLC,TFT)

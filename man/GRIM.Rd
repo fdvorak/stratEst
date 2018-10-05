@@ -18,7 +18,7 @@
 data(GRIM)
 }
 \description{
-Matrix represention of the prisoner's dilemma strategy which plays C until either player plays D, then it plays D forever.
+Matrix representation of the prisoner's dilemma strategy which plays C until either player plays D, then it plays D forever.
 }
 \examples{
 strategies <- rbind(GRIM,ALLD,ALLC,TFT,PTFT)

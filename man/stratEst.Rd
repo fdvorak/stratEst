@@ -20,7 +20,7 @@ stratEst(data, strategies, shares, covariates, cluster, response = "mixed",
 
 \item{covariates}{A matrix where each row corresponds to same row in data. Hence, the covariate matrix must have as many rows as the data matrix. Observations which have the same ID in data must also have the same vector of covariates. Missing value are not allowed. If covariates are supplied, a latent class regression model is estimated.}
 
-\item{cluster}{A column vector which indicates the assignment of each row in data to cluter units.}
+\item{cluster}{A column vector which indicates the assignment of each row in data to cluster units.}
 
 \item{response}{String which can be set to \code{"pure"} or \code{"mixed"}. If set to \code{"pure"} all response probabilities estimated from the data are pure responses. If set to \code{"mixed"} all response probabilities estimated from the data are mixed responses. The default is \code{"mixed"}.}
 

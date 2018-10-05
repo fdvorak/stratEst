@@ -18,7 +18,7 @@
 data(TF2T)
 }
 \description{
-Matrix represention of the prisoner's dilemma strategy which plays C unless partner played D in both of the last 2 rounds.
+Matrix representation of the prisoner's dilemma strategy which plays C unless partner played D in both of the last 2 rounds.
 }
 \examples{
 strategies <- rbind(TF2T,GRIM,ALLD,ALLC,TFT)

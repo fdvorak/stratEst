@@ -18,7 +18,7 @@
 data(RAND)
 }
 \description{
-Matrix represention of the prisoner's dilemma strategy which always randomizes between C and D.
+Matrix representation of the prisoner's dilemma strategy which always randomizes between C and D.
 }
 \examples{
 strategies <- rbind(RAND,GRIM,ALLD,ALLC,TFT)

@@ -18,7 +18,7 @@
 data(DGRIM2)
 }
 \description{
-Matrix represention of the prisoner's dilemma strategy which plays D in the first round, then play GRIM2.
+Matrix representation of the prisoner's dilemma strategy which plays D in the first round, then play GRIM2.
 }
 \examples{
 strategies <- rbind(DGRIM2,GRIM,ALLD,ALLC,TFT)

@@ -20,9 +20,9 @@
 data(DF2011)
 }
 \description{
-A dataset with observations from the repeated prisonner's dilemma experiment of Dal Bo and Frechette (2011).
+A dataset with observations from the repeated prisoner's dilemma experiment of Dal Bo and Frechette (2011).
 }
 \references{
-Dal Bo, P. and G. R. Frechette (2011): The evolution of cooperation in innitely repeated games: Experimental evidence, \emph{American Economic Review}, 101, 411-429.
+Dal Bo, P. and G. R. Frechette (2011): The evolution of cooperation in infinitely repeated games: Experimental evidence, \emph{American Economic Review}, 101, 411-429.
 }
 \keyword{datasets}

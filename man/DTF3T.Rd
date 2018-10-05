@@ -18,7 +18,7 @@
 data(DTF3T)
 }
 \description{
-Matrix represention of the prisoner's dilemma strategy which plays D in the first round, then play TF3T.
+Matrix representation of the prisoner's dilemma strategy which plays D in the first round, then play TF3T.
 }
 \examples{
 strategies <- rbind(DTF3T,GRIM,ALLD,ALLC,TFT)

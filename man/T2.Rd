@@ -18,7 +18,7 @@
 data(T2)
 }
 \description{
-Matrix represention of the prisoner's dilemma strategy which plays C until either player plays D, then it plays D twice and returns to C (regardless of all actions during the punishment rounds).
+Matrix representation of the prisoner's dilemma strategy which plays C until either player plays D, then it plays D twice and returns to C (regardless of all actions during the punishment rounds).
 }
 \examples{
 strategies <- rbind(T2,GRIM,ALLD,ALLC,TFT)

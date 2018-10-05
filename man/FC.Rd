@@ -18,7 +18,7 @@
 data(FC)
 }
 \description{
-Matrix represention of the prisoner's dilemma strategy which plays C in the first round, then D forever.
+Matrix representation of the prisoner's dilemma strategy which plays C in the first round, then D forever.
 }
 \examples{
 strategies <- rbind(FC,ALLD,ALLC,TFT,GRIM)
