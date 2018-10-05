@@ -5,7 +5,8 @@ License: GLP-3
 Copyright Information:
   2018 Fabian Dvorak
 References:
-
+  Fabian Dvorak (2018). stratEst: An R Package for Strategy Estimation. User Manual.
+  http://fdvorak.com/software/
 
 
 ## Rcpp: Seamless R and C++ Integration
