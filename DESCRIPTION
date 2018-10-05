@@ -2,13 +2,11 @@ Package: stratEst
 Type: Package
 Title: An R package for strategy estimation
 Version: 0.1.0
-Authors@R: person("Fabian", "Dvorak", email = "fabian.dvorak@uni.kn",
-  role = c("aut", "cre"))
 Author: Fabian Dvorak
 Maintainer: Fabian Dvorak <fabian.dvorak@uni.kn>
 Date: 2018-10-05
 Description: Implements variants of the strategy estimation method.
-Copyright: See the file COPYRIGHTS for copyright and license details 
+Copyright: See the file COPYRIGHTS for copyright, authorship and license details 
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
