@@ -42,5 +42,5 @@ My understanding is that the inflation of the libs subdirectory is due to the us
 ## Downstream dependencies
 I have also run R CMD check on downstream dependencies of the package  
 
-No ERRORs or WARNINGs found :)
+No ERRORs or WARNINGs found.
 

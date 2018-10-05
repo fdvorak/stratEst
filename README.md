@@ -3,18 +3,18 @@
 stratEst
 ========
 
-Performs variants of the strategy estimation method. The estimation function returns maximum-likelihood estimates for the population shares and response parameters of a set of candidate strategies given some data from an economic experiment. Candidate strategies can be supplied by the user in the form of deterministic finite-state automata. The number and the complexity of strategies can be restricted by the user or selected based on information criteria. stratEst also features latent class regression to assess the influence of covariates on strategy choice.
+The stratEst package can be used to perform variants of the strategy estimation method (Dal Bo and Frechette, 2011). The estimation function returns maximum-likelihood estimates for the population shares and response parameters of a set of candidate strategies given some data from an economic experiment. Candidate strategies can be supplied by the user in the form of deterministic finite-state automata. The number and the complexity of strategies can be restricted by the user or selected based on information criteria. stratEst also features latent class regression to assess the influence of covariates on strategy choice.
 
 Installation
 ------------
 
-To install the most recent version of stratEst from CRAN:
+To install the stratEst package from CRAN:
 
 ``` r
 install.packages("stratEst")
 ```
 
-You can install the most recent version of stratEst from github with:
+You can install the development version of stratEst from github:
 
 ``` r
 install.packages("devtools")
