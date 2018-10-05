@@ -11,9 +11,9 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 ## Test environments
-* local windows 10 pro install, R 3.5.0
+* local windows 10 pro install, R 3.5.1
 * mac OS X	10.13.6 (on travis-ci), R 3.5.0
-* win-builder (devel and release)
+* win-builder (r-devel and r-release)
 * ubuntu 14.04.5 LTS (on travis-ci), 3.5.1
 
 ## R CMD check results
@@ -25,11 +25,13 @@ mac OS X 10.13.6 (on travis-ci)
 
 win-builder (r-devel)   
 0 errors | 0 warnings | 1 note  
-NOTE: Maintainer: 'Fabian Dvorak <fabian.dvorak@uni.kn>'
+Note: Maintainer: 'Fabian Dvorak <fabian.dvorak@uni.kn>'
+New submission
 
 win-builder (r-release)     
 0 errors | 0 warnings | 1 note  
-NOTE: Maintainer: 'Fabian Dvorak <fabian.dvorak@uni.kn>'
+Note: Maintainer: 'Fabian Dvorak <fabian.dvorak@uni.kn>'
+New submission
 
 ubuntu 14.04.5 LTS (on travis-ci)  
 0 errors | 0 warnings | 1 note  

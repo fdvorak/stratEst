@@ -1,6 +1,6 @@
 Package: stratEst
 Type: Package
-Title: An R package for strategy estimation
+Title: An R Package for Strategy Estimation
 Version: 0.1.0
 Author: Fabian Dvorak
 Maintainer: Fabian Dvorak <fabian.dvorak@uni.kn>
