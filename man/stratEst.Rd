@@ -102,7 +102,7 @@ stratEst(data,strats)
 data <- DF2011[DF2011$treatment == 1 | DF2011$treatment == 4,]
 strats <- rbind(ALLD,TFT)
 covar <- as.matrix(as.numeric(data$treatment == 4 ))
-stratEst(data,strats,covariates = covar)
+stratEst(data,strats,covariates = covar,lcr.runs = 500)
 }
 \references{
 Breitmoser, Y. (2015): Cooperation, but no reciprocity: Individual strategies in the repeated prisoner's dilemma, \emph{American Economic Review}, 105, 2882-2910.
