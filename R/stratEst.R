@@ -68,9 +68,9 @@
 #' ## Latent class regression with data from Dal Bo and Frechette (2011)
 #' ## For the two treatments with R = 32, introduce a dummy which is one if delta = 3/4
 #' data <- DF2011[DF2011$treatment == 1 | DF2011$treatment == 4,]
-#' strats <- rbind(ALLD,ALLC,GRIM,TFT,T2,WSLS)
+#' strats <- rbind(ALLD,TFT)
 #' covar <- as.matrix(as.numeric(data$treatment == 4 ))
-#' stratEst(data,strats,covariates = covar,select="strategies")
+#' stratEst(data,strats,covariates = covar)
 #' @export
 stratEst <- function( data, strategies, shares, covariates, cluster, response = "mixed", r.responses = "no", r.trembles = "global", select = "no", min.strategies = 1, crit = "bic", se = "yes", outer.runs = 10, outer.tol = 0, outer.max = 1000, inner.runs = 100, inner.tol = 0, inner.max = 10, lcr.runs = 1000, lcr.tol = 0, lcr.max = 1000, bs.samples = 1000, print.messages = TRUE ){
   # crude argument checks
