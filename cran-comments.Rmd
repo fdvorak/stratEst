@@ -35,7 +35,7 @@ New submission
 
 ubuntu 14.04.5 LTS (on travis-ci)  
 0 errors | 0 warnings | 1 note  
-NOTE: installed size is  7.1Mb
+NOTE: installed size is  7.0Mb
       sub-directories of 1Mb or more:
       libs   6.8Mb
   
