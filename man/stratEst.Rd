@@ -100,9 +100,9 @@ stratEst(data,strats)
 ## Latent class regression with data from Dal Bo and Frechette (2011)
 ## For the two treatments with R = 32, introduce a dummy which is one if delta = 3/4
 data <- DF2011[DF2011$treatment == 1 | DF2011$treatment == 4,]
-strats <- rbind(ALLD,ALLC,GRIM,TFT,T2,WSLS)
+strats <- rbind(ALLD,TFT)
 covar <- as.matrix(as.numeric(data$treatment == 4 ))
-stratEst(data,strats,covariates = covar,select="strategies")
+stratEst(data,strats,covariates = covar)
 }
 \references{
 Breitmoser, Y. (2015): Cooperation, but no reciprocity: Individual strategies in the repeated prisoner's dilemma, \emph{American Economic Review}, 105, 2882-2910.
