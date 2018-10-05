@@ -1,6 +1,6 @@
 #' T2F2T
 #'
-#' Matrix represention of the prisoner's dilemma strategy which plays C unless partner played 2 consecutive Ds in the last 3 rounds (2 rounds of punishment if partner plays D twice in a row).
+#' Matrix representation of the prisoner's dilemma strategy which plays C unless partner played 2 consecutive Ds in the last 3 rounds (2 rounds of punishment if partner plays D twice in a row).
 #'
 #' @format A matrix with 1 row and 6 columns:
 #' \describe{

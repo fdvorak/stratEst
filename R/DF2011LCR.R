@@ -1,6 +1,6 @@
 #' Data of Dal Bo and Frechette (2011)
 #'
-#' A dataset to set up to perform latent class regression on the repeated prisonner's dilemma experiment by Dal Bo and Frechette.
+#' A dataset to set up to perform latent class regression on the repeated prisoner's dilemma experiment by Dal Bo and Frechette.
 #'
 #' @format A data frame with 37042 rows and 8 variables:
 #' \describe{
@@ -16,6 +16,6 @@
 #' @usage data(DF2011LCR)
 #' @source \url{https://www.aeaweb.org/articles?id=10.1257/aer.101.1.411}
 #' @references
-#' Dal Bo, P. and G. R. Frechette (2011): The evolution of cooperation in innitely repeated games: Experimental evidence, \emph{American Economic Review}, 101, 411-429.
+#' Dal Bo, P. and G. R. Frechette (2011): The evolution of cooperation in infinitely repeated games: Experimental evidence, \emph{American Economic Review}, 101, 411-429.
 #'
 "DF2011LCR"

@@ -1,6 +1,6 @@
 #' PTFT
 #'
-#' Matrix represention of the prisoner's dilemma strategy which plays C if both players chose the same move last round, otherwise it plays D.
+#' Matrix representation of the prisoner's dilemma strategy which plays C if both players chose the same move last round, otherwise it plays D.
 #'
 #'#' @format A matrix with 1 row and 6 columns:
 #' \describe{

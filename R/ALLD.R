@@ -1,6 +1,6 @@
 #' ALLD
 #'
-#' Matrix represention of the prisoner's dilemma strategy which always plays D.
+#' Matrix representation of the prisoner's dilemma strategy which always plays D.
 #'
 #' @format A matrix with 1 row and 6 columns:
 #' \describe{

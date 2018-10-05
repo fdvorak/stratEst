@@ -1,6 +1,6 @@
 #' TF3T
 #'
-#' Matrix represention of the prisoner's dilemma strategy which plays C unless partner played D in all of the last 3 rounds.
+#' Matrix representation of the prisoner's dilemma strategy which plays C unless partner played D in all of the last 3 rounds.
 #'
 #' @format A matrix with 1 row and 6 columns:
 #' \describe{

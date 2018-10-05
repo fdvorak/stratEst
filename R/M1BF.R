@@ -1,6 +1,6 @@
 #' M1BF
 #'
-#' Matrix represention of the prisoner's dilemma strategy which plays if both players played C, and D if both players played D. If the own action was C and the other player played D, play C with some probability. If the own action was D and the other player played C, play C with some (potentially different) probability.
+#' Matrix representation of the prisoner's dilemma strategy which plays if both players played C, and D if both players played D. If the own action was C and the other player played D, play C with some probability. If the own action was D and the other player played C, play C with some (potentially different) probability.
 #'
 #' @format A matrix with 1 row and 6 columns:
 #' \describe{

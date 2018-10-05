@@ -1,6 +1,6 @@
 #' T2
 #'
-#' Matrix represention of the prisoner's dilemma strategy which plays C until either player plays D, then it plays D twice and returns to C (regardless of all actions during the punishment rounds).
+#' Matrix representation of the prisoner's dilemma strategy which plays C until either player plays D, then it plays D twice and returns to C (regardless of all actions during the punishment rounds).
 #'
 #' @format A matrix with 1 row and 6 columns:
 #' \describe{

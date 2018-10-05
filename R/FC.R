@@ -1,6 +1,6 @@
 #' FC
 #'
-#' Matrix represention of the prisoner's dilemma strategy which plays C in the first round, then D forever.
+#' Matrix representation of the prisoner's dilemma strategy which plays C in the first round, then D forever.
 #'
 #' @format A matrix with 1 row and 6 columns:
 #' \describe{

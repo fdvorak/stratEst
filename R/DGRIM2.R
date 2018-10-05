@@ -1,6 +1,6 @@
 #' DGRIM2
 #'
-#' Matrix represention of the prisoner's dilemma strategy which plays D in the first round, then play GRIM2.
+#' Matrix representation of the prisoner's dilemma strategy which plays D in the first round, then play GRIM2.
 #'
 #' @format A matrix with 1 row and 6 columns:
 #' \describe{
