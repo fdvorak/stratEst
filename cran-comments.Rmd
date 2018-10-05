@@ -11,26 +11,36 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 ## Test environments
-* local win install, R 3.5.0
-* ubuntu 12.04 (on travis-ci), R 3.1.2
+* local windows 10 pro install, R 3.5.0
+* mac OS X	10.13.6 (on travis-ci), R 3.5.0
 * win-builder (devel and release)
+* ubuntu 14.04.5 LTS (on travis-ci), 3.5.1
 
 ## R CMD check results
-There were no ERRORs or WARNINGs. 
+local windows 10 pro install  
+0 errors | 0 warnings | 0 notes
 
-There was 1 NOTE:
+mac OS X 10.13.6 (on travis-ci)  
+0 errors | 0 warnings | 0 notes
 
-* checking dependencies in R code ... NOTE
-  Namespace in Imports field not imported from: 'R6'
+win-builder (r-devel)   
+0 errors | 0 warnings | 1 note  
+NOTE: Maintainer: 'Fabian Dvorak <fabian.dvorak@uni.kn>'
 
-  R6 is a build-time dependency.
+win-builder (r-release)     
+0 errors | 0 warnings | 1 note  
+NOTE: Maintainer: 'Fabian Dvorak <fabian.dvorak@uni.kn>'
+
+ubuntu 14.04.5 LTS (on travis-ci)  
+0 errors | 0 warnings | 1 note  
+NOTE: installed size is  7.1Mb
+      sub-directories of 1Mb or more:
+      libs   6.8Mb
+  
+My understanding is that the inflation of the libs subdirectory is due to the use of Rcpp. The main functions of the stratEst package have been written in C++ using Rcpp and RcppArmadillo. These functions are essential for the functioning of the package. Without the speed up gained from those C++ functions, the package would become impractical.
 
 ## Downstream dependencies
-I have also run R CMD check on downstream dependencies of httr 
-(https://github.com/wch/checkresults/blob/master/httr/r-release). 
-All packages that I could install passed except:
+I have also run R CMD check on downstream dependencies of the package  
 
-* Ecoengine: this appears to be a failure related to config on 
-  that machine. I couldn't reproduce it locally, and it doesn't 
-  seem to be related to changes in httr (the same problem exists 
-  with httr 0.4).
+No ERRORs or WARNINGs found :)
+

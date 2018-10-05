@@ -132,26 +132,33 @@ $(document).ready(function () {
 <div id="test-environments" class="section level2">
 <h2>Test environments</h2>
 <ul>
-<li>local OS X install, R 3.1.2</li>
-<li>ubuntu 12.04 (on travis-ci), R 3.1.2</li>
+<li>local windows 10 pro install, R 3.5.0</li>
+<li>mac OS X 10.13.6 (on travis-ci), R 3.5.0</li>
 <li>win-builder (devel and release)</li>
+<li>ubuntu 14.04.5 LTS (on travis-ci), 3.5.1</li>
 </ul>
 </div>
 <div id="r-cmd-check-results" class="section level2">
 <h2>R CMD check results</h2>
-<p>There were no ERRORs or WARNINGs.</p>
-<p>There was 1 NOTE:</p>
-<ul>
-<li>checking dependencies in R code … NOTE Namespace in Imports field not imported from: ‘R6’</li>
-</ul>
-<p>R6 is a build-time dependency.</p>
+<p>local windows 10 pro install<br />
+0 errors | 0 warnings | 0 notes</p>
+<p>mac OS X 10.13.6 (on travis-ci)<br />
+0 errors | 0 warnings | 0 notes</p>
+<p>win-builder (r-devel)<br />
+0 errors | 0 warnings | 1 note<br />
+NOTE: Maintainer: ‘Fabian Dvorak <a href="mailto:fabian.dvorak@uni.kn">fabian.dvorak@uni.kn</a>’</p>
+<p>win-builder (r-release)<br />
+0 errors | 0 warnings | 1 note<br />
+NOTE: Maintainer: ‘Fabian Dvorak <a href="mailto:fabian.dvorak@uni.kn">fabian.dvorak@uni.kn</a>’</p>
+<p>ubuntu 14.04.5 LTS (on travis-ci)<br />
+0 errors | 0 warnings | 1 note<br />
+NOTE: installed size is 7.1Mb sub-directories of 1Mb or more: libs 6.8Mb</p>
+<p>My understanding is that the inflation of the libs subdirectory is due to the use of Rcpp. The main functions of the stratEst package have been written in C++ using Rcpp and RcppArmadillo. These functions are essential for the functioning of the package. Without the speed up gained from those C++ functions, the package would become impractical.</p>
 </div>
 <div id="downstream-dependencies" class="section level2">
 <h2>Downstream dependencies</h2>
-<p>I have also run R CMD check on downstream dependencies of httr (<a href="https://github.com/wch/checkresults/blob/master/httr/r-release" class="uri">https://github.com/wch/checkresults/blob/master/httr/r-release</a>). All packages that I could install passed except:</p>
-<ul>
-<li>Ecoengine: this appears to be a failure related to config on that machine. I couldn’t reproduce it locally, and it doesn’t seem to be related to changes in httr (the same problem exists with httr 0.4).</li>
-</ul>
+<p>I have also run R CMD check on downstream dependencies of the package</p>
+<p>No ERRORs or WARNINGs found :)</p>
 </div>
 
 

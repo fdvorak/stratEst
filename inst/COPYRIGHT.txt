@@ -1,0 +1,50 @@
+##Note: stratEst uses seamless integration of R and C++ based on the Rcpp package and the linear algebra library RcppArmadillo. The following author, license, and copyright details apply.
+
+## stratEst package
+License: GLP-3
+Copyright Information:
+  2018 Fabian Dvorak
+References:
+
+
+
+## Rcpp: Seamless R and C++ Integration
+License: GPL-2 | GPL-3 [expanded from: GPL (≥ 2)]
+Copyright Information:
+  Copyright 2011 - 2013  Douglas Bates, Romain Francois and Dirk Eddelbuettel
+References:
+  Dirk Eddelbuettel and Romain Francois (2011). Rcpp: Seamless R and C++ Integration.
+  Journal of Statistical Software, 40(8), 1-18. URL http://www.jstatsoft.org/v40/i08/.
+
+  Eddelbuettel, Dirk (2013) Seamless R and C++ Integration with Rcpp. Springer, New York.
+  ISBN 978-1-4614-6867-7.
+
+  Dirk Eddelbuettel and James Joseph Balamuta (2017). Extending R with C++: A Brief
+  Introduction to Rcpp. PeerJ Preprints 5:e3188v1. URL
+  https://doi.org/10.7287/peerj.preprints.3188v1.
+
+
+## RcppArmadillo Linear Algebra Library
+License: Apache License 2.0
+Copyright Information:
+  Armadillo C++ Linear Algebra Library
+  Copyright 2008-2018 Conrad Sanderson (http://conradsanderson.id.au)
+  Copyright 2008-2016 National ICT Australia (NICTA)
+  Copyright 2017-2018 Arroyo Consortium
+  Copyright 2017-2018 Data61, CSIRO
+
+  This product includes software developed by Conrad Sanderson (http://conradsanderson.id.au)
+  This product includes software developed at National ICT Australia (NICTA)
+  This product includes software developed at Arroyo Consortium
+  This product includes software developed at Data61, CSIRO
+
+References:
+  Dirk Eddelbuettel and Romain Francois (2011). Rcpp: Seamless R and C++ Integration.
+  Journal of Statistical Software, 40(8), 1-18. URL http://www.jstatsoft.org/v40/i08/.
+
+  Eddelbuettel, Dirk (2013) Seamless R and C++ Integration with Rcpp. Springer, New York.
+  ISBN 978-1-4614-6867-7.
+
+  Dirk Eddelbuettel and James Joseph Balamuta (2017). Extending R with C++: A Brief
+  Introduction to Rcpp. PeerJ Preprints 5:e3188v1. URL
+  https://doi.org/10.7287/peerj.preprints.3188v1.

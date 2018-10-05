@@ -2,9 +2,12 @@ Package: stratEst
 Type: Package
 Title: Strategy Estimation in Experimental Economics
 Version: 0.1.0
+Authors@R: person("Fabian", "Dvorak", email = "fabian.dvorak@uni.kn",
+  role = c("aut", "cre"))
 Author: Fabian Dvorak
 Maintainer: Fabian Dvorak <fabian.dvorak@uni.kn>
 Description: Implements variants of the strategy estimation method.
+Copyright: See the file COPYRIGHTS for copyright and license details 
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
@@ -15,3 +18,4 @@ Suggests: testthat
 Depends: R (>= 2.10)
 URL: http://github.com/fdvorak/stratEst
 BugReports: http://github.com/fdvorak/stratEst/issues
+NeedsCompilation: yes
