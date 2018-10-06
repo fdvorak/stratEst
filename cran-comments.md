@@ -1,3 +1,10 @@
+---
+title: "cran-comments"
+author: "Fabian Dvorak"
+date: "October 6, 2018"
+output: html_document
+---
+
 ## Resubmission
 This is a resubmission. This version:
 
