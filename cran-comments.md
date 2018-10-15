@@ -1,14 +1,15 @@
 ---
 title: "cran-comments"
 author: "Fabian Dvorak"
-date: "October 6, 2018"
+date: "October 15, 2018"
 output: html_document
 ---
 
 ## Resubmission
-This is a resubmission. This version:
+This is a resubmission. Thanks for your time. This version:
 
-* uses SHLIB_OPENMP_CFLAGS in both PKG_CXXFLAGS and PKG_LIBS
+* Omits the redundant "An R Package for" in the title field of DESCRIPTION.
+* Elaborates which strategy estimation method and points out two variants including references in the Description field of DESCRIPTION.
 
 ## Test environments
 * local windows 10 pro install, R 3.5.1
