@@ -1,0 +1,16 @@
+---
+title: "NEWS"
+author: "Fabian Dvorak"
+date: "19 Oktober 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# stratEst 0.1.0.9000
+
+# stratEst 0.1.0
+
+* first release

@@ -1,7 +1,7 @@
 Package: stratEst
 Type: Package
 Title: Strategy Estimation
-Version: 0.1.0
+Version: 0.1.0.9000
 Author: Fabian Dvorak
 Maintainer: Fabian Dvorak <fabian.dvorak@uni.kn>
 Date: 2018-10-15
