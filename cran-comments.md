@@ -1,15 +1,15 @@
 ---
 title: "cran-comments"
 author: "Fabian Dvorak"
-date: "October 15, 2018"
+date: "December 16, 2018"
 output: html_document
 ---
 
 ## Resubmission
-This is a resubmission. Thanks for your time. This version:
+This is a patch release for version 0.1.0. This version:
 
-* Omits the redundant "An R Package for" in the title field of DESCRIPTION.
-* Elaborates which strategy estimation method and points out two variants including references in the Description field of DESCRIPTION.
+* fixes the overload ambiguity of the log() function in C++ code (Error on Solaris)
+* reports solutions with tremble parameters bigger than 0.5
 
 ## Test environments
 * local windows 10 pro install, R 3.5.1

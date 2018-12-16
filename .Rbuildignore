@@ -3,8 +3,9 @@
 ^\.travis\.yml$
 ^\.gitattributes$
 ^cran-comments\.Rmd$
-^cran-comments\.html$
 ^README\.Rmd$
 ^README-.*\.png$
+^NEWS\.Rmd$
+^NEWS\.html$
 ^revdep$
 ^cran-comments\.md$

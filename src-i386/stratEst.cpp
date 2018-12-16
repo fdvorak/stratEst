@@ -193,12 +193,18 @@ arma::field<arma::mat> stratEst_EM(arma::cube& output_cube, arma::cube& sum_outp
     if ( new_ll_val(0) == 0 ){ eps_now = 0; }
     if ( new_ll_val.is_finite() ){  eps = eps_now; }                                  // only continue if no overshoot
     else { eps = arma::datum::nan; }                                                  // if overshooting occured report results from last eval
+    if( num_trembles_to_est > 0 ){
+      if( max(new_trembles) > 0.5 ){
+        eps = arma::datum::nan;
+        new_ll_val(0) = arma::datum::inf;
+      }
+    }
 
   } // end while
 
   // calculate selection criteria
   aic_val = new_ll_val + free_params;                                                 // update AIC value
-  bic_val = new_ll_val + ( free_params * log( (double) num_ids ) )/2;                           // update BIC value
+  bic_val = new_ll_val + ( free_params * log(num_ids ) )/2;                           // update BIC value
   icl_val = bic_val + new_entropy_k;                                                  // update ICL value
 
   // prepare output
@@ -504,12 +510,18 @@ arma::field<arma::mat> stratEst_LCR_EM(arma::cube& output_cube, arma::cube& sum_
     if ( new_ll_val(0) == 0 ){ eps_now = 0; }
     if ( new_ll_val.is_finite() ){  eps = eps_now; }                                  // only continue if no overshoot
     else { eps = arma::datum::nan; }                                                  // if overshooting occured report results from last eval
+    if( num_trembles_to_est > 0 ){
+      if( max(new_trembles) > 0.5 ){
+        eps = arma::datum::nan;
+        new_ll_val(0) = arma::datum::inf;
+      }
+    }
 
   } // end while
 
   // calculate selection criteria
   aic_val = new_ll_val + free_params;                                                 // update AIC value
-  bic_val = new_ll_val + ( free_params * log( (double) num_ids ) )/2;                           // update BIC value
+  bic_val = new_ll_val + ( free_params * log( num_ids ) )/2;                           // update BIC value
   icl_val = bic_val + new_entropy_k;                                                  // update ICL value
 
   // prepare output

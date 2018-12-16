@@ -1,10 +1,10 @@
 Package: stratEst
 Type: Package
 Title: Strategy Estimation
-Version: 0.1.0.9000
+Version: 0.1.1
 Author: Fabian Dvorak
 Maintainer: Fabian Dvorak <fabian.dvorak@uni.kn>
-Date: 2018-10-15
+Date: 2018-12-16
 Description: Implements variants of the strategy frequency estimation method by Dal Bo & Frechette (2011) <doi:10.1257/aer.101.1.411>, including its adaptation to behavioral memory-one Markov strategies by Breitmoser (2015) <doi:10.1257/aer.20130675>, and the extension in the spirit of latent-class regression by Dvorak & Fehrler (2018) <doi:10.2139/ssrn.2986445>. 
 Copyright: See the file COPYRIGHTS for copyright, authorship and license details 
 License: GPL-3

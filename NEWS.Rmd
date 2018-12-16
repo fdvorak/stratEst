@@ -1,7 +1,7 @@
 ---
 title: "NEWS"
 author: "Fabian Dvorak"
-date: "19 Oktober 2018"
+date: "16 December 2018"
 output: html_document
 ---
 
@@ -9,7 +9,10 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-# stratEst 0.1.0.9000
+# stratEst 0.1.1
+
+* fixes the overload ambiguity of the log() function in C++ code
+* reports solutions with tremble parameters bigger than 0.5
 
 # stratEst 0.1.0
 
