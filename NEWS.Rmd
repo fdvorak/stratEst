@@ -1,7 +1,7 @@
 ---
 title: "NEWS"
 author: "Fabian Dvorak"
-date: "16 December 2018"
+date: "17 December 2018"
 output: html_document
 ---
 

@@ -1,7 +1,7 @@
 ---
 title: "cran-comments"
 author: "Fabian Dvorak"
-date: "December 16, 2018"
+date: "December 17, 2018"
 output: html_document
 ---
 
@@ -9,6 +9,8 @@ Thanks for your time. This is a patch release for version 0.1.0. This version:
 
 * fixes the overload ambiguity of the log() function in C++ code (Error on Solaris)
 * reports solutions with tremble parameters bigger than 0.5
+
+Note that package checks currently also report ERRORS for r-devel-linux-x86_64-debian-clang, r-devel-linux-x86_64-debian-gcc, and r-patched-linux-x86_64 due to the use of Rcpp.
 
 ## Test environments
 * local windows 10 pro install, R 3.5.1
