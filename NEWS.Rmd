@@ -9,6 +9,9 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+# stratEst 0.1.1.9000
+
+
 # stratEst 0.1.1
 
 * fixes the overload ambiguity of the log() function in C++ code
