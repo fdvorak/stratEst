@@ -5,8 +5,7 @@ date: "December 16, 2018"
 output: html_document
 ---
 
-## Resubmission
-This is a patch release for version 0.1.0. This version:
+Thanks for your time. This is a patch release for version 0.1.0. This version:
 
 * fixes the overload ambiguity of the log() function in C++ code (Error on Solaris)
 * reports solutions with tremble parameters bigger than 0.5
@@ -25,14 +24,10 @@ mac OS X 10.13.6 (on travis-ci)
 0 errors | 0 warnings | 0 notes
 
 win-builder (r-devel)   
-0 errors | 0 warnings | 1 note  
-Note: Maintainer: 'Fabian Dvorak <fabian.dvorak@uni.kn>'     
-New submission
+0 errors | 0 warnings | 0 notes  
 
 win-builder (r-release)     
-0 errors | 0 warnings | 1 note  
-Note: Maintainer: 'Fabian Dvorak <fabian.dvorak@uni.kn>'      
-New submission
+0 errors | 0 warnings | 0 notes  
 
 ubuntu 14.04.5 LTS (on travis-ci)  
 0 errors | 0 warnings | 1 note  
@@ -45,5 +40,5 @@ My current understanding is that the inflation of the libs subdirectory is due t
 ## Downstream dependencies
 I have also run R CMD check on downstream dependencies of the package.  
 
-No ERRORs or WARNINGs found.
+0 packages with problems
 
