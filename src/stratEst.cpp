@@ -587,11 +587,10 @@ arma::field<arma::mat> stratEst_SE(arma::cube& output_cube, arma::cube& sum_outp
   arma::mat fisher_info_trembles( num_trembles_to_est , num_trembles_to_est , arma::fill::zeros );
 
   // SE of mixed responses & trembles
-  arma::mat zero_weight_mat( num_rows_response_mat , num_cols_response_mat , arma::fill::zeros );
-  arma::mat one_weight_mat( num_rows_response_mat , num_cols_response_mat , arma::fill::zeros );
-  zero_weight_mat.fill( 1/( num_cols_response_mat-1 ) );
-  one_weight_mat.fill( num_cols_response_mat/( num_cols_response_mat-1 ) );
-  arma::mat tremble_weight_mat = zero_weight_mat - ( response_mat % one_weight_mat );
+  arma::mat r_weight_mat( num_rows_response_mat , num_cols_response_mat , arma::fill::zeros );
+  arma::mat one_weight_mat( num_rows_response_mat , num_cols_response_mat , arma::fill::ones );
+  r_weight_mat.fill( num_cols_response_mat - 1 );
+  arma::mat tremble_weight_mat = ( one_weight_mat - response_mat)/r_weight_mat - response_mat;
 
   for (int i = 0; i < num_ids ; i++) {
     arma::vec score_contribution_responses( num_responses_to_est , arma::fill::zeros );
