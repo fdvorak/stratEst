@@ -17,8 +17,8 @@ rcpparma_bothproducts <- function(x) {
     .Call(`_stratEst_rcpparma_bothproducts`, x)
 }
 
-stratEst_cpp <- function(data, strategies, shares, covariates, LCR, cluster, response = "mixed", r_responses = "no", r_trembles = "global", select = "no", min_strategies = 1L, crit = "bic", SE = "yes", outer_runs = 10L, outer_tol_eval = 0, outer_max_eval = 1000L, inner_runs = 100L, inner_tol_eval = 0, inner_max_eval = 100L, LCR_runs = 100L, LCR_tol_eval = 0L, LCR_max_eval = 1000L, BS_samples = 1000L, print_messages = TRUE) {
-    .Call(`_stratEst_stratEst_cpp`, data, strategies, shares, covariates, LCR, cluster, response, r_responses, r_trembles, select, min_strategies, crit, SE, outer_runs, outer_tol_eval, outer_max_eval, inner_runs, inner_tol_eval, inner_max_eval, LCR_runs, LCR_tol_eval, LCR_max_eval, BS_samples, print_messages)
+stratEst_cpp <- function(data, strategies, shares, covariates, LCR, cluster, response = "mixed", r_responses = "no", r_trembles = "global", select = "no", min_strategies = 1L, crit = "bic", SE = "yes", outer_runs = 10L, outer_tol_eval = 0, outer_max_eval = 1000L, inner_runs = 100L, inner_tol_eval = 0, inner_max_eval = 100L, LCR_runs = 100L, LCR_tol_eval = 0L, LCR_max_eval = 1000L, BS_samples = 1000L, print_messages = TRUE, integer_strategies = TRUE) {
+    .Call(`_stratEst_stratEst_cpp`, data, strategies, shares, covariates, LCR, cluster, response, r_responses, r_trembles, select, min_strategies, crit, SE, outer_runs, outer_tol_eval, outer_max_eval, inner_runs, inner_tol_eval, inner_max_eval, LCR_runs, LCR_tol_eval, LCR_max_eval, BS_samples, print_messages, integer_strategies)
 }
 
 transform_cpp <- function(id, supergame, period, group, output, input, unique_ids) {

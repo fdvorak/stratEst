@@ -290,7 +290,7 @@ arma::field<arma::mat> stratEst_LCR_EM(arma::cube& output_cube, arma::cube& sum_
   priors_entities_mat.col(0).fill(1);
   priors_entities_mat.cols( 1 , k-1 ) = exp( covariate_mat * coefficient_mat );
   for ( int i = 0; i < num_ids; i++){
-     priors_entities_mat.row(i) /= accu( priors_entities_mat.row(i) );
+    priors_entities_mat.row(i) /= accu( priors_entities_mat.row(i) );
   }
 
   while (  eval < max_eval+eval_pre && eps != tol_eval && eps != arma::datum::nan ) {
@@ -765,7 +765,7 @@ arma::field<arma::mat> stratEst_SE(arma::cube& output_cube, arma::cube& sum_outp
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // [[Rcpp::export]]
-List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec shares, arma::mat covariates, bool LCR, arma::vec cluster, std::string response = "mixed", std::string r_responses = "no", std::string r_trembles = "global", std::string select = "no", int min_strategies = 1 , std::string crit = "bic", std::string SE = "yes", int outer_runs = 10, double outer_tol_eval = 0, int outer_max_eval = 1000, int inner_runs = 100, double inner_tol_eval = 0, int inner_max_eval = 100, int LCR_runs = 100, int LCR_tol_eval = 0, int LCR_max_eval = 1000, int BS_samples = 1000, bool print_messages = true ) {
+List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec shares, arma::mat covariates, bool LCR, arma::vec cluster, std::string response = "mixed", std::string r_responses = "no", std::string r_trembles = "global", std::string select = "no", int min_strategies = 1 , std::string crit = "bic", std::string SE = "yes", int outer_runs = 10, double outer_tol_eval = 0, int outer_max_eval = 1000, int inner_runs = 100, double inner_tol_eval = 0, int inner_max_eval = 100, int LCR_runs = 100, int LCR_tol_eval = 0, int LCR_max_eval = 1000, int BS_samples = 1000, bool print_messages = true, bool integer_strategies = true ) {
   // future development
   int newton_stepsize = 1;
   double penalty = 0;
@@ -808,7 +808,7 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec shares, arma::
   arma::uvec zeros_round = find( round_vec <= 0 );
   int num_zeros_round = zeros_round.n_elem;
   if ( num_zeros_id != 0 || num_zeros_match != 0 || num_zeros_round != 0 ){
-    stop("id, supergame, and round columns of data matrix must contain values greater than zero.");
+    stop("The variables id, game (supergame), and period in of the data frame must contain values greater than zero.");
   }
   arma::vec unique_ids = unique( data.col(0) ) ;
   int num_ids = unique_ids.n_elem;
@@ -827,7 +827,7 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec shares, arma::
       int num_unique_rounds_sbj = unique_rounds_sbj.n_elem;
       int num_rounds_sbj = rounds_sbj.n_elem;
       if( num_unique_rounds_sbj != num_rounds_sbj ){
-        stop("The same round number cannot occur several times within the same supergame of the same subject.");
+        stop("The same round number cannot occur several times within the same game for the same subject.");
       }
       int num_rounds_sbj_match = unique_rounds_sbj.n_elem;
       for(int k = 0; k < num_rounds_sbj_match; k++) {
@@ -882,22 +882,22 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec shares, arma::
       int num_fixed_responses_row =  fixed_responses_row.n_elem;
       if( num_fixed_responses_row > 0 ){
         if( arma::max( fixed_responses_row ) > 1  ){
-          stop("fixed responses cannot exceed one.");
+          stop("Fixed responses cannot exceed one.");
         }
         if( arma::max( fixed_responses_row ) < 0  ){
-          stop("fixed responses cannot be negative.");
+          stop("Fixed responses cannot be negative.");
         }
         if( accu( fixed_responses_row ) > 1 ){
-          stop("sum of fixed shares cannot exceed one. stratEst cannot proceed with the current values.");
+          stop("The sum of fixed shares cannot exceed one. stratEst cannot proceed with the current values.");
         }
         else if(  num_fixed_responses_row == num_outputs && accu( fixed_responses_row ) != 1 ){
-          stop("fixed shares must sum to one. stratEst cannot proceed with the current values.");
+          stop("The fixed shares must sum to one. stratEst cannot proceed with the current values.");
         }
         if( num_fixed_responses_row < (num_outputs-1)  && fixed_mixed_responses_row.n_elem != 0 && response == "pure" ){
-          stop("it is not possible to estimate pure strategy parameters in a row where other parameters are fixed at mixed values. estimate mixed parameters or change the fixed values to zero or one.");
+          stop("It is not possible to estimate pure strategy parameters in a row where other parameters are fixed at mixed values. Estimate mixed parameters or change the fixed values to zero or one.");
         }
         if( num_fixed_responses_row < num_non_zero_outputs && ( r_responses != "no" || r_trembles != "no" ) ){
-          stop("it is not possible to fix only a subset of response probabilities in the same state if restrictions apply. fix either all or no probability in each row of strategies.");
+          stop("It is not possible to fix only a subset of response probabilities in the same state if restrictions apply. Fix either all or no probability in each row of strategies.");
         }
       }
     }
@@ -906,19 +906,19 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec shares, arma::
   //check fixed shares
   int num_shares = complete_share_vec.n_elem;
   if( k !=  num_shares ){
-    stop("shares must have as many elements as strategies.");
+    stop("Shares must have as many elements as strategies.");
   }
   arma::vec fixed_shares = complete_share_vec( find_finite( complete_share_vec ) );
   int num_fixed_shares = fixed_shares.n_elem;
   if ( num_fixed_shares > 0 ){
     if( arma::max( fixed_shares ) > 1  ){
-      stop("shares cannot exceed one.");
+      stop("Shares cannot exceed one.");
     }
     if( arma::max( fixed_shares ) < 0  ){
-      stop("shares cannot be negative.");
+      stop("Shares cannot be negative.");
     }
     if( accu( fixed_shares ) > 1 ){
-      stop("sum of fixed shares cannot exceed one. stratEst cannot proceed with the current values.");
+      stop("Sum of fixed shares cannot exceed one. stratEst cannot proceed with the current values.");
     }
     if( num_fixed_shares == (k-1) ){
       complete_share_vec.replace( arma::datum::nan , 1 - accu( fixed_shares ) );
@@ -929,15 +929,15 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec shares, arma::
   arma::mat covariate_mat( num_ids , covariates.n_cols + 1 , arma::fill::ones );
   if( LCR ){
     if( num_shares == 1 ){
-      stop("latent class regression requires more than one strategy.");
+      stop("Latent class regression requires more than one strategy.");
     }
     int cols_covariates = covariates.n_cols;
     int rows_covariates = covariates.n_rows;
     if( rows_covariates != rows_data  ){
-      stop("covariate matrix must have as many rows as data.");
+      stop("Covariate matrix must have as many rows as data.");
     }
     if( num_fixed_shares > 0 ){
-      stop("shares cannot be fixed with covariates.");
+      stop("Shares cannot be fixed with covariates.");
     }
     arma::mat incomplete_covariate_mat( num_ids , covariates.n_cols , arma::fill::ones );
     for(int j = 0; j < num_ids; j++) {
@@ -946,7 +946,7 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec shares, arma::
         arma::vec unique_covariate = unique( covariate( find( id_vec == j+1 ) ) );
         int num_unique_covariate = unique_covariate.n_elem;
         if( num_unique_covariate > 1 ){
-          stop("covariate matrix contains different values of the same variable for the same subject.");
+          stop("Covariate matrix contains different values of the same variable for the same subject.");
         }
         else{
           incomplete_covariate_mat( j , c ) = unique_covariate(0);
@@ -966,17 +966,17 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec shares, arma::
     arma::uvec zeros_cluster = find( cluster <= 0 );
     int num_zeros_cluster = zeros_cluster.n_elem;
     if ( num_zeros_cluster != 0 ){
-      stop("cluster must contain values greater than zero.");
+      stop("Cluster must contain values greater than zero.");
     }
     int elem_cluster = cluster.n_elem;
     if( elem_cluster != rows_data  ){
-      stop("cluster vector must have the same number of elements as there are rows in data.");
+      stop("The cluster vector must have the same number of elements as there are rows in data.");
     }
     for(int j = 0; j < num_ids; j++) {
       arma::vec unique_cluster = unique( cluster( find( id_vec == j+1 ) ) );
       int num_unique_cluster = unique_cluster.n_elem;
       if( num_unique_cluster > 1 ){
-        stop("indivdiuals must be nested within clusters, i.e. the data of one individual appears only in one cluster.");
+        stop("Indivdiuals must be nested within clusters, i.e. the data of one individual appears only in one cluster.");
       }
       else{
         cluster_id_vec(j) = unique_cluster(0);
@@ -1374,7 +1374,12 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec shares, arma::
               }
             }
             else{
-              Rcout<< "estimate nested model " << kill <<  " (" << ro+1  << "/" << ri+1 << ")     \r";
+              if( integer_strategies == true ){
+                Rcout<< "estimate model with " << K - 1 << " strategies " <<  " (" << ro+1  << "/" << ri+1 << ")     \r";
+              }
+              else{
+                Rcout<< "estimate nested model " << kill <<  " (" << ro+1  << "/" << ri+1 << ")     \r";
+              }
             }
           }
           //random starting points
@@ -1626,6 +1631,10 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec shares, arma::
         }
       }
 
+      if( integer_strategies == true && kill == 1  ){
+        kill = K;
+      }
+
     } // end kill loop
 
 
@@ -1647,11 +1656,16 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec shares, arma::
       kill_start = 1;
       if( print_messages == true ){
         Rcout<< "\r";
-        Rcout<< "eliminate strategy " << killed << " (info criterion)";
+        if( integer_strategies == true ){
+          Rcout<< "eliminate one strategy (info criterion)";
+        }
+        else{
+          Rcout<< "eliminate strategy " << killed << " (info criterion)";
+        }
       }
     }
     if( print_messages == true ){
-       Rcout<< "\nDONE\n";
+      Rcout<< "\nDONE\n";
     }
   } // end strategy selection loop
 
@@ -1722,188 +1736,188 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec shares, arma::
       }
     }
     if( print_messages == true ){
-    Rcout<< "\nDONE\n";
+      Rcout<< "\nDONE\n";
     }
   }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// standard erros & convergence checks
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  // standard erros & convergence checks
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-arma::mat estimated_shares = R(0,0);
-arma::mat estimated_responses = R(1,0);
-arma::mat estimated_trembles = R(2,0);
-int num_shares_to_est = shares_to_est.n_elem;
-arma::mat BS_shares_SE( num_shares_to_est , 1 , arma::fill::zeros );
-int num_responses_to_est = estimated_responses.n_elem;
-if( response == "pure" ){
-  num_responses_to_est = 0;
-}
-arma::mat BS_responses_SE( num_responses_to_est , 1 , arma::fill::zeros );
-int num_trembles_to_est = estimated_trembles.n_elem;
-arma::mat BS_trembles_SE( num_trembles_to_est , 1 , arma::fill::zeros  );
-arma::mat BS_coefficients_SE( covariate_mat.n_cols * (k-1) , 1 , arma::fill::zeros  );
-int num_coefficients_to_est = 0;
-if( LCR ){
-  arma::mat estimated_coefficients = R(13,0);
-  num_coefficients_to_est = estimated_coefficients.n_elem;
-}
-arma::mat estimated_coefficients_BS( num_coefficients_to_est , 1 , arma::fill::zeros );
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// analytical standard erros & convergence checks
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-arma::field<arma::mat> R_SE(5,1);
-R_SE = stratEst_SE( output_cube, sum_outputs_cube, strat_id, covariate_mat, R(0,0), R(1,0), R(2,0), R(13,0), R(3,0), R(4,0), R(14,0), R(12,0), R(18,0), R(16,0), R(17,0), R(15,0), num_shares_to_est, indices_responses, indices_trembles, response, R(19,0), CL, cluster_id_vec, LCR );
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// standard erros via bootstrap
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-if( SE == "bs" ){
-  int BS_samples_shares = BS_samples;
-  int BS_samples_responses = BS_samples;
-  int BS_samples_trembles = BS_samples;
-  // int BS_samples_coefficients = BS_samples;
-  if( print_messages == true ){
-    Rcout<<"start boostrap procedure\n";
+  arma::mat estimated_shares = R(0,0);
+  arma::mat estimated_responses = R(1,0);
+  arma::mat estimated_trembles = R(2,0);
+  int num_shares_to_est = shares_to_est.n_elem;
+  arma::mat BS_shares_SE( num_shares_to_est , 1 , arma::fill::zeros );
+  int num_responses_to_est = estimated_responses.n_elem;
+  if( response == "pure" ){
+    num_responses_to_est = 0;
   }
-  for (int i = 0; i < BS_samples; i++) {
-    Rcpp::checkUserInterrupt();
+  arma::mat BS_responses_SE( num_responses_to_est , 1 , arma::fill::zeros );
+  int num_trembles_to_est = estimated_trembles.n_elem;
+  arma::mat BS_trembles_SE( num_trembles_to_est , 1 , arma::fill::zeros  );
+  arma::mat BS_coefficients_SE( covariate_mat.n_cols * (k-1) , 1 , arma::fill::zeros  );
+  int num_coefficients_to_est = 0;
+  if( LCR ){
+    arma::mat estimated_coefficients = R(13,0);
+    num_coefficients_to_est = estimated_coefficients.n_elem;
+  }
+  arma::mat estimated_coefficients_BS( num_coefficients_to_est , 1 , arma::fill::zeros );
+
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  // analytical standard erros & convergence checks
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  arma::field<arma::mat> R_SE(5,1);
+  R_SE = stratEst_SE( output_cube, sum_outputs_cube, strat_id, covariate_mat, R(0,0), R(1,0), R(2,0), R(13,0), R(3,0), R(4,0), R(14,0), R(12,0), R(18,0), R(16,0), R(17,0), R(15,0), num_shares_to_est, indices_responses, indices_trembles, response, R(19,0), CL, cluster_id_vec, LCR );
+
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  // standard erros via bootstrap
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  if( SE == "bs" ){
+    int BS_samples_shares = BS_samples;
+    int BS_samples_responses = BS_samples;
+    int BS_samples_trembles = BS_samples;
+    // int BS_samples_coefficients = BS_samples;
     if( print_messages == true ){
-      Rcout<< "sample " << i+1 << " (of " << BS_samples <<")\r";
+      Rcout<<"start boostrap procedure\n";
     }
-    arma::field<arma::mat> R_LCR_BS(20,1);
-    arma::field<arma::mat> R_NO_LCR_BS(13,1);
+    for (int i = 0; i < BS_samples; i++) {
+      Rcpp::checkUserInterrupt();
+      if( print_messages == true ){
+        Rcout<< "sample " << i+1 << " (of " << BS_samples <<")\r";
+      }
+      arma::field<arma::mat> R_LCR_BS(20,1);
+      arma::field<arma::mat> R_NO_LCR_BS(13,1);
 
-    int num_ids_to_sample = num_ids;
-    // sample clusters if CL true
-    arma::vec sampled_clusters( num_clusters , 1 , arma::fill::randu );
-    if( CL ){
-      sampled_clusters *= num_clusters;
-      sampled_clusters = ceil( sampled_clusters );
-      int ids_in_sampled_clusters = 0;
-      for (int j = 0; j < num_clusters; j++) {
-        arma::vec unique_ids_in_sampled_cluster = unique( id_vec( find( cluster == sampled_clusters(j) ) ) );
-        ids_in_sampled_clusters = ids_in_sampled_clusters + unique_ids_in_sampled_cluster.n_elem;
+      int num_ids_to_sample = num_ids;
+      // sample clusters if CL true
+      arma::vec sampled_clusters( num_clusters , 1 , arma::fill::randu );
+      if( CL ){
+        sampled_clusters *= num_clusters;
+        sampled_clusters = ceil( sampled_clusters );
+        int ids_in_sampled_clusters = 0;
+        for (int j = 0; j < num_clusters; j++) {
+          arma::vec unique_ids_in_sampled_cluster = unique( id_vec( find( cluster == sampled_clusters(j) ) ) );
+          ids_in_sampled_clusters = ids_in_sampled_clusters + unique_ids_in_sampled_cluster.n_elem;
+        }
+        num_ids_to_sample = ids_in_sampled_clusters;
       }
-      num_ids_to_sample = ids_in_sampled_clusters;
-    }
-    arma::vec sampled_ids( num_ids_to_sample , arma::fill::zeros );
-    // sample ids
-    if( CL ){
-      arma::mat sampled_ids_mat = unique( id_vec( find( cluster == sampled_clusters(0) ) ) );
-      for (int j = 1; j < num_clusters; j++) {
-        arma::mat sampled_ids_mat_old = sampled_ids_mat;
-        arma::mat sampled_ids_mat_new = unique( id_vec( find( cluster == sampled_clusters(j) ) ) );
-        sampled_ids_mat = join_cols(sampled_ids_mat_old,sampled_ids_mat_new);
-      }
-      sampled_ids = sampled_ids_mat.col(0);
-    }
-    else{
-      sampled_ids.randu();
-      sampled_ids *= num_ids_to_sample;
-      sampled_ids = ceil( sampled_ids );
-    }
-    int num_sampled_ids = sampled_ids.n_elem;
-    arma::cube output_cube_BS_sample( output_cube.n_rows , output_cube.n_cols , num_sampled_ids , arma::fill::zeros );
-    arma::cube sum_outputs_cube_BS_sample( sum_outputs_cube.n_rows , sum_outputs_cube.n_cols , num_sampled_ids , arma::fill::zeros );
-    arma::mat covariate_mat_BS_sample( num_sampled_ids , covariate_mat.n_cols , arma::fill::zeros );
-    for (int j = 0; j < num_sampled_ids; j++) {
-      output_cube_BS_sample.slice(j) = output_cube.slice( sampled_ids(j) - 1 );
-      sum_outputs_cube_BS_sample.slice(j) = sum_outputs_cube.slice( sampled_ids(j) - 1 );
-      if( LCR ){
-        covariate_mat_BS_sample.row(j) = covariate_mat.row( sampled_ids(j) - 1 );
-      }
-    }
-    // bootstrap shares
-    arma::mat pre_eval_mat( 1 , 1 , arma::fill::zeros );
-    arma::mat indices_responses_BS( indices_responses.n_rows , indices_responses.n_cols , arma::fill::zeros );
-    arma::mat indices_trembles_BS( indices_trembles.n_rows , indices_trembles.n_cols , arma::fill::zeros );
-    if( num_shares_to_est > 0 ){
-      arma::mat estimated_shares_BS( k , 1 , arma::fill::zeros );
-      if( LCR == false ){
-        R_NO_LCR_BS = stratEst_EM( output_cube_BS_sample, sum_outputs_cube_BS_sample, strat_id, R(0,0), R(1,0), R(2,0), R(3,0), R(4,0), shares_to_est, indices_responses_BS, indices_trembles_BS, responses_to_sum, response, 0 , outer_tol_eval, outer_max_eval );
-        estimated_shares_BS = R_NO_LCR_BS(0,0);
-      }
-      if( estimated_shares_BS.is_finite() && estimated_shares_BS.n_elem > 0 ){
-        BS_shares_SE += ( ( estimated_shares_BS( shares_to_est ) - estimated_shares( shares_to_est )) % (estimated_shares_BS( shares_to_est ) - estimated_shares( shares_to_est ) ) );
+      arma::vec sampled_ids( num_ids_to_sample , arma::fill::zeros );
+      // sample ids
+      if( CL ){
+        arma::mat sampled_ids_mat = unique( id_vec( find( cluster == sampled_clusters(0) ) ) );
+        for (int j = 1; j < num_clusters; j++) {
+          arma::mat sampled_ids_mat_old = sampled_ids_mat;
+          arma::mat sampled_ids_mat_new = unique( id_vec( find( cluster == sampled_clusters(j) ) ) );
+          sampled_ids_mat = join_cols(sampled_ids_mat_old,sampled_ids_mat_new);
+        }
+        sampled_ids = sampled_ids_mat.col(0);
       }
       else{
-        BS_samples_shares = BS_samples_shares - 1;
+        sampled_ids.randu();
+        sampled_ids *= num_ids_to_sample;
+        sampled_ids = ceil( sampled_ids );
       }
-    }
-    // bootstrap responses & trembles
-    if( response != "pure" ){
-      int num_estimated_responses = estimated_responses.n_elem;
-      arma::mat estimated_responses_BS( estimated_responses.n_elem , 1 , arma::fill::zeros );
-      arma::mat responses_BS( 1 , 1 );
-      for (int j = 0; j < num_estimated_responses; j++) {
-        responses_BS.fill( estimated_responses(j,0) );
-        arma::mat indices_responses_BS_j = indices_responses_BS;
-        indices_responses_BS_j( find( indices_responses == j+1 ) ).fill(1);
+      int num_sampled_ids = sampled_ids.n_elem;
+      arma::cube output_cube_BS_sample( output_cube.n_rows , output_cube.n_cols , num_sampled_ids , arma::fill::zeros );
+      arma::cube sum_outputs_cube_BS_sample( sum_outputs_cube.n_rows , sum_outputs_cube.n_cols , num_sampled_ids , arma::fill::zeros );
+      arma::mat covariate_mat_BS_sample( num_sampled_ids , covariate_mat.n_cols , arma::fill::zeros );
+      for (int j = 0; j < num_sampled_ids; j++) {
+        output_cube_BS_sample.slice(j) = output_cube.slice( sampled_ids(j) - 1 );
+        sum_outputs_cube_BS_sample.slice(j) = sum_outputs_cube.slice( sampled_ids(j) - 1 );
         if( LCR ){
-          arma::uvec coefficients_to_est = find_finite( R(13,0) );
-          R_LCR_BS = stratEst_LCR_EM( output_cube_BS_sample, sum_outputs_cube_BS_sample, strat_id, covariate_mat_BS_sample, R(0,0), responses_BS, R(2,0), R(13,0), R(3,0), R(4,0), R(14,0), shares_to_est, indices_responses_BS_j, indices_trembles_BS, false, coefficients_to_est, responses_to_sum, response, 0 , outer_tol_eval, outer_max_eval, newton_stepsize, penalty );
-          arma::mat response_estimate_BS = R_LCR_BS(1,0);
-          estimated_responses_BS(j,0) = response_estimate_BS(0,0);
+          covariate_mat_BS_sample.row(j) = covariate_mat.row( sampled_ids(j) - 1 );
+        }
+      }
+      // bootstrap shares
+      arma::mat pre_eval_mat( 1 , 1 , arma::fill::zeros );
+      arma::mat indices_responses_BS( indices_responses.n_rows , indices_responses.n_cols , arma::fill::zeros );
+      arma::mat indices_trembles_BS( indices_trembles.n_rows , indices_trembles.n_cols , arma::fill::zeros );
+      if( num_shares_to_est > 0 ){
+        arma::mat estimated_shares_BS( k , 1 , arma::fill::zeros );
+        if( LCR == false ){
+          R_NO_LCR_BS = stratEst_EM( output_cube_BS_sample, sum_outputs_cube_BS_sample, strat_id, R(0,0), R(1,0), R(2,0), R(3,0), R(4,0), shares_to_est, indices_responses_BS, indices_trembles_BS, responses_to_sum, response, 0 , outer_tol_eval, outer_max_eval );
+          estimated_shares_BS = R_NO_LCR_BS(0,0);
+        }
+        if( estimated_shares_BS.is_finite() && estimated_shares_BS.n_elem > 0 ){
+          BS_shares_SE += ( ( estimated_shares_BS( shares_to_est ) - estimated_shares( shares_to_est )) % (estimated_shares_BS( shares_to_est ) - estimated_shares( shares_to_est ) ) );
         }
         else{
-          R_NO_LCR_BS = stratEst_EM( output_cube_BS_sample, sum_outputs_cube_BS_sample, strat_id, R(0,0), responses_BS, R(2,0), R(3,0), R(4,0), shares_to_est, indices_responses_BS_j, indices_trembles_BS, responses_to_sum, response, 0 , outer_tol_eval, outer_max_eval );
-          arma::mat response_estimate_BS = R_NO_LCR_BS(1,0);
-          estimated_responses_BS(j,0) = response_estimate_BS(0,0);
+          BS_samples_shares = BS_samples_shares - 1;
         }
       }
-      if( estimated_responses_BS.is_finite() ){
-        BS_responses_SE += ( (estimated_responses_BS - estimated_responses) % (estimated_responses_BS - estimated_responses ) );
+      // bootstrap responses & trembles
+      if( response != "pure" ){
+        int num_estimated_responses = estimated_responses.n_elem;
+        arma::mat estimated_responses_BS( estimated_responses.n_elem , 1 , arma::fill::zeros );
+        arma::mat responses_BS( 1 , 1 );
+        for (int j = 0; j < num_estimated_responses; j++) {
+          responses_BS.fill( estimated_responses(j,0) );
+          arma::mat indices_responses_BS_j = indices_responses_BS;
+          indices_responses_BS_j( find( indices_responses == j+1 ) ).fill(1);
+          if( LCR ){
+            arma::uvec coefficients_to_est = find_finite( R(13,0) );
+            R_LCR_BS = stratEst_LCR_EM( output_cube_BS_sample, sum_outputs_cube_BS_sample, strat_id, covariate_mat_BS_sample, R(0,0), responses_BS, R(2,0), R(13,0), R(3,0), R(4,0), R(14,0), shares_to_est, indices_responses_BS_j, indices_trembles_BS, false, coefficients_to_est, responses_to_sum, response, 0 , outer_tol_eval, outer_max_eval, newton_stepsize, penalty );
+            arma::mat response_estimate_BS = R_LCR_BS(1,0);
+            estimated_responses_BS(j,0) = response_estimate_BS(0,0);
+          }
+          else{
+            R_NO_LCR_BS = stratEst_EM( output_cube_BS_sample, sum_outputs_cube_BS_sample, strat_id, R(0,0), responses_BS, R(2,0), R(3,0), R(4,0), shares_to_est, indices_responses_BS_j, indices_trembles_BS, responses_to_sum, response, 0 , outer_tol_eval, outer_max_eval );
+            arma::mat response_estimate_BS = R_NO_LCR_BS(1,0);
+            estimated_responses_BS(j,0) = response_estimate_BS(0,0);
+          }
+        }
+        if( estimated_responses_BS.is_finite() ){
+          BS_responses_SE += ( (estimated_responses_BS - estimated_responses) % (estimated_responses_BS - estimated_responses ) );
+        }
+        else{
+          BS_samples_responses = BS_samples_responses - 1;
+        }
+      }
+      int num_estimated_trembles = estimated_trembles.n_elem;
+      arma::mat estimated_trembles_BS( estimated_trembles.n_elem , 1 , arma::fill::zeros );
+      arma::mat trembles_BS( 1 , 1 );
+      for (int j = 0; j < num_estimated_trembles; j++) {
+        trembles_BS.fill( estimated_trembles(j,0) );
+        arma::mat indices_trembles_BS_j = indices_trembles_BS;
+        indices_trembles_BS_j( find( indices_trembles == j+1 ) ).fill(1);
+        if( LCR ){
+          arma::uvec coefficients_to_est = find_finite( R(13,0) );
+          R_LCR_BS = stratEst_LCR_EM( output_cube_BS_sample, sum_outputs_cube_BS_sample, strat_id, covariate_mat_BS_sample, R(0,0), R(1,0), trembles_BS, R(13,0), R(3,0), R(4,0), R(14,0), shares_to_est, indices_responses_BS, indices_trembles_BS_j, false, coefficients_to_est, responses_to_sum, response, 0, outer_tol_eval, outer_max_eval, newton_stepsize, penalty );
+          arma::mat trembles_estimate_BS = R_LCR_BS(2,0);
+          estimated_trembles_BS(j,0) = trembles_estimate_BS(0,0);
+        }
+        else{
+          R_NO_LCR_BS = stratEst_EM( output_cube_BS_sample, sum_outputs_cube_BS_sample, strat_id, R(0,0), R(1,0), trembles_BS, R(3,0), R(4,0), shares_to_est, indices_responses_BS, indices_trembles_BS_j, responses_to_sum, response, 0, outer_tol_eval, outer_max_eval );
+          arma::mat trembles_estimate_BS = R_NO_LCR_BS(2,0);
+          estimated_trembles_BS(j,0) = trembles_estimate_BS(0,0);
+        }
+      }
+      if( estimated_trembles_BS.is_finite() ){
+        BS_trembles_SE += ( (estimated_trembles_BS - estimated_trembles) % (estimated_trembles_BS - estimated_trembles ) );
       }
       else{
-        BS_samples_responses = BS_samples_responses - 1;
+        BS_samples_trembles = BS_samples_trembles - 1;
       }
     }
-    int num_estimated_trembles = estimated_trembles.n_elem;
-    arma::mat estimated_trembles_BS( estimated_trembles.n_elem , 1 , arma::fill::zeros );
-    arma::mat trembles_BS( 1 , 1 );
-    for (int j = 0; j < num_estimated_trembles; j++) {
-      trembles_BS.fill( estimated_trembles(j,0) );
-      arma::mat indices_trembles_BS_j = indices_trembles_BS;
-      indices_trembles_BS_j( find( indices_trembles == j+1 ) ).fill(1);
-      if( LCR ){
-        arma::uvec coefficients_to_est = find_finite( R(13,0) );
-        R_LCR_BS = stratEst_LCR_EM( output_cube_BS_sample, sum_outputs_cube_BS_sample, strat_id, covariate_mat_BS_sample, R(0,0), R(1,0), trembles_BS, R(13,0), R(3,0), R(4,0), R(14,0), shares_to_est, indices_responses_BS, indices_trembles_BS_j, false, coefficients_to_est, responses_to_sum, response, 0, outer_tol_eval, outer_max_eval, newton_stepsize, penalty );
-        arma::mat trembles_estimate_BS = R_LCR_BS(2,0);
-        estimated_trembles_BS(j,0) = trembles_estimate_BS(0,0);
-      }
-      else{
-        R_NO_LCR_BS = stratEst_EM( output_cube_BS_sample, sum_outputs_cube_BS_sample, strat_id, R(0,0), R(1,0), trembles_BS, R(3,0), R(4,0), shares_to_est, indices_responses_BS, indices_trembles_BS_j, responses_to_sum, response, 0, outer_tol_eval, outer_max_eval );
-        arma::mat trembles_estimate_BS = R_NO_LCR_BS(2,0);
-        estimated_trembles_BS(j,0) = trembles_estimate_BS(0,0);
-      }
+    BS_shares_SE = sqrt( BS_shares_SE/BS_samples_shares );
+    BS_responses_SE = sqrt( BS_responses_SE/BS_samples_responses );
+    BS_trembles_SE = sqrt( BS_trembles_SE/BS_samples_trembles );
+    if( BS_samples_shares/BS_samples < 0.9 ){
+      BS_shares_SE.fill(-1);
     }
-    if( estimated_trembles_BS.is_finite() ){
-      BS_trembles_SE += ( (estimated_trembles_BS - estimated_trembles) % (estimated_trembles_BS - estimated_trembles ) );
+    if( BS_samples_responses/BS_samples < 0.9 ){
+      BS_responses_SE.fill(-1);
     }
-    else{
-      BS_samples_trembles = BS_samples_trembles - 1;
+    if( BS_samples_trembles/BS_samples < 0.9 ){
+      BS_trembles_SE.fill(-1);
+    }
+    if( print_messages == true ){
+      Rcout<< "\nDONE\n";
     }
   }
-  BS_shares_SE = sqrt( BS_shares_SE/BS_samples_shares );
-  BS_responses_SE = sqrt( BS_responses_SE/BS_samples_responses );
-  BS_trembles_SE = sqrt( BS_trembles_SE/BS_samples_trembles );
-  if( BS_samples_shares/BS_samples < 0.9 ){
-    BS_shares_SE.fill(-1);
-  }
-  if( BS_samples_responses/BS_samples < 0.9 ){
-    BS_responses_SE.fill(-1);
-  }
-  if( BS_samples_trembles/BS_samples < 0.9 ){
-    BS_trembles_SE.fill(-1);
-  }
-  if( print_messages == true ){
-    Rcout<< "\nDONE\n";
-  }
-}
 
 
 

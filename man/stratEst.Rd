@@ -4,23 +4,24 @@
 \alias{stratEst}
 \title{Estimation function for strategy estimation}
 \usage{
-stratEst(data, strategies, shares, covariates, cluster, response = "mixed",
-  r.responses = "no", r.trembles = "global", select = "no",
-  min.strategies = 1, crit = "bic", se = "yes", outer.runs = 10,
-  outer.tol = 0, outer.max = 1000, inner.runs = 100, inner.tol = 0,
-  inner.max = 10, lcr.runs = 1000, lcr.tol = 0, lcr.max = 1000,
-  bs.samples = 1000, print.messages = TRUE)
+stratEst(data, strategies, shares, covariates, cluster,
+  response = "mixed", r.responses = "no", r.trembles = "global",
+  select = "no", min.strategies = 1, crit = "bic", se = "yes",
+  outer.runs = 10, outer.tol = 0, outer.max = 1000,
+  inner.runs = 100, inner.tol = 0, inner.max = 10, lcr.runs = 1000,
+  lcr.tol = 0, lcr.max = 1000, bs.samples = 1000,
+  print.messages = TRUE)
 }
 \arguments{
-\item{data}{A data frame with at least five columns which contain the data for the estimation in a long format. Each row in data represents one observation of one individual. The following three columns are mandatory: A column named \code{id} which identifies the observations of the same participant across the rows of the data frame. A column named \code{supergame} which indicates the supergame number of the observation. A column named \code{period} which indicates the round within the supergame. In addition to these three columns, the data frame must either contain two columns named \code{cooperation} and \code{other_cooperation} OR two columns named \code{input} and \code{output}. The first option can be used for prisoner's dilemma experiments. For these experiments, use \code{cooperation} as a dummy which indicates if the participant cooperated in the current period. Use \code{other_cooperation} as a dummy to indicate if the current partner cooperated or not. The second option (\code{input} and \code{output}) can be used to analyze data from other experiments (see the reference manual for details).}
+\item{data}{Mandatory input object which contains the data for the estimation in the long format. Each row in \code{data} represents one observation of one individual. The object \code{data} must be a data frame object with variables in columns. Three columns are mandatory: A column named \code{id} which identifies the observations of the same individual across the rows of the data frame. A column named \code{input} which indicates the type of information observed by the individual before giving a response. A column named \code{output} which contains the behavioral response of the individual after observing the input. If an individual plays the same game for more than one period with the same partner, \code{data} must contain a variable \code{period} which identifies the period within the game. If an individual plays the same game more than once with different partners, \code{data} must contain a variable \code{game} (or \code{supergame}) which identifies data from different games. For data from prisoner's dilemma experiments, two more data formats are possible. Instead of using the variables \code{input} and \code{output}, the data frame may also contain the variables \code{cooperation} and \code{other_cooperation}, or alternatively, the variables  \code{cooperation} and \code{group}. The variable \code{cooperation} should be a dummy which indicates if the participant cooperated in the current period. The variable \code{other_cooperation} should be a dummy which indicates if the other player cooperated in the current period. The variable \code{group} should be an identifier variable with a unique value for each unique match of two individuals.}
 
-\item{strategies}{A matrix where each row corresponds to one state of a strategy, starting with the start state of an automaton. The first column enumerates the states of each strategy in ascending order. A value of one in the first column indicates the begin of a new strategy with its start state. The columns after the first column contain the collection of multinomial response vectors. The number of columns for the multinomial response vectors must correspond to the number of unique non-zero outputs in data. Without a reference output - which is labeled with a zero in the output column of data - the columns specify the complete multinomial response distribution for each unique value in the output column. In this case, the response probabilities in each row must sum to one. With a reference output, the response probability for the response labeled with zero is omitted and the response probabilities in each row must sum to a value smaller or equal to one. The remaining columns of the strategies matrix define the deterministic state transitions. The number of columns must equal the number of unique non-zero inputs in the data. The numbers in the first column indicate the next state of the automaton if the input is one. The numbers in the second column indicate the next state if the input is two and so on.}
+\item{strategies}{Mandatory input object. Can be either a positive integer or a matrix. If an integer is used, the estimation function will generate the respective number of memory-one strategies with as many states as there are unique input values in \code{data}. A matrix can be used to supply a set of customized strategies. In the matrix, each row corresponds to one state of a strategy, starting with the start state of an automaton. The first column enumerates the states of each strategy in ascending order. A value of one in the first column indicates the begin of a new strategy with its start state. The columns after the first column contain the collection of multinomial response vectors. The number of columns for the multinomial response vectors must correspond to the number of unique non-zero outputs in data. Without a reference output - which is labeled with a zero in the output column of data - the columns specify the complete multinomial response distribution for each unique value in the output column. In this case, the response probabilities in each row must sum to one. With a reference output, the response probability for the response labeled with zero is omitted and the response probabilities in each row must sum to a value smaller or equal to one. The remaining columns of the strategies matrix define the deterministic state transitions. The number of columns must equal the number of unique non-zero inputs in the data. The numbers in the first column indicate the next state of the automaton if the input is one. The numbers in the second column indicate the next state if the input is two and so on.}
 
 \item{shares}{A column vector of strategy shares. The number of elements must correspond to the number of strategies defined in the strategies matrix. Elements which are NA are estimated from the data. If the object is not supplied, a share is estimated for every strategy defined in the strategies matrix.}
 
 \item{covariates}{A matrix where each row corresponds to same row in data. Hence, the covariate matrix must have as many rows as the data matrix. Observations which have the same ID in data must also have the same vector of covariates. Missing value are not allowed. If covariates are supplied, a latent class regression model is estimated.}
 
-\item{cluster}{A column vector which indicates the assignment of each row in data to cluster units.}
+\item{cluster}{A column vector which indicates the assignment of each row in data to cluster units for block-bootstrapped standard errors. Note that estimates will nevertheless be biased due to the non-linearity of the model.}
 
 \item{response}{String which can be set to \code{"pure"} or \code{"mixed"}. If set to \code{"pure"} all response probabilities estimated from the data are pure responses. If set to \code{"mixed"} all response probabilities estimated from the data are mixed responses. The default is \code{"mixed"}.}
 
@@ -91,11 +92,24 @@ The estimation function \code{stratEst()} returns maximum-likelihood estimates f
 The strategy estimation method was introduced by (Dal Bo & Frechette 2011) to estimate the relative frequency of a fixed set of pure strategies in the indefinitely repeated prisoner's dilemma. Breitmoser (2015) extended the method to the estimation of behavior strategies. The \pkg{stratEst} package uses the EM algorithm (Dempster, Laird & Rubin 1977) and the Newton-Raphson method to obtain maximum-likelihood estimates for the population shares and response parameters of a set of candidate strategies. The package builds on other software contributions of the R community. To increase speed the estimation procedures, the package uses integration of C++ and R achieved by the Rcpp package (Eddelbuettel & Francois 2011) and the open source linear algebra library for the C++ language RppArmadillo (Sanderson & Curtin 2016).
 }
 \examples{
+## Fictitious data from a helping game
+## Participant 62 plays reciprocal strategy.
+## Participant 87 plays alternating strategy.
+id <- c(62,62,62,62,87,87,87,87)
+game <- c(4,4,4,4,4,4,4,4)
+period <- c(1,2,3,4,1,2,3,4)
+input <- c(0,1,2,3,0,1,3,2)
+output <- c(2,2,1,2,2,1,2,1)
+data <- as.data.frame(cbind(id,game,period,input,output))
+strategies <- matrix(c(1,2,3,1,2,0.5,0,1,0.1,NA,0.5,1,0,0.9,NA,2,2,2,2,1,
+3,3,3,2,1,2,2,2,2,1,3,3,3,2,1),5,7)
+model <- stratEst(data,strategies)
+
 ## Replication of Dal Bo and Frechette (2011), Table 7 on page 424
 ## Results for the first treatment with delta = 1/2 and R = 32 (column 1 of Table 7)
 data <- DF2011[DF2011$treatment == 1,]
-strats <- rbind(ALLD,ALLC,GRIM,TFT,T2,WSLS)
-stratEst(data,strats)
+strategies <- rbind(ALLD,ALLC,GRIM,TFT,WSLS,T2)
+stratEst(data,strategies)
 
 ## Latent class regression with data from Dal Bo and Frechette (2011)
 ## For the two treatments with R = 32, introduce a dummy which is one if delta = 3/4

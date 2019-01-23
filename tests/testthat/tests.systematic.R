@@ -52,3 +52,55 @@ test_that("additional systematic tests",  {
   expect_equal(4,length(select_both_global$responses))
 })
 
+test_that("multivariate output test",  {
+  skip_on_cran()
+  N = 32                                                  # number of subjects
+  num_responses = c(2,3,4,5)                                       # number of distinct responses of the machines
+  tremble = 0.2
+  shares = runif(5)                            # generate 5 shares
+  shares = shares/sum(shares)                             # normalize shares
+  for( m in 1:length(num_responses)){
+    check = 0
+    while( check == 0 ){
+      strategy_mat = matrix(runif(5*5*num_responses[m]),5*5,num_responses[m])
+      strategy_mat = matrix(as.numeric(strategy_mat == apply(strategy_mat,1,max)),5*5,num_responses[m])
+      if( sum(as.numeric(apply(strategy_mat,1,sum) == 1)) == 5*5 ){ check = 1 }
+    }
+
+    strats = cbind(rep(c(1:5),5),strategy_mat,matrix(unlist(lapply(c(2:5), function(x) rep(x,5*5) )),5*5,5-1))
+
+    response_mat = (1-strategy_mat)*tremble/(num_responses[m]-1) + strategy_mat*(1-tremble)
+
+    strategy_vec = t(rmultinom(N, size = 1, prob = shares))%*%matrix(c(1:5),5,1)
+    strat_id = rep( strategy_vec , each= (15*5))
+
+    real_shares = rep(NA,5)
+    for( i in 1:5 ){
+      real_shares[i] = sum(as.numeric(strategy_vec==i))/length(strategy_vec)
+    }
+
+    id = rep(NA,15*5*N)
+    supergame = rep( unlist(lapply(c(1:15), function(x) rep(x,5) )) ,N )
+    period = rep(c(1:5),15*N)
+    input =  rep(c(1:5)-1,15*N)
+    output = rep(NA,15*5*N)
+    rand_vec = runif(15*5*N)
+    pr_vec = rep(NA,15*5*N)
+
+    for( i in 1:N ){
+      id[ ((i-1)*15*5 + 1) : ((i-1)*15*5 + 15*5) ] = rep(i,15*5)
+    }
+
+    for( j in 1:(15*5*N) ){
+      output[ j ] = t(rmultinom(1, size = 1, prob = response_mat[1+input[j] + (strat_id[j]-1)*5 , ] ))%*%matrix(c(1:num_responses[m]),num_responses[m],1)
+    }
+
+    data <- cbind(id,supergame,period,input,output)
+
+    P = stratEst(data,5,response="pure",outer.runs = 2, print.messages = F)
+    M = stratEst(data,5,response="mixed",outer.runs = 2, print.messages = F)
+    expect_equal(num_responses[m]+5,ncol(P$strategies))
+    expect_equal(num_responses[m]+5,ncol(M$strategies))
+  }
+})
+

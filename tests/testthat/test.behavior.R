@@ -2,7 +2,6 @@ library(stratEst)
 
 test_that("behavior strategies",  {
   set.seed(1)
-  expect_equal(1,1)
   N = 200
   Obs = 20
 

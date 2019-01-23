@@ -1,11 +1,11 @@
 #' Estimation function for strategy estimation
 #' @useDynLib stratEst,.registration = TRUE
 #' @importFrom Rcpp sourceCpp
-#' @param data A data frame with at least five columns which contain the data for the estimation in a long format. Each row in data represents one observation of one individual. The following three columns are mandatory: A column named \code{id} which identifies the observations of the same participant across the rows of the data frame. A column named \code{supergame} which indicates the supergame number of the observation. A column named \code{period} which indicates the round within the supergame. In addition to these three columns, the data frame must either contain two columns named \code{cooperation} and \code{other_cooperation} OR two columns named \code{input} and \code{output}. The first option can be used for prisoner's dilemma experiments. For these experiments, use \code{cooperation} as a dummy which indicates if the participant cooperated in the current period. Use \code{other_cooperation} as a dummy to indicate if the current partner cooperated or not. The second option (\code{input} and \code{output}) can be used to analyze data from other experiments (see the reference manual for details).
-#' @param strategies A matrix where each row corresponds to one state of a strategy, starting with the start state of an automaton. The first column enumerates the states of each strategy in ascending order. A value of one in the first column indicates the begin of a new strategy with its start state. The columns after the first column contain the collection of multinomial response vectors. The number of columns for the multinomial response vectors must correspond to the number of unique non-zero outputs in data. Without a reference output - which is labeled with a zero in the output column of data - the columns specify the complete multinomial response distribution for each unique value in the output column. In this case, the response probabilities in each row must sum to one. With a reference output, the response probability for the response labeled with zero is omitted and the response probabilities in each row must sum to a value smaller or equal to one. The remaining columns of the strategies matrix define the deterministic state transitions. The number of columns must equal the number of unique non-zero inputs in the data. The numbers in the first column indicate the next state of the automaton if the input is one. The numbers in the second column indicate the next state if the input is two and so on.
+#' @param data Mandatory input object which contains the data for the estimation in the long format. Each row in \code{data} represents one observation of one individual. The object \code{data} must be a data frame object with variables in columns. Three columns are mandatory: A column named \code{id} which identifies the observations of the same individual across the rows of the data frame. A column named \code{input} which indicates the type of information observed by the individual before giving a response. A column named \code{output} which contains the behavioral response of the individual after observing the input. If an individual plays the same game for more than one period with the same partner, \code{data} must contain a variable \code{period} which identifies the period within the game. If an individual plays the same game more than once with different partners, \code{data} must contain a variable \code{game} (or \code{supergame}) which identifies data from different games. For data from prisoner's dilemma experiments, two more data formats are possible. Instead of using the variables \code{input} and \code{output}, the data frame may also contain the variables \code{cooperation} and \code{other_cooperation}, or alternatively, the variables  \code{cooperation} and \code{group}. The variable \code{cooperation} should be a dummy which indicates if the participant cooperated in the current period. The variable \code{other_cooperation} should be a dummy which indicates if the other player cooperated in the current period. The variable \code{group} should be an identifier variable with a unique value for each unique match of two individuals.
+#' @param strategies Mandatory input object. Can be either a positive integer or a matrix. If an integer is used, the estimation function will generate the respective number of memory-one strategies with as many states as there are unique input values in \code{data}. A matrix can be used to supply a set of customized strategies. In the matrix, each row corresponds to one state of a strategy, starting with the start state of an automaton. The first column enumerates the states of each strategy in ascending order. A value of one in the first column indicates the begin of a new strategy with its start state. The columns after the first column contain the collection of multinomial response vectors. The number of columns for the multinomial response vectors must correspond to the number of unique non-zero outputs in data. Without a reference output - which is labeled with a zero in the output column of data - the columns specify the complete multinomial response distribution for each unique value in the output column. In this case, the response probabilities in each row must sum to one. With a reference output, the response probability for the response labeled with zero is omitted and the response probabilities in each row must sum to a value smaller or equal to one. The remaining columns of the strategies matrix define the deterministic state transitions. The number of columns must equal the number of unique non-zero inputs in the data. The numbers in the first column indicate the next state of the automaton if the input is one. The numbers in the second column indicate the next state if the input is two and so on.
 #' @param shares A column vector of strategy shares. The number of elements must correspond to the number of strategies defined in the strategies matrix. Elements which are NA are estimated from the data. If the object is not supplied, a share is estimated for every strategy defined in the strategies matrix.
 #' @param covariates A matrix where each row corresponds to same row in data. Hence, the covariate matrix must have as many rows as the data matrix. Observations which have the same ID in data must also have the same vector of covariates. Missing value are not allowed. If covariates are supplied, a latent class regression model is estimated.
-#' @param cluster A column vector which indicates the assignment of each row in data to cluster units.
+#' @param cluster A column vector which indicates the assignment of each row in data to cluster units for block-bootstrapped standard errors. Note that estimates will nevertheless be biased due to the non-linearity of the model.
 #' @param response String which can be set to \code{"pure"} or \code{"mixed"}. If set to \code{"pure"} all response probabilities estimated from the data are pure responses. If set to \code{"mixed"} all response probabilities estimated from the data are mixed responses. The default is \code{"mixed"}.
 #' @param r.responses A string which can be set to \code{"no"}, \code{"strategies"}, \code{"states"} or \code{"global"}. If set to \code{"strategies"}, the estimation function estimates strategies with one strategy specific vector of responses in every state of the strategy. If set to \code{"states"}, one state specific vector of responses is estimated for each state. If set to \code{"global"}, a single vector of responses is estimated which applies in every state of each strategy. Default is \code{"no"}.
 #' @param r.trembles String which can be set to \code{"no"}, \code{"strategies"}, \code{"states"} or \code{"global"}. If set to \code{"strategies"}, the estimation unction estimates strategies with one strategy specific tremble probability. If set to  \code{"states"}, one state specific tremble probability is estimated for each state. If set to \code{"global"}, a single tremble is estimated which applies in every state of each strategy. Default is \code{"global"}.
@@ -59,11 +59,24 @@
 #'
 #' Sanderson, C. and R. Curtin (2016): Armadillo: a template-based C++ library for linear algebra. \emph{Journal of Open Source Software}, 1-26.
 #' @examples
+#' ## Fictitious data from a helping game
+#' ## Participant 62 plays reciprocal strategy.
+#' ## Participant 87 plays alternating strategy.
+#' id <- c(62,62,62,62,87,87,87,87)
+#' game <- c(4,4,4,4,4,4,4,4)
+#' period <- c(1,2,3,4,1,2,3,4)
+#' input <- c(0,1,2,3,0,1,3,2)
+#' output <- c(2,2,1,2,2,1,2,1)
+#' data <- as.data.frame(cbind(id,game,period,input,output))
+#' strategies <- matrix(c(1,2,3,1,2,0.5,0,1,0.1,NA,0.5,1,0,0.9,NA,2,2,2,2,1,
+#' 3,3,3,2,1,2,2,2,2,1,3,3,3,2,1),5,7)
+#' model <- stratEst(data,strategies)
+#'
 #' ## Replication of Dal Bo and Frechette (2011), Table 7 on page 424
 #' ## Results for the first treatment with delta = 1/2 and R = 32 (column 1 of Table 7)
 #' data <- DF2011[DF2011$treatment == 1,]
-#' strats <- rbind(ALLD,ALLC,GRIM,TFT,T2,WSLS)
-#' stratEst(data,strats)
+#' strategies <- rbind(ALLD,ALLC,GRIM,TFT,WSLS,T2)
+#' stratEst(data,strategies)
 #'
 #' ## Latent class regression with data from Dal Bo and Frechette (2011)
 #' ## For the two treatments with R = 32, introduce a dummy which is one if delta = 3/4
@@ -76,11 +89,14 @@ stratEst <- function( data, strategies, shares, covariates, cluster, response = 
   # crude argument checks
   # check data
   if( missing(data) ) {
-    stop("data not supplied")
+    stop("Mandatory input object data is missing.")
   }
   data_frame <- as.data.frame(data)
   id <- data_frame$id
-  supergame <- data_frame$supergame
+  supergame <- data_frame$game
+  if( is.null(supergame) ) {
+    supergame <- data_frame$supergame
+  }
   period <- data_frame$period
   group <- data_frame$group
   cooperation <- data_frame$cooperation
@@ -95,32 +111,39 @@ stratEst <- function( data, strategies, shares, covariates, cluster, response = 
   output <- data_frame$output
 
   if( is.null(id) ) {
-    stop("data does not contain the variable: id (id)")
-  }
-  if( is.null(supergame) ) {
-    stop("data does not contain the variable: supergame (match)")
-  }
-  if( is.null(period) ) {
-    stop("data does not contain the variable: period (round)")
+    stop("Data does not contain the variable: id")
   }
   if( ( is.null(input) == F |  is.null(output) == F ) & ( is.null(group) == F |  is.null(cooperation) == F )  ){
-      stop("make sure data either contains the variables group and cooperation or the variables input and output")
+    stop("Make sure data contains the variables input and output. For data from the prisoner's dilemma the variables cooperation and group or cooperation and other_cooperation can also be used istead.")
   }
   if( is.null(cooperation) == F & is.null(group) & is.null(other_cooperation) ) {
-    stop("if data contains the variable cooperation, it must contain the variable group or other_cooperation")
+    stop("If data contains the variable cooperation, it must contain the variable group or other_cooperation.")
   }
   if( is.null(group) == F & is.null(cooperation) ) {
-    stop("if data contains the variable group, it must contain the variable cooperation")
+    stop("If data contains the variable group, it must contain the variable cooperation.")
   }
   if( is.null(output) == F & is.null(input)  ){
-    stop("if data contains the variable output, it must contain the variable input")
+    stop("If data contains the variable output, it must contain the variable input.")
   }
   if( is.null(input) == F & is.null(output)  ){
-    stop("if data contains the variable input, it must contain the variable output")
+    stop("If data contains the variable input, it must contain the variable output.")
   }
   if( missing(strategies) ) {
-    stop("strategies not supplied")
+    stop("Mandatory input object strategies is missing. Use either an integer or a strategy matrix. ")
   }
+
+  # generate variable supergame if missing
+  if( is.null(supergame) ) {
+    data_frame$supergame <- rep(1,length(id))
+    supergame <- data_frame$supergame
+  }
+
+  # generate variable period if missing
+  if( is.null(period) ){
+    data_frame$period <- rep(1,length(id))
+    period <- data_frame$period
+  }
+
   # check covariates
   if( missing(covariates) ) {
     covariates = matrix(0,1,1)
@@ -128,49 +151,60 @@ stratEst <- function( data, strategies, shares, covariates, cluster, response = 
   } else{
     LCR = TRUE
   }
+
   # check cluster
   if( missing(cluster) ) {
     cluster = matrix(0,1,1)
   }
+
   # check outer.runs
   if ( outer.runs < 0 | outer.runs%%1 != 0 ){
     stop("Number of outer runs must be a positive integer. Default is 100.");
   }
+
   # check inner.runs
   if ( inner.runs < 0 | inner.runs%%1 != 0 ){
     stop("Number of inner runs must be a positive integer. Default is 100.");
   }
+
   # check outer.max
   if ( outer.max < 0  | outer.max%%1 != 0){
     stop("Number of outer max evaluations must be a positive integer. Default is 1000.");
   }
+
   # check inner.max
   if ( inner.max < 0 | inner.max%%1 != 0 ){
     stop("Number of inner max evaluations must be a positive integer. Default is 100.");
   }
+
   # check response
   if ( response != "mixed" & response != "pure" ){
-    stop("response has to be one of the following: \"mixed\" or \"pure\". Default is \"mixed\".");
+    stop("The input object response has to be one of the following: \"mixed\" or \"pure\". Default is \"mixed\".");
   }
+
   # check r.responses
   if ( r.responses != "no" & r.responses != "strategies" & r.responses != "states" & r.responses != "global"  ){
-    stop("r_responses has to be one of the following: \"no\", \"strategies\", \"states\" or \"global\". Default is \"no\".");
+    stop("The input object r.responses has to be one of the following: \"no\", \"strategies\", \"states\" or \"global\". Default is \"no\".");
   }
+
   # check r.trembles
   if ( r.trembles != "no" & r.trembles != "strategies" & r.trembles != "states" & r.trembles != "global"  ){
-    stop("r_trembles has to be one of the following: \"no\", \"strategies\", \"states\" or \"global\". Default is \"no\".");
+    stop("The input object r.trembles has to be one of the following: \"no\", \"strategies\", \"states\" or \"global\". Default is \"no\".");
   }
+
   # check select
   if ( select != "no" & select != "strategies" & select != "responses"  & select != "trembles" & select != "both" & select != "all" ){
-    stop("select has to be one of the following: \"no\", \"strategies\", \"responses\", \"trembles\", \"both\", or \"all\". Default is \"no\".");
+    stop("The input object select has to be one of the following: \"no\", \"strategies\", \"responses\", \"trembles\", \"both\", or \"all\". Default is \"no\".");
   }
+
   # check crit
   if ( crit != "aic" & crit != "bic" & crit != "icl" ){
-    stop("crit has to be one of the following: \"aic\", \"bic\", or \"icl\". Default is \"bic\".");
+    stop("The input object crit has to be one of the following: \"aic\", \"bic\", or \"icl\". Default is \"bic\".");
   }
+
   # check bs.samples
   if ( bs.samples < 0  | bs.samples%%1 != 0){
-    stop("Number of bootstrap samples must be a positive integer. Default is 1000.");
+    stop("The number of bootstrap samples must be a positive integer. Default is 1000.");
   }
 
   # for future use
@@ -188,7 +222,9 @@ stratEst <- function( data, strategies, shares, covariates, cluster, response = 
   }
 
   #check strategies
+  integer_strategies = F
   if( is.matrix(strategies) == F ){
+    integer_strategies = T
     n_strats = strategies
     n_inputs = length( unique( input ) )
     n_outputs = sum( unique( output ) != 0 )
@@ -201,10 +237,10 @@ stratEst <- function( data, strategies, shares, covariates, cluster, response = 
     n_strats = sum( as.numeric( strategies[,1] == 1 ) )
   }
   if ( ( select == "strategies" | select == "all" ) && n_strats == 1 ){
-    stop("strategies cannot be selected if there is only one strategy.");
+    stop("Strategies cannot be selected if there is only one strategy.");
   }
   if ( n_strats <= min.strategies && ( select == "strategies" || select == "all" ) ){
-    stop("the number of strategies supplied cannot be smaller or equal to the minimum number strategies when performing strategy selection.");
+    stop("The number of strategies supplied cannot be smaller or equal to the minimum number strategies when performing strategy selection.");
   }
   #check shares
   if( missing(shares) ) {
@@ -212,7 +248,7 @@ stratEst <- function( data, strategies, shares, covariates, cluster, response = 
   }
 
 
-  stratEst.output <- stratEst_cpp( data, strategies, shares, covariates, LCR, cluster, response, r.responses, r.trembles, select, min.strategies, crit, se, outer.runs, outer.tol, outer.max, inner.runs, inner.tol, inner.max, lcr.runs, lcr.tol, lcr.max, bs.samples, print.messages )
+  stratEst.output <- stratEst_cpp( data, strategies, shares, covariates, LCR, cluster, response, r.responses, r.trembles, select, min.strategies, crit, se, outer.runs, outer.tol, outer.max, inner.runs, inner.tol, inner.max, lcr.runs, lcr.tol, lcr.max, bs.samples, print.messages, integer_strategies )
   return(stratEst.output)
 }
 

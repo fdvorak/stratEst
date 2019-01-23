@@ -12,7 +12,7 @@ Encoding: UTF-8
 LazyData: true
 LinkingTo: Rcpp, RcppArmadillo
 Imports: Rcpp (>= 0.12.18)
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.1
 Suggests: testthat
 Depends: R (>= 2.10)
 URL: http://github.com/fdvorak/stratEst
