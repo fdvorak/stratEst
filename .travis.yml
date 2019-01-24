@@ -9,6 +9,6 @@ compiler:
   - gcc
 osx_image: xcode10
 language: R
-sudo: false
+sudo: true
 cache: packages
 
