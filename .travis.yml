@@ -12,6 +12,3 @@ language: R
 sudo: false
 cache: packages
 
-environment:
-  global:
-    WARNINGS_ARE_ERRORS: 1
