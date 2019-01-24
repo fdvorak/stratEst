@@ -4,7 +4,7 @@ before_install:
   - tlmgr install index
 
 r_build_args:
---no-build-vignettes
+ --no-vignettes
 
 dist: trusty
 os:
