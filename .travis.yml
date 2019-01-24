@@ -15,7 +15,8 @@ compiler:
   - gcc
 osx_image: xcode10
 language: R
-
+r:
+  - devel
 sudo: false
 cache: packages
 
