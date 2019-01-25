@@ -13,6 +13,3 @@ r:
   - release
 sudo: false
 cache: packages
-
-r_build_args: --no-build-vignettes --no-manual
-

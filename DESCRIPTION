@@ -13,9 +13,8 @@ LazyData: true
 LinkingTo: Rcpp, RcppArmadillo
 Imports: Rcpp (>= 0.12.18)
 RoxygenNote: 6.1.1
-Suggests: testthat, R.rsp
+Suggests: testthat
 Depends: R (>= 2.10)
 URL: http://github.com/fdvorak/stratEst
 BugReports: http://github.com/fdvorak/stratEst/issues
 NeedsCompilation: yes
-VignetteBuilder: R.rsp
