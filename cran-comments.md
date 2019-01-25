@@ -14,28 +14,24 @@ Thanks for your time. This is a patch release for version 0.1.1. This version:
 ## Test environments
 * windows 10 pro install, R 3.5.2 (local)
 * windows server 2012 R2 x64, R 3.5.2 patched (via appveyor)
-* windows server 2008 R2 SP1, r-devel (via r hub)
 * windows, r-devel (via win-builder)
 * windows, r-release (via win-builder)
 * mac OS X	10.13.6, R 3.5.2 (via travis-ci)
-* debian linux, R-devel (via r hub)
-* fedora linux, r-devel (via r hub)
-* ubuntu 16.04 LTS, r-release (via r hub)
+* mac OS X	10.13.6, r-oldrel (via travis-ci)
 * ubuntu 14.04.5 LTS , R 3.5.2 (via travis-ci)
+* ubuntu 14.04.5 LTS , r-oldrel (via travis-ci)
 
 ## R CMD check results
-windows 10 pro install, R 3.5.2 (local)
-windows server 2012 R2 x64, R 3.5.2 patched (via appveyor)
-windows server 2008 R2 SP1, r-devel (via r hub)
-windows, r-devel (via win-builder)
-windows, r-release (via win-builder)
-mac OS X	10.13.6, R 3.5.2 (via travis-ci)
+windows 10 pro install, R 3.5.2 (local) 
+windows server 2012 R2 x64, R 3.5.2 patched (via appveyor)  
+windows, r-devel (via win-builder)  
+windows, r-release (via win-builder)  
+mac OS X	10.13.6, R 3.5.2 (via travis-ci)  
+mac OS X	10.13.6, r-oldrel (via travis-ci)   
 0 errors | 0 warnings | 0 notes
 
-debian linux, R-devel (via r hub)
-fedora linux, r-devel (via r hub)
-ubuntu 16.04 LTS, r-release (via r hub)
-ubuntu 14.04.5 LTS , R 3.5.2 (via travis-ci)  
+ubuntu 14.04.5 LTS , R 3.5.2 (via travis-ci)   
+ubuntu 14.04.5 LTS , r-oldrel (via travis-ci)   
 0 errors | 0 warnings | 1 note  
 NOTE: installed size is  7.7Mb
       sub-directories of 1Mb or more:
