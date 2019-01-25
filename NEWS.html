@@ -11,6 +11,7 @@
 
 <meta name="author" content="Fabian Dvorak" />
 
+<meta name="date" content="2019-01-25" />
 
 <title>NEWS</title>
 
@@ -282,6 +283,9 @@ img {
 button.code-folding-btn:focus {
   outline: none;
 }
+summary {
+  display: list-item;
+}
 </style>
 
 
@@ -368,13 +372,25 @@ $(document).ready(function () {
 
 <h1 class="title toc-ignore">NEWS</h1>
 <h4 class="author"><em>Fabian Dvorak</em></h4>
-<h4 class="date"><em>19 Oktober 2018</em></h4>
+<h4 class="date"><em>25 January 2019</em></h4>
 
 </div>
 
 
-<div id="stratest-0.1.0.9000" class="section level1">
-<h1>stratEst 0.1.0.9000</h1>
+<div id="stratest-0.1.2" class="section level1">
+<h1>stratEst 0.1.2</h1>
+<ul>
+<li>fixes a bug in the calculation of the score function for trembles</li>
+<li>fixes a bug in the selection procedure if the input object strategies is an integer</li>
+<li>contains the current working paper version</li>
+</ul>
+</div>
+<div id="stratest-0.1.1" class="section level1">
+<h1>stratEst 0.1.1</h1>
+<ul>
+<li>fixes the overload ambiguity of the log() function in C++ code</li>
+<li>reports solutions with tremble parameters bigger than 0.5</li>
+</ul>
 </div>
 <div id="stratest-0.1.0" class="section level1">
 <h1>stratEst 0.1.0</h1>

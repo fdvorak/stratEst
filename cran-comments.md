@@ -1,43 +1,47 @@
 ---
 title: "cran-comments"
 author: "Fabian Dvorak"
-date: "December 17, 2018"
+date: "January 25 2019"
 output: html_document
 ---
 
-Thanks for your time. This is a patch release for version 0.1.0. This version:
+Thanks for your time. This is a patch release for version 0.1.1. This version:
 
-* fixes the overload ambiguity of the log() function in C++ code (Error on Solaris)
-* reports solutions with tremble parameters bigger than 0.5
-
-Note that package checks currently also report ERRORS for r-devel-linux-x86_64-debian-clang, r-devel-linux-x86_64-debian-gcc, and r-patched-linux-x86_64 due to the use of Rcpp.
+* fixes a bug in the calculation of the score function for trembles
+* fixes a bug in the selection procedure if the input object strategies is an integer
+* adds the current working paper version of the project
 
 ## Test environments
-* local windows 10 pro install, R 3.5.1
-* mac OS X	10.13.6 (on travis-ci), R 3.5.0
-* win-builder (r-devel and r-release)
-* ubuntu 14.04.5 LTS (on travis-ci), 3.5.1
+* windows 10 pro install, R 3.5.2 (local)
+* windows server 2012 R2 x64, R 3.5.2 patched (via appveyor)
+* windows server 2008 R2 SP1, r-devel (via r hub)
+* windows, r-devel (via win-builder)
+* windows, r-release (via win-builder)
+* mac OS X	10.13.6, R 3.5.2 (via travis-ci)
+* debian linux, R-devel (via r hub)
+* fedora linux, r-devel (via r hub)
+* ubuntu 16.04 LTS, r-release (via r hub)
+* ubuntu 14.04.5 LTS , R 3.5.2 (via travis-ci)
 
 ## R CMD check results
-local windows 10 pro install  
+windows 10 pro install, R 3.5.2 (local)
+windows server 2012 R2 x64, R 3.5.2 patched (via appveyor)
+windows server 2008 R2 SP1, r-devel (via r hub)
+windows, r-devel (via win-builder)
+windows, r-release (via win-builder)
+mac OS X	10.13.6, R 3.5.2 (via travis-ci)
 0 errors | 0 warnings | 0 notes
 
-mac OS X 10.13.6 (on travis-ci)  
-0 errors | 0 warnings | 0 notes
-
-win-builder (r-devel)   
-0 errors | 0 warnings | 0 notes  
-
-win-builder (r-release)     
-0 errors | 0 warnings | 0 notes  
-
-ubuntu 14.04.5 LTS (on travis-ci)  
+debian linux, R-devel (via r hub)
+fedora linux, r-devel (via r hub)
+ubuntu 16.04 LTS, r-release (via r hub)
+ubuntu 14.04.5 LTS , R 3.5.2 (via travis-ci)  
 0 errors | 0 warnings | 1 note  
-NOTE: installed size is  7.1Mb
+NOTE: installed size is  7.7Mb
       sub-directories of 1Mb or more:
-      libs   6.8Mb
+      libs   7.0Mb
   
-My current understanding is that the inflation of the libs subdirectory is due to the use of Rcpp. The main functions of the stratEst package have been written in C++ using Rcpp and RcppArmadillo. These functions are essential for the functioning of the package. Without the speed up gained from those C++ functions, the package would become impractical.
+My understanding is that the inflation of the libs subdirectory is due to the use of Rcpp. The main functions of the stratEst package have been written in C++ using Rcpp and RcppArmadillo. These functions are essential for the functioning of the package. Without the speed up gained from those C++ functions, the package would become impractical.
 
 ## Downstream dependencies
 I have also run R CMD check on downstream dependencies of the package.  

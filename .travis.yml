@@ -10,6 +10,8 @@ compiler:
 osx_image: xcode10
 language: R
 r:
+  - oldrel
+  - devel
   - release
 sudo: false
 cache: packages

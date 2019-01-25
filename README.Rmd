@@ -14,7 +14,7 @@ knitr::opts_chunk$set(
 
 # stratEst
 
-The stratEst package can be used to perform variants of the strategy estimation method (Dal Bo and Frechette, 2011). The estimation function \code{stratEst()} returns maximum-likelihood estimates for the population shares and response parameters of a set of candidate strategies given some data from an economic experiment. Candidate strategies can be supplied by the user in the form of deterministic finite-state automata. The number and the complexity of strategies can be restricted by the user or selected based on information criteria. stratEst also features latent class regression to assess the influence of covariates on strategy choice.
+stratEst is a statistical software package which implements variants of the strategy estimation method (Dal Bo & Frechette, 2011). Strategies can be estimated from the data or supplied by the user in the form of deterministic finite-state automata. The package uses the EM algorithm (Dempster, 1977) and the Newton-Raphson method to obtain maximum-likelihood estimates of the population shares and choice parameters of the strategies. The number and the complexity of strategies can be restricted by the user or selected based on information criteria. The package also features an extension of strategy estimation in the spirit of latent class regression to assess the effects of covariates on strategy use. 
 
 ## Installation
 

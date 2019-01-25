@@ -1,7 +1,7 @@
 ---
 title: "NEWS"
 author: "Fabian Dvorak"
-date: "17 December 2018"
+date: "25 January 2019"
 output: html_document
 ---
 
@@ -9,7 +9,11 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-# stratEst 0.1.1.9000
+# stratEst 0.1.2
+
+* fixes a bug in the calculation of the score function for trembles
+* fixes a bug in the selection procedure if the input object strategies is an integer
+* contains the current working paper version
 
 
 # stratEst 0.1.1
