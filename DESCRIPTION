@@ -5,7 +5,7 @@ Version: 0.1.2
 Author: Fabian Dvorak
 Maintainer: Fabian Dvorak <fabian.dvorak@uni.kn>
 Date: 2019-01-24
-Description: Implements variants of the strategy frequency estimation method by Dal Bo & Frechette (2011) <doi:10.1257/aer.101.1.411>, including its adaptation to behavioral memory-one Markov strategies by Breitmoser (2015) <doi:10.1257/aer.20130675>, and the extension in the spirit of latent-class regression by Dvorak & Fehrler (2018) <doi:10.2139/ssrn.2986445>. 
+Description: Implements variants of the strategy frequency estimation method by Dal Bo & Frechette (2011) <doi:10.1257/aer.101.1.411>, including the adaptation to estimate choice parameters of behavior strategies by Breitmoser (2015) <doi:10.1257/aer.20130675>, and the extension in the spirit of latent-class regression by Dvorak & Fehrler (2018) <doi:10.2139/ssrn.2986445>. 
 Copyright: See the file COPYRIGHTS for copyright, authorship and license details 
 License: GPL-3
 Encoding: UTF-8
