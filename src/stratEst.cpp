@@ -32,7 +32,7 @@ arma::field<arma::mat> stratEst_EM(arma::cube& output_cube, arma::cube& sum_outp
   arma::vec new_entropy_k( 1 , arma::fill::ones);
   arma::mat i_shares_mat( num_ids , k , arma::fill::zeros );
   arma::cube i_shares_cube( num_rows_response_mat , num_cols_response_mat , num_ids , arma::fill::zeros );
-  arma::mat state_obs( num_rows_response_mat , num_cols_response_mat , arma::fill::zeros );
+  arma::mat state_obs( num_rows_response_mat , 1 , arma::fill::zeros );
   arma::vec new_shares = shares;
   arma::mat new_responses = responses;
   arma::vec new_trembles = trembles;
@@ -263,7 +263,7 @@ arma::field<arma::mat> stratEst_LCR_EM(arma::cube& output_cube, arma::cube& sum_
   arma::vec new_entropy_k( 1 , arma::fill::ones);
   arma::mat i_shares_mat( num_ids , k , arma::fill::zeros );
   arma::cube i_shares_cube( num_rows_response_mat , num_cols_response_mat , num_ids , arma::fill::zeros );
-  arma::mat state_obs( num_rows_response_mat , num_cols_response_mat , arma::fill::zeros );
+  arma::mat state_obs( num_rows_response_mat , 1 , arma::fill::zeros );
   arma::vec new_shares = shares;
   arma::mat new_responses = responses;
   arma::vec new_trembles = trembles;
