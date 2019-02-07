@@ -39,7 +39,7 @@
 #' \item{eval}{Number of iterations of the solver. The reported number is the sum of iterations performed in the inner and the outer run which led to the reported estimates.}
 #' \item{tol.val}{The tolerance value in the last iteration.}
 #' \item{entropy}{Entropy of the assignments.}
-#' \item{state.obs}{A column vector with the number of weighted observations for each state corresponding to the order of states in \code{strategies}.}
+#' \item{state.obs}{A column vector with the number of weighted observations for each strategy state corresponding to the rows of \code{strategies}.}
 #' \item{assignments}{Matrix which contains the posterior probability assignments of individuals to strategies. The rows of the matrix correspond to the ID sorted in ascending order beginning with the individual with the lowest ID. The columns correspond to the strategies, starting with the first strategy defined in the strategy matrix in column one.}
 #' \item{priors}{Matrix which contains the individual prior probabilities of individuals as predicted by the covariate vectors of the individuals. The rows correspond to the ID sorted in ascending order beginning with the individual with the lowest ID. The columns correspond to the strategies, starting with the first strategy defined in the strategy matrix.}
 #' \item{shares.se}{Column vector which contains the standard errors of the estimated shares. The elements correspond to the vector of estimates.}
