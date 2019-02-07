@@ -39,6 +39,7 @@
 #' \item{eval}{Number of iterations of the solver. The reported number is the sum of iterations performed in the inner and the outer run which led to the reported estimates.}
 #' \item{tol.val}{The tolerance value in the last iteration.}
 #' \item{entropy}{Entropy of the assignments.}
+#' \item{state.obs}{A column vector with the number of weighted observations for each state corresponding to the order of states in \code{strategies}.}
 #' \item{assignments}{Matrix which contains the posterior probability assignments of individuals to strategies. The rows of the matrix correspond to the ID sorted in ascending order beginning with the individual with the lowest ID. The columns correspond to the strategies, starting with the first strategy defined in the strategy matrix in column one.}
 #' \item{priors}{Matrix which contains the individual prior probabilities of individuals as predicted by the covariate vectors of the individuals. The rows correspond to the ID sorted in ascending order beginning with the individual with the lowest ID. The columns correspond to the strategies, starting with the first strategy defined in the strategy matrix.}
 #' \item{shares.se}{Column vector which contains the standard errors of the estimated shares. The elements correspond to the vector of estimates.}
@@ -248,8 +249,9 @@ stratEst <- function( data, strategies, shares, covariates, cluster, response = 
   }
 
 
-  stratEst.output <- stratEst_cpp( data, strategies, shares, covariates, LCR, cluster, response, r.responses, r.trembles, select, min.strategies, crit, se, outer.runs, outer.tol, outer.max, inner.runs, inner.tol, inner.max, lcr.runs, lcr.tol, lcr.max, bs.samples, print.messages, integer_strategies )
-  return(stratEst.output)
+  cpp.output <- stratEst_cpp( data, strategies, shares, covariates, LCR, cluster, response, r.responses, r.trembles, select, min.strategies, crit, se, outer.runs, outer.tol, outer.max, inner.runs, inner.tol, inner.max, lcr.runs, lcr.tol, lcr.max, bs.samples, print.messages, integer_strategies )
+  stratEst.return <- list("shares" = cpp.output$shares, "strategies" = cpp.output$strategies, "responses" = cpp.output$responses, "trembles" = cpp.output$trembles,  "coefficients" = cpp.output$coefficients, "response.mat" = cpp.output$response.mat, "tremble.mat" = cpp.output$tremble.mat, "coefficient.mat" =  cpp.output$coefficient.mat, "loglike" = cpp.output$fit[1,1], "crit.val" = cpp.output$fit[1,2], "eval" = cpp.output$solver[1,1], "tol.val" = cpp.output$solver[1,2], "entropy" = cpp.output$fit[1,3], "state.obs" = cpp.output$state.obs, "assignments" = cpp.output$assignments, "priors" = cpp.output$priors, "shares.se" = cpp.output$shares.se, "responses.se" = cpp.output$responses.se, "trembles.se" = cpp.output$trembles.se, "coefficients.se" = cpp.output$coefficients.se, "convergence" = cpp.output$convergence );
+  return(stratEst.return)
 }
 
 .onUnload <- function (libpath) { library.dynam.unload("stratEst", libpath)}
