@@ -212,14 +212,26 @@ stratEst <- function( data, strategies, shares, covariates, cluster, response = 
   newton.stepsize = 1
   penalty = 0
 
+  # sort data
+
+
   # transform PD data into input output data structure
   if( is.null(cooperation) == FALSE ){
+    # sort data frame
+    data_frame <- data_frame[order(data_frame$period), ]
+    data_frame <- data_frame[order(data_frame$supergame), ]
+    data_frame <- data_frame[order(data_frame$id), ]
+    # transform data
     data <- transform_pd( data_frame )
     input <- data[,4]
     output <- data[,5]
   }else{
     # prepare data
     data <- cbind(id,supergame,period,input,output)
+    # sort data
+    data <- data[order(data[,3]), ]
+    data <- data[order(data[,2]), ]
+    data <- data[order(data[,1]), ]
   }
 
   #check strategies
@@ -248,8 +260,9 @@ stratEst <- function( data, strategies, shares, covariates, cluster, response = 
     shares = rep( NA , n_strats )
   }
 
-
+  # make coefficients input object and fixable
   cpp.output <- stratEst_cpp( data, strategies, shares, covariates, LCR, cluster, response, r.responses, r.trembles, select, min.strategies, crit, se, outer.runs, outer.tol, outer.max, inner.runs, inner.tol, inner.max, lcr.runs, lcr.tol, lcr.max, bs.samples, print.messages, integer_strategies )
+  # make data.frame out of strategies and skip responses, trembles
   stratEst.return <- list("shares" = cpp.output$shares, "strategies" = cpp.output$strategies, "responses" = cpp.output$responses, "trembles" = cpp.output$trembles,  "coefficients" = cpp.output$coefficients, "response.mat" = cpp.output$response.mat, "tremble.mat" = cpp.output$tremble.mat, "coefficient.mat" =  cpp.output$coefficient.mat, "loglike" = cpp.output$fit[1,1], "crit.val" = cpp.output$fit[1,2], "eval" = cpp.output$solver[1,1], "tol.val" = cpp.output$solver[1,2], "entropy" = cpp.output$fit[1,3], "state.obs" = cpp.output$state.obs, "assignments" = cpp.output$assignments, "priors" = cpp.output$priors, "shares.se" = cpp.output$shares.se, "responses.se" = cpp.output$responses.se, "trembles.se" = cpp.output$trembles.se, "coefficients.se" = cpp.output$coefficients.se, "convergence" = cpp.output$convergence );
   return(stratEst.return)
 }
