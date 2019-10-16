@@ -2,10 +2,11 @@ library(stratEst)
 
 test_that("core systematic tests",  {
   # shares
-  one_fixed_share <- stratEst(DF2011[DF2011[,1]==1,],3,shares=c(0.5,NA,NA),print.messages = F)
-  two_fixed_shares <- stratEst(DF2011[DF2011[,1]==1,],3,shares=c(0.5,0.5,NA),print.messages = F)
+  one_fixed_share <- stratEst(DF2011[DF2011[,1]==1,],3,shares=matrix(c(0.5,NA,NA),3,1),print.messages = F)
+  two_fixed_shares <- stratEst(DF2011[DF2011[,1]==1,],3,shares=matrix(c(0.5,0.2,NA),3,1),print.messages = F)
+  all_fixed <- stratEst(DF2011[DF2011[,1]==1,],3,shares=matrix(c(0.5,0.2,0.3),3,1),print.messages = F)
   # cluster
-  cluster_bs <- stratEst(DF2011LCR[DF2011LCR[,1] == 1 & DF2011LCR[,4]==32 & DF2011LCR[,5]==0.5,],2,cluster = DF2011LCR$group[DF2011LCR[,1] == 1 & DF2011LCR[,4]==32 & DF2011LCR[,5]==0.5],print.messages = F, bs.samples = 50 )
+  cluster_bs <- stratEst(DF2011LCR[DF2011LCR[,1] == 1 & DF2011LCR[,4]==32 & DF2011LCR[,5]==0.5,],2,cluster = DF2011LCR$group[DF2011LCR[,1] == 1 & DF2011LCR[,4]==32 & DF2011LCR[,5]==0.5], bs.samples = 50, print.messages = F )
   # restrict trembles
   restrict_trembles_no <- stratEst(DF2011[DF2011[,1]==1,],strategies=rbind(ALLD,TFT,WSLS),r.trembles="no",print.messages = F)
   expect_equal(5,length(restrict_trembles_no$trembles))
@@ -54,11 +55,11 @@ test_that("additional systematic tests",  {
 
 test_that("multivariate output test",  {
   skip_on_cran()
-  N = 32                                                  # number of subjects
-  num_responses = c(2,3,4,5)                                       # number of distinct responses of the machines
+  N = 32                                       # number of subjects
+  num_responses = c(2,3,4,5)                   # number of distinct responses of the machines
   tremble = 0.2
   shares = runif(5)                            # generate 5 shares
-  shares = shares/sum(shares)                             # normalize shares
+  shares = shares/sum(shares)                  # normalize shares
   for( m in 1:length(num_responses)){
     check = 0
     while( check == 0 ){
@@ -95,7 +96,7 @@ test_that("multivariate output test",  {
       output[ j ] = t(rmultinom(1, size = 1, prob = response_mat[1+input[j] + (strat_id[j]-1)*5 , ] ))%*%matrix(c(1:num_responses[m]),num_responses[m],1)
     }
 
-    data <- cbind(id,supergame,period,input,output)
+    data <- as.data.frame(cbind(id,supergame,period,input,output))
 
     P = stratEst(data,5,response="pure",outer.runs = 2, print.messages = F)
     M = stratEst(data,5,response="mixed",outer.runs = 2, print.messages = F)

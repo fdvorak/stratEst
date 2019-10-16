@@ -5,7 +5,8 @@ transform_pd <- function( data ){
   supergame <- data$supergame
   period <- data$period
   group <- data$group
-  output = data$cooperation
+  output <- data$cooperation
+  sample <- data$sample
   if( is.null(output) ) {
     output <- data$coop
   }
@@ -19,8 +20,8 @@ transform_pd <- function( data ){
     input <- transform_pd_cpp(id, supergame, period, output, p_output, input, unique_ids)
   }
   # prepare data
-  data <- cbind(id,supergame,period,input,output)
-  input <- data[,4]                                   # this is necessary for the column label input
-  data <- cbind(id,supergame,period,input,output)     # do not delete
+  data <- cbind(id,supergame,period,input,output,sample)
+  input <- data[,4]                                       # this is necessary for the column label input
+  data <- cbind(id,supergame,period,input,output,sample)  # do not delete
   return(data)
 }

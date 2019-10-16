@@ -110,6 +110,7 @@ stratEst <- function( data, strategies, shares, covariates, cluster, response = 
   }
   input <- data_frame$input
   output <- data_frame$output
+  sample <- data_frame$sample
 
   if( is.null(id) ) {
     stop("Data does not contain the variable: id")
@@ -144,6 +145,13 @@ stratEst <- function( data, strategies, shares, covariates, cluster, response = 
     data_frame$period <- rep(1,length(id))
     period <- data_frame$period
   }
+
+  # generate variable sample if missing
+  if( is.null(sample) ){
+    sample <- rep(1,length(id))
+  }
+  data_frame$sample <- sample
+  num_samples <- length(unique(sample))
 
   # check covariates
   if( missing(covariates) ) {
@@ -227,7 +235,7 @@ stratEst <- function( data, strategies, shares, covariates, cluster, response = 
     output <- data[,5]
   }else{
     # prepare data
-    data <- cbind(id,supergame,period,input,output)
+    data <- cbind(id,supergame,period,input,output,sample)
     # sort data
     data <- data[order(data[,3]), ]
     data <- data[order(data[,2]), ]
@@ -257,13 +265,16 @@ stratEst <- function( data, strategies, shares, covariates, cluster, response = 
   }
   #check shares
   if( missing(shares) ) {
-    shares = rep( NA , n_strats )
+    shares = matrix( NA , n_strats , num_samples )
   }
 
   # make coefficients input object and fixable
   cpp.output <- stratEst_cpp( data, strategies, shares, covariates, LCR, cluster, response, r.responses, r.trembles, select, min.strategies, crit, se, outer.runs, outer.tol, outer.max, inner.runs, inner.tol, inner.max, lcr.runs, lcr.tol, lcr.max, bs.samples, print.messages, integer_strategies )
   # make data.frame out of strategies and skip responses, trembles
-  stratEst.return <- list("shares" = cpp.output$shares, "strategies" = cpp.output$strategies, "responses" = cpp.output$responses, "trembles" = cpp.output$trembles,  "coefficients" = cpp.output$coefficients, "response.mat" = cpp.output$response.mat, "tremble.mat" = cpp.output$tremble.mat, "coefficient.mat" =  cpp.output$coefficient.mat, "loglike" = cpp.output$fit[1,1], "crit.val" = cpp.output$fit[1,2], "eval" = cpp.output$solver[1,1], "tol.val" = cpp.output$solver[1,2], "entropy" = cpp.output$fit[1,3], "state.obs" = cpp.output$state.obs, "assignments" = cpp.output$assignments, "priors" = cpp.output$priors, "shares.se" = cpp.output$shares.se, "responses.se" = cpp.output$responses.se, "trembles.se" = cpp.output$trembles.se, "coefficients.se" = cpp.output$coefficients.se, "convergence" = cpp.output$convergence );
+  stratEst.return <- list("shares" = cpp.output$shares, "strategies" = cpp.output$strategies, "responses" = cpp.output$responses, "trembles" = cpp.output$trembles,  "coefficients" = cpp.output$coefficients, "response.mat" = cpp.output$response.mat, "tremble.mat" = cpp.output$tremble.mat, "coefficient.mat" =  cpp.output$coefficient.mat, "loglike" = cpp.output$fit[1,1], "crit.val" = cpp.output$fit[1,2], "eval" = cpp.output$solver[1,1], "tol.val" = cpp.output$solver[1,2], "entropy" = cpp.output$fit[1,3], "state.obs" = cpp.output$state.obs, "assignments" = cpp.output$assignments, "priors" = cpp.output$priors, "shares.se" = cpp.output$shares.se, "responses.se" = cpp.output$responses.se, "trembles.se" = cpp.output$trembles.se, "coefficients.se" = cpp.output$coefficients.se, "shares.covar" = cpp.output$stats.list$shares.covar, "shares.score" =  cpp.output$stats.list$shares.score, "shares.fisher" = cpp.output$stats.list$shares.fisher, "responses.covar" = cpp.output$stats.list$responses.covar, "responses.score" = cpp.output$stats.list$responses.score, "responses.fisher" = cpp.output$stats.list$responses.fisher, "trembles.covar" = cpp.output$stats.list$trembles.covar, "trembles.score" = cpp.output$stats.list$trembles.score, "trembles.fisher" = cpp.output$stats.list$trembles.fisher, "coefficients.covar" = cpp.output$stats.list$coefficients.covar, "coefficients.score" = cpp.output$stats.list$coefficients.score, "coefficients.fisher" = cpp.output$stats.list$coefficients.fisher, "convergence" = cpp.output$convergence );
+  # delete empty list entries
+  stratEst.return <- stratEst.return[lapply(stratEst.return,length)>0]
+  # return result
   return(stratEst.return)
 }
 
