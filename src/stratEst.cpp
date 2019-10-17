@@ -683,6 +683,7 @@ arma::field<arma::mat> stratEst_SE(arma::cube& output_cube, arma::cube& sum_outp
       identity_responses += no_sum_constraint_responses;
       arma::mat jacobian_responses = rows_mat_responses % ( identity_responses - cols_mat_responses );
       arma::mat covar_responses_mat = jacobian_responses * inverse_fisher_info_responses * jacobian_responses.t() ;
+      responses_covar = covar_responses_mat;
       SE_responses = sqrt( covar_responses_mat.diag() );
     }
   }
@@ -995,7 +996,7 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::mat shares, arma::
     with_zero_share_mat.replace(arma::datum::nan, 0);
     arma::vec sums_of_shares = sum( with_zero_share_mat , 0 );
     if( any( sums_of_shares > 1 ) ){
-      stop("Sum of fixed shares cannot exceed one. stratEst cannot proceed with the current values.");
+      stop("The sum of all fixed values in a column of 'shares' cannot exceed one. It is not possible to proceed with the current values.");
     }
     for(int j = 0; j < num_samples; j++) {
       arma::vec complete_share_col = complete_share_mat(arma::span::all,j);
@@ -1015,7 +1016,7 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::mat shares, arma::
       stop("Latent class regression requires more than one strategy.");
     }
     if( num_samples > 1 ){
-      stop("Latent class regression cannot be run for several samples.");
+      stop("Latent class regression cannot be run with more than one sample.");
     }
     int cols_covariates = covariates.n_cols;
     int rows_covariates = covariates.n_rows;
@@ -1032,7 +1033,7 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::mat shares, arma::
         arma::vec unique_covariate = unique( covariate( find( id_vec == j+1 ) ) );
         int num_unique_covariate = unique_covariate.n_elem;
         if( num_unique_covariate > 1 ){
-          stop("Covariate matrix contains different values of the same variable for the same subject.");
+          stop("Covariate matrix contains different values of the same variable for the same id.");
         }
         else{
           incomplete_covariate_mat( j , c ) = unique_covariate(0);
@@ -1537,7 +1538,6 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::mat shares, arma::
             }
           }
 
-          // bug here ?
           // // random responses to start (normalized to remaining response)
           arma::vec start_responses = arma::randu( num_responses_to_est );
           for (int i = 0; i < num_responses_to_est; i++) {

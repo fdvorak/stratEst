@@ -53,10 +53,11 @@ test_that("behavior strategies",  {
 
   output <- ifelse( rand_vec >= pr_vec , 0 , 1 )
 
-  data <- cbind(id,supergame,period,input,output)
-  covar = matrix(as.numeric(id>100),nrow(data),1)
+  covar = as.numeric(id>100)
+  data <- as.data.frame(cbind(id,supergame,period,input,output,covar))
 
-  model = stratEst( data, strategies, covariates = covar , select="all", se="yes", crit = "icl", inner.runs = 100, inner.max = 10, outer.runs = 1,outer.max = 200,outer.tol = 0,print.messages = F)
+
+  model = stratEst( data, strategies, covariates = "covar" , select="all", se="yes", crit = "icl", inner.runs = 100, inner.max = 10, outer.runs = 1,outer.max = 200,outer.tol = 0,print.messages = F)
 
   expect_equal( 0.465, round(model$shares[1],3) )
   expect_equal( 0.535, round(model$shares[2],3) )

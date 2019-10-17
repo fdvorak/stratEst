@@ -1,12 +1,19 @@
 library(stratEst)
 
 test_that("core systematic tests",  {
+  # unsorted data
+  set.seed(1)
+  unsorted <- stratEst(DF2011[sample(nrow(DF2011)),],strategies=rbind(ALLD,ALLC,GRIM,TFT,WSLS,T2),sample.id = "treatment", print.messages = F)
+  set.seed(1)
+  sorted <- stratEst(DF2011[sample(nrow(DF2011)),],strategies=rbind(ALLD,ALLC,GRIM,TFT,WSLS,T2),sample.id = "treatment",print.messages = F)
+  expect_equal(unsorted$shares,sorted$shares)
   # shares
   one_fixed_share <- stratEst(DF2011[DF2011[,1]==1,],3,shares=matrix(c(0.5,NA,NA),3,1),print.messages = F)
   two_fixed_shares <- stratEst(DF2011[DF2011[,1]==1,],3,shares=matrix(c(0.5,0.2,NA),3,1),print.messages = F)
   all_fixed <- stratEst(DF2011[DF2011[,1]==1,],3,shares=matrix(c(0.5,0.2,0.3),3,1),print.messages = F)
+  no_fixed_samples <- stratEst(DF2011,3,sample.id="treatment",print.messages = F)
   # cluster
-  cluster_bs <- stratEst(DF2011LCR[DF2011LCR[,1] == 1 & DF2011LCR[,4]==32 & DF2011LCR[,5]==0.5,],2,cluster = DF2011LCR$group[DF2011LCR[,1] == 1 & DF2011LCR[,4]==32 & DF2011LCR[,5]==0.5], bs.samples = 50, print.messages = F )
+  cluster_bs <- stratEst(DF2011LCR[DF2011LCR[,1] == 1 & DF2011LCR[,4]==32 & DF2011LCR[,5]==0.5,],2,cluster.id = "group", bs.samples = 50, print.messages = F )
   # restrict trembles
   restrict_trembles_no <- stratEst(DF2011[DF2011[,1]==1,],strategies=rbind(ALLD,TFT,WSLS),r.trembles="no",print.messages = F)
   expect_equal(5,length(restrict_trembles_no$trembles))

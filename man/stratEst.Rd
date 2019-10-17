@@ -4,7 +4,7 @@
 \alias{stratEst}
 \title{Estimation function for strategy estimation}
 \usage{
-stratEst(data, strategies, shares, covariates, cluster,
+stratEst(data, strategies, shares, sample.id, cluster.id, covariates,
   response = "mixed", r.responses = "no", r.trembles = "global",
   select = "no", min.strategies = 1, crit = "bic", se = "yes",
   outer.runs = 10, outer.tol = 0, outer.max = 1000,
@@ -19,9 +19,11 @@ stratEst(data, strategies, shares, covariates, cluster,
 
 \item{shares}{A column vector of strategy shares. The number of elements must correspond to the number of strategies defined in the strategies matrix. Elements which are NA are estimated from the data. If the object is not supplied, a share is estimated for every strategy defined in the strategies matrix.}
 
-\item{covariates}{A matrix where each row corresponds to same row in data. Hence, the covariate matrix must have as many rows as the data matrix. Observations which have the same ID in data must also have the same vector of covariates. Missing value are not allowed. If covariates are supplied, a latent class regression model is estimated.}
+\item{sample.id}{A character indicating the variable in data which contains an id for samples. Individual observations must be nested in samples. The same must be true for clusters if specified. If more than one sample exists, shares are estimated for each sample. All other parameters are estimated for the data of all samples. If the object is not supplied, it is assumed that the data contains only one sample.}
 
-\item{cluster}{A column vector which indicates the assignment of each row in data to cluster units for block-bootstrapped standard errors. Note that estimates will nevertheless be biased due to the non-linearity of the model.}
+\item{cluster.id}{A character indicating the variable in data which contains an id for clusters. Individual observations must be nested in clusters. for block-bootstrapped standard errors. Note that estimates will nevertheless be biased due to the non-linearity of the model.}
+
+\item{covariates}{A character vector indicating the covariates in data for latent class regression. Rows with the same id must have the values of covariates. Missing value are not allowed. Whenever a character vector is supplied for the input object 'covariates', a latent class regression model is estimated.}
 
 \item{response}{String which can be set to \code{"pure"} or \code{"mixed"}. If set to \code{"pure"} all response probabilities estimated from the data are pure responses. If set to \code{"mixed"} all response probabilities estimated from the data are mixed responses. The default is \code{"mixed"}.}
 
@@ -74,6 +76,7 @@ The function returns a list with the following elements.
 \item{eval}{Number of iterations of the solver. The reported number is the sum of iterations performed in the inner and the outer run which led to the reported estimates.}
 \item{tol.val}{The tolerance value in the last iteration.}
 \item{entropy}{Entropy of the assignments.}
+\item{state.obs}{A column vector with the number of weighted observations for each strategy state corresponding to the rows of \code{strategies}.}
 \item{assignments}{Matrix which contains the posterior probability assignments of individuals to strategies. The rows of the matrix correspond to the ID sorted in ascending order beginning with the individual with the lowest ID. The columns correspond to the strategies, starting with the first strategy defined in the strategy matrix in column one.}
 \item{priors}{Matrix which contains the individual prior probabilities of individuals as predicted by the covariate vectors of the individuals. The rows correspond to the ID sorted in ascending order beginning with the individual with the lowest ID. The columns correspond to the strategies, starting with the first strategy defined in the strategy matrix.}
 \item{shares.se}{Column vector which contains the standard errors of the estimated shares. The elements correspond to the vector of estimates.}
@@ -113,10 +116,10 @@ stratEst(data,strategies)
 
 ## Latent class regression with data from Dal Bo and Frechette (2011)
 ## For the two treatments with R = 32, introduce a dummy which is one if delta = 3/4
-data <- DF2011[DF2011$treatment == 1 | DF2011$treatment == 4,]
+dummy <- as.numeric(DF2011$treatment > 3 )
+data <- as.data.frame(cbind(DF2011,dummy))
 strats <- rbind(ALLD,TFT)
-covar <- as.matrix(as.numeric(data$treatment == 4 ))
-stratEst(data,strats,covariates = covar,lcr.runs = 500)
+stratEst(data,strats,covariates = c("dummy"),lcr.runs = 500)
 }
 \references{
 Breitmoser, Y. (2015): Cooperation, but no reciprocity: Individual strategies in the repeated prisoner's dilemma, \emph{American Economic Review}, 105, 2882-2910.
