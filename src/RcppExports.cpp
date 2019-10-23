@@ -50,7 +50,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // stratEst_cpp
-List stratEst_cpp(arma::mat data, arma::mat strategies, arma::mat shares, arma::mat covariates, bool LCR, arma::vec cluster, std::string response, std::string r_responses, std::string r_trembles, std::string select, int min_strategies, std::string crit, std::string SE, int outer_runs, double outer_tol_eval, int outer_max_eval, int inner_runs, double inner_tol_eval, int inner_max_eval, int LCR_runs, int LCR_tol_eval, int LCR_max_eval, int BS_samples, bool print_messages, bool integer_strategies, double newton_stepsize, bool penalty);
+List stratEst_cpp(arma::mat data, arma::mat strategies, arma::mat shares, arma::mat covariates, bool LCR, arma::vec cluster, std::string response, std::string r_responses, std::string r_trembles, std::string select, int min_strategies, std::string crit, std::string SE, int outer_runs, double outer_tol_eval, int outer_max_eval, int inner_runs, double inner_tol_eval, int inner_max_eval, int LCR_runs, double LCR_tol_eval, int LCR_max_eval, int BS_samples, bool print_messages, bool integer_strategies, double newton_stepsize, bool penalty);
 RcppExport SEXP _stratEst_stratEst_cpp(SEXP dataSEXP, SEXP strategiesSEXP, SEXP sharesSEXP, SEXP covariatesSEXP, SEXP LCRSEXP, SEXP clusterSEXP, SEXP responseSEXP, SEXP r_responsesSEXP, SEXP r_tremblesSEXP, SEXP selectSEXP, SEXP min_strategiesSEXP, SEXP critSEXP, SEXP SESEXP, SEXP outer_runsSEXP, SEXP outer_tol_evalSEXP, SEXP outer_max_evalSEXP, SEXP inner_runsSEXP, SEXP inner_tol_evalSEXP, SEXP inner_max_evalSEXP, SEXP LCR_runsSEXP, SEXP LCR_tol_evalSEXP, SEXP LCR_max_evalSEXP, SEXP BS_samplesSEXP, SEXP print_messagesSEXP, SEXP integer_strategiesSEXP, SEXP newton_stepsizeSEXP, SEXP penaltySEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -75,7 +75,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type inner_tol_eval(inner_tol_evalSEXP);
     Rcpp::traits::input_parameter< int >::type inner_max_eval(inner_max_evalSEXP);
     Rcpp::traits::input_parameter< int >::type LCR_runs(LCR_runsSEXP);
-    Rcpp::traits::input_parameter< int >::type LCR_tol_eval(LCR_tol_evalSEXP);
+    Rcpp::traits::input_parameter< double >::type LCR_tol_eval(LCR_tol_evalSEXP);
     Rcpp::traits::input_parameter< int >::type LCR_max_eval(LCR_max_evalSEXP);
     Rcpp::traits::input_parameter< int >::type BS_samples(BS_samplesSEXP);
     Rcpp::traits::input_parameter< bool >::type print_messages(print_messagesSEXP);
