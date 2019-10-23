@@ -5,10 +5,10 @@ test_that("behavior strategies",  {
   N = 200
   Obs = 20
 
-  intercept = -0.5
-  intercept2 = 0.2
-  dummy = 1.5
-  dummy2 = 0.2
+  intercept = 0.2
+  intercept2 = 0
+  dummy = 1
+  dummy2 = 0
   response = 0.25
   tremble = 0.10
 
@@ -57,14 +57,14 @@ test_that("behavior strategies",  {
   data <- as.data.frame(cbind(id,supergame,period,input,output,covar))
 
 
-  model = stratEst( data, strategies, covariates = "covar" , select="all", se="yes", crit = "icl", inner.runs = 100, inner.max = 10, outer.runs = 1,outer.max = 200,outer.tol = 0,print.messages = F)
+  model = stratEst( data, strategies, covariates = "covar" , select="all", se="yes", crit = "icl", inner.runs = 100, inner.max = 10, outer.runs = 1,outer.max = 200,outer.tol = 0,lcr.runs = 100, print.messages = F)
 
-  expect_equal( 0.465, round(model$shares[1],3) )
-  expect_equal( 0.535, round(model$shares[2],3) )
-  expect_equal( 0.229, round(model$responses[1],3) )
+  expect_equal( 0.33, round(model$shares[1],3) )
+  expect_equal( 0.67, round(model$shares[2],3) )
+  expect_equal( 0.231, round(model$responses[1],3) )
   expect_equal( 0.110, round(model$trembles[1],3) )
-  expect_equal( -0.754, round(model$coefficients[1],3) )
-  expect_equal( 1.852, round(model$coefficients[2],3) )
+  expect_equal( 0.160, round(model$coefficients[1],3) )
+  expect_equal( 1.226, round(model$coefficients[2],3) )
   expect_equal( 2 , length( model$shares ) )
   expect_equal( 2 , length( model$responses ) )
   expect_equal( 1 , length( model$trembles ) )

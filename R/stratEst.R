@@ -24,6 +24,8 @@
 #' @param lcr.tol Positive number which stets the tolerance of the continuation condition of the Latent Class Regression runs. The iterative algorithm stops if the relative decrease of the log-likelihood is smaller than \code{lcr.tol}. Default is 0.
 #' @param lcr.max Positive integer which stets the maximum number of iterations of the Latent Class Regression EM runs. The iterative algorithm stops if it did not converge after \code{lcr.max} iterations. Default is 1000.
 #' @param bs.samples Positive integer which sets the number of bootstrap samples drawn with replacement.
+#' @param stepsize Positive number which sets the stepsize of the Fisher scoring algorithm. Default is 1.
+#' @param penalty A logical value indicating if the Firth penalty is used when estimating a latent class regression model. Default is FALSE.
 #' @param print.messages Logical, if \code{TRUE} messages are printed which illustrate the status of the estimation process.
 #' @note The strategy estimation method was introduced by (Dal Bo & Frechette 2011) to estimate the relative frequency of a fixed set of pure strategies in the indefinitely repeated prisoner's dilemma. Breitmoser (2015) extended the method to the estimation of behavior strategies. The \pkg{stratEst} package uses the EM algorithm (Dempster, Laird & Rubin 1977) and the Newton-Raphson method to obtain maximum-likelihood estimates for the population shares and response parameters of a set of candidate strategies. The package builds on other software contributions of the R community. To increase speed the estimation procedures, the package uses integration of C++ and R achieved by the Rcpp package (Eddelbuettel & Francois 2011) and the open source linear algebra library for the C++ language RppArmadillo (Sanderson & Curtin 2016).
 #' @return The function returns a list with the following elements.
@@ -87,7 +89,7 @@
 #' strats <- rbind(ALLD,TFT)
 #' stratEst(data,strats,covariates = c("dummy"),lcr.runs = 500)
 #' @export
-stratEst <- function( data, strategies, shares , sample.id , cluster.id , covariates, response = "mixed", r.responses = "no", r.trembles = "global", select = "no", min.strategies = 1, crit = "bic", se = "yes", outer.runs = 10, outer.tol = 0, outer.max = 1000, inner.runs = 100, inner.tol = 0, inner.max = 10, lcr.runs = 1000, lcr.tol = 0, lcr.max = 1000, bs.samples = 1000, print.messages = TRUE ){
+stratEst <- function( data, strategies, shares , sample.id , cluster.id , covariates, response = "mixed", r.responses = "no", r.trembles = "global", select = "no", min.strategies = 1, crit = "bic", se = "yes", outer.runs = 10, outer.tol = 0, outer.max = 1000, inner.runs = 100, inner.tol = 0, inner.max = 10, lcr.runs = 1000, lcr.tol = 0, lcr.max = 1000, bs.samples = 1000, stepsize = 1 , penalty = F , print.messages = TRUE ){
   # crude argument checks
   # check data
   if( missing(data) ) {
@@ -145,7 +147,7 @@ stratEst <- function( data, strategies, shares , sample.id , cluster.id , covari
   }
 
 
-  # generate variable cluster if missing
+  # generate variable covariates if missing
   if( missing(covariates) ){
     covariate_mat <- matrix(0,1,1)
     LCR = FALSE
@@ -249,13 +251,17 @@ stratEst <- function( data, strategies, shares , sample.id , cluster.id , covari
     stop("The number of bootstrap samples must be a positive integer. Default is 1000.");
   }
 
-  # for future use
-  newton.stepsize = 1
-  penalty = 0
+  # check stepsize
+  if ( stepsize < 0 ){
+    stop("The newton.stepsize must be a positive number. Default is 1.");
+  }
+
+  # check penalty
+  if (  is.logical(penalty) == F){
+    stop("The input argument 'penalty' must be boolean. Default is FALSE.");
+  }
 
   # sort data
-
-
   # transform PD data into input output data structure
   if( is.null(cooperation) == FALSE ){
     # sort data frame
@@ -302,7 +308,7 @@ stratEst <- function( data, strategies, shares , sample.id , cluster.id , covari
   }
 
   # make coefficients input object and fixable
-  cpp.output <- stratEst_cpp( data, strategies, shares, covariate_mat, LCR, cluster, response, r.responses, r.trembles, select, min.strategies, crit, se, outer.runs, outer.tol, outer.max, inner.runs, inner.tol, inner.max, lcr.runs, lcr.tol, lcr.max, bs.samples, print.messages, integer_strategies )
+  cpp.output <- stratEst_cpp( data, strategies, shares, covariate_mat, LCR, cluster, response, r.responses, r.trembles, select, min.strategies, crit, se, outer.runs, outer.tol, outer.max, inner.runs, inner.tol, inner.max, lcr.runs, lcr.tol, lcr.max, bs.samples, print.messages, integer_strategies, stepsize , penalty )
   # make data.frame out of strategies and skip responses, trembles
   stratEst.return <- list("shares" = cpp.output$shares, "strategies" = cpp.output$strategies, "responses" = cpp.output$responses, "trembles" = cpp.output$trembles,  "coefficients" = cpp.output$coefficients, "response.mat" = cpp.output$response.mat, "tremble.mat" = cpp.output$tremble.mat, "coefficient.mat" =  cpp.output$coefficient.mat, "loglike" = cpp.output$fit[1,1], "crit.val" = cpp.output$fit[1,2], "eval" = cpp.output$solver[1,1], "tol.val" = cpp.output$solver[1,2], "entropy" = cpp.output$fit[1,3], "state.obs" = cpp.output$state.obs, "assignments" = cpp.output$assignments, "priors" = cpp.output$priors, "shares.se" = cpp.output$shares.se, "responses.se" = cpp.output$responses.se, "trembles.se" = cpp.output$trembles.se, "coefficients.se" = cpp.output$coefficients.se, "shares.covar" = cpp.output$stats.list$shares.covar, "shares.score" =  cpp.output$stats.list$shares.score, "shares.fisher" = cpp.output$stats.list$shares.fisher, "responses.covar" = cpp.output$stats.list$responses.covar, "responses.score" = cpp.output$stats.list$responses.score, "responses.fisher" = cpp.output$stats.list$responses.fisher, "trembles.covar" = cpp.output$stats.list$trembles.covar, "trembles.score" = cpp.output$stats.list$trembles.score, "trembles.fisher" = cpp.output$stats.list$trembles.fisher, "coefficients.covar" = cpp.output$stats.list$coefficients.covar, "coefficients.score" = cpp.output$stats.list$coefficients.score, "coefficients.fisher" = cpp.output$stats.list$coefficients.fisher, "convergence" = cpp.output$convergence );
   # delete empty list entries

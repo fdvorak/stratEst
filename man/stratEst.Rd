@@ -9,8 +9,8 @@ stratEst(data, strategies, shares, sample.id, cluster.id, covariates,
   select = "no", min.strategies = 1, crit = "bic", se = "yes",
   outer.runs = 10, outer.tol = 0, outer.max = 1000,
   inner.runs = 100, inner.tol = 0, inner.max = 10, lcr.runs = 1000,
-  lcr.tol = 0, lcr.max = 1000, bs.samples = 1000,
-  print.messages = TRUE)
+  lcr.tol = 0, lcr.max = 1000, bs.samples = 1000, stepsize = 1,
+  penalty = F, print.messages = TRUE)
 }
 \arguments{
 \item{data}{Mandatory input object which contains the data for the estimation in the long format. Each row in \code{data} represents one observation of one individual. The object \code{data} must be a data frame object with variables in columns. Three columns are mandatory: A column named \code{id} which identifies the observations of the same individual across the rows of the data frame. A column named \code{input} which indicates the type of information observed by the individual before giving a response. A column named \code{output} which contains the behavioral response of the individual after observing the input. If an individual plays the same game for more than one period with the same partner, \code{data} must contain a variable \code{period} which identifies the period within the game. If an individual plays the same game more than once with different partners, \code{data} must contain a variable \code{game} (or \code{supergame}) which identifies data from different games. For data from prisoner's dilemma experiments, two more data formats are possible. Instead of using the variables \code{input} and \code{output}, the data frame may also contain the variables \code{cooperation} and \code{other_cooperation}, or alternatively, the variables  \code{cooperation} and \code{group}. The variable \code{cooperation} should be a dummy which indicates if the participant cooperated in the current period. The variable \code{other_cooperation} should be a dummy which indicates if the other player cooperated in the current period. The variable \code{group} should be an identifier variable with a unique value for each unique match of two individuals.}
@@ -58,6 +58,10 @@ stratEst(data, strategies, shares, sample.id, cluster.id, covariates,
 \item{lcr.max}{Positive integer which stets the maximum number of iterations of the Latent Class Regression EM runs. The iterative algorithm stops if it did not converge after \code{lcr.max} iterations. Default is 1000.}
 
 \item{bs.samples}{Positive integer which sets the number of bootstrap samples drawn with replacement.}
+
+\item{stepsize}{Positive number which sets the stepsize of the Fisher scoring algorithm. Default is 1.}
+
+\item{penalty}{A logical value indicating if the Firth penalty is used when estimating a latent class regression model. Default is FALSE.}
 
 \item{print.messages}{Logical, if \code{TRUE} messages are printed which illustrate the status of the estimation process.}
 }

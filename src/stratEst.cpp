@@ -256,7 +256,7 @@ arma::field<arma::mat> stratEst_EM(arma::cube& output_cube, arma::cube& sum_outp
 // stratEst_LCR_EM
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-arma::field<arma::mat> stratEst_LCR_EM(arma::cube& output_cube, arma::cube& sum_outputs_cube, arma::vec& strat_id, arma::mat& covariate_mat, arma::mat shares_mat, arma::vec responses, arma::vec trembles, arma::vec coefficients, arma::mat response_mat, arma::mat tremble_mat, arma::mat coefficient_mat , arma::uvec shares_to_est, arma::mat indices_responses, arma::mat indices_trembles, bool estimate_coefficients, arma::uvec coefficients_to_est, arma::mat& responses_to_sum, std::string& response, int eval_pre , double tol_eval, int max_eval, int newton_stepsize, double penalty) {
+arma::field<arma::mat> stratEst_LCR_EM(arma::cube& output_cube, arma::cube& sum_outputs_cube, arma::vec& strat_id, arma::mat& covariate_mat, arma::mat shares_mat, arma::vec responses, arma::vec trembles, arma::vec coefficients, arma::mat response_mat, arma::mat tremble_mat, arma::mat coefficient_mat , arma::uvec shares_to_est, arma::mat indices_responses, arma::mat indices_trembles, bool estimate_coefficients, arma::uvec coefficients_to_est, arma::mat& responses_to_sum, std::string& response, int eval_pre , double tol_eval, int max_eval, double newton_stepsize, bool penalty) {
 
   arma::field<arma::mat> F(21,1);
   arma::vec shares = shares_mat.col(0);
@@ -288,18 +288,26 @@ arma::field<arma::mat> stratEst_LCR_EM(arma::cube& output_cube, arma::cube& sum_
   arma::mat new_responses = responses;
   arma::vec new_trembles = trembles;
   arma::vec new_coefficients = coefficients;
+  arma::vec changes_coefficients( num_coefficients_to_est , arma::fill::zeros );
   arma::vec score_vec( num_coefficients , arma::fill::zeros );
+  arma::vec short_score_vec( num_coefficients_to_est , arma::fill::zeros );
   arma::mat hessian_mat( num_coefficients , num_coefficients , arma::fill::zeros );
   arma::mat fisher_info( num_coefficients , num_coefficients , arma::fill::zeros );
+  arma::mat penalized_fisher_info( num_coefficients_to_est , num_coefficients_to_est , arma::fill::zeros );
+  arma::cube d_hessian_cube( num_coefficients , num_coefficients , num_coefficients , arma::fill::zeros );
+  arma::cube delta_lk( num_coefficients , num_coefficients , num_coefficients , arma::fill::zeros );
+  arma::cube delta_lh( num_coefficients , num_coefficients , num_coefficients , arma::fill::zeros );
+  arma::cube delta_kh( num_coefficients , num_coefficients , num_coefficients , arma::fill::zeros );
   arma::mat score_contribution_mat( num_ids , num_coefficients , arma::fill::zeros );
+  arma::mat penalized_score_contribution_mat( num_ids , num_coefficients_to_est , arma::fill::zeros );
   arma::mat priors_entities_mat( num_ids , k , arma::fill::zeros );
   arma::umat indices_responses_to_sum = find( responses_to_sum == 1 );
   arma::umat indices_non_fixed_responses = find( indices_responses == 0 && responses_to_sum == 0 );
   arma::vec stepsize_vec( num_coefficients_to_est , arma::fill::ones );
   arma::vec penalty_vec( num_coefficients_to_est , arma::fill::zeros );
-  penalty_vec.fill(2*penalty);
   stepsize_vec.fill(newton_stepsize);
   int eval = eval_pre;
+  bool coefficients_changed = true;
 
   // create indices response cube & indidices trembles ctube
   arma::cube indices_responses_cube( num_rows_response_mat , num_cols_response_mat , num_ids , arma::fill::zeros );
@@ -318,7 +326,7 @@ arma::field<arma::mat> stratEst_LCR_EM(arma::cube& output_cube, arma::cube& sum_
     priors_entities_mat.row(i) /= accu( priors_entities_mat.row(i) );
   }
 
-  while (  eval < max_eval+eval_pre && eps != tol_eval && eps != arma::datum::nan ) {
+  while (  eval < max_eval+eval_pre && eps != tol_eval && eps != arma::datum::nan && coefficients_changed ) {
     eval++;
 
     // parameters are assigned to updated parameter values
@@ -341,86 +349,160 @@ arma::field<arma::mat> stratEst_LCR_EM(arma::cube& output_cube, arma::cube& sum_
     score_vec.fill(0);
     hessian_mat.fill(0);
     fisher_info.fill(0);
+    d_hessian_cube.fill(0);
 
-    // loop through ids
-    for (int i = 0; i < num_ids; i++) {
+      // loop through ids
+      for (int i = 0; i < num_ids; i++) {
 
-      // calculate the probability for each outcome in each state of each strategy
-      arma::mat pr_outcomes_states_strategies_entities_mat( num_rows_response_mat , num_cols_response_mat , arma::fill::zeros );
-      for ( int l = 0; l < num_cols_response_mat; l++){
-        for (int j = 0; j < num_rows_response_mat; j++){
-          pr_outcomes_states_strategies_entities_mat(j,l) = pow( pr_mat(j,l) , output_cube(j,l,i) );
+        // calculate the probability for each outcome in each state of each strategy
+        arma::mat pr_outcomes_states_strategies_entities_mat( num_rows_response_mat , num_cols_response_mat , arma::fill::zeros );
+        for ( int l = 0; l < num_cols_response_mat; l++){
+          for (int j = 0; j < num_rows_response_mat; j++){
+            pr_outcomes_states_strategies_entities_mat(j,l) = pow( pr_mat(j,l) , output_cube(j,l,i) );
+          }
         }
-      }
-      arma::vec pr_states_strategies_entities_mat = prod( pr_outcomes_states_strategies_entities_mat , 1 );
-      arma::vec pr_entity_k( k , arma::fill::zeros );
-      for ( int j = 0; j < k; j++){
-        pr_entity_k(j) = prod( pr_states_strategies_entities_mat( find( strat_id == j+1 ) ) );
-      }
+        arma::vec pr_states_strategies_entities_mat = prod( pr_outcomes_states_strategies_entities_mat , 1 );
+        arma::vec pr_entity_k( k , arma::fill::zeros );
+        for ( int j = 0; j < k; j++){
+          pr_entity_k(j) = prod( pr_states_strategies_entities_mat( find( strat_id == j+1 ) ) );
+        }
 
-      // log likelihood contribution of subject
-      pr_entity_k %= priors_entities_mat.row(i).t();
-      new_ll_val += -log( sum( pr_entity_k , 0 ) );
+        // log likelihood contribution of subject
+        pr_entity_k %= priors_entities_mat.row(i).t();
+        new_ll_val += -log( sum( pr_entity_k , 0 ) );
 
-      // share contribution of subject as posterior probability of i to use k / N
-      arma::vec i_shares = pr_entity_k.each_row() / sum( pr_entity_k , 0 );
-      new_shares( shares_to_est ) += ( i_shares( shares_to_est )  / num_ids );
+        // share contribution of subject as posterior probability of i to use k / N
+        arma::vec i_shares = pr_entity_k.each_row() / sum( pr_entity_k , 0 );
+        new_shares( shares_to_est ) += ( i_shares( shares_to_est )  / num_ids );
 
-      i_shares_mat.row(i) = i_shares.t();
-      arma::mat lines_entity_k = repmat( i_shares , 1 , num_cols_response_mat );
-      arma::mat entity_slice( num_rows_response_mat , num_cols_response_mat );
-      for ( int l = 0; l < num_rows_response_mat; l++){
-        entity_slice.row(l) = lines_entity_k.row( strat_id( l ) - 1 );
-      }
-      i_shares_cube.slice(i) = entity_slice;
+        i_shares_mat.row(i) = i_shares.t();
+        arma::mat lines_entity_k = repmat( i_shares , 1 , num_cols_response_mat );
+        arma::mat entity_slice( num_rows_response_mat , num_cols_response_mat );
+        for ( int l = 0; l < num_rows_response_mat; l++){
+          entity_slice.row(l) = lines_entity_k.row( strat_id( l ) - 1 );
+        }
+        i_shares_cube.slice(i) = entity_slice;
 
-      // entropy k contribution
-      arma::rowvec i_entropy_k = i_shares.t() % log( i_shares.t() );
-      i_entropy_k.replace(arma::datum::nan, 0);
-      new_entropy_k -= sum( i_entropy_k , 1 );
+        // entropy k contribution
+        arma::rowvec i_entropy_k = i_shares.t() % log( i_shares.t() );
+        i_entropy_k.replace(arma::datum::nan, 0);
+        new_entropy_k -= sum( i_entropy_k , 1 );
 
-      // score and hessian contributions
-      arma::vec score_contribution( num_coefficients , arma::fill::zeros );
-      arma::vec individual_prior = priors_entities_mat.row(i).t();
-      arma::vec s_covariate_vec = repmat( covariate_mat.row(i).t() , k , 1 );
-      arma::mat h_covariate_mat = repmat( covariate_mat.row(i).t() * covariate_mat.row(i) , k , k );
-      arma::mat h_i_shares( num_coefficients , num_coefficients , arma::fill::zeros );
-      arma::vec h_i_shares_vec( num_coefficients , arma::fill::zeros );
-      arma::mat h_i_prior( num_coefficients , num_coefficients , arma::fill::zeros );
-      arma::vec h_i_prior_vec( num_coefficients , arma::fill::zeros );
-      arma::vec h_ones_zeros_vec( num_coefficients , arma::fill::zeros );
-      arma::mat h_ones_zeros( num_coefficients , num_coefficients , arma::fill::zeros );
-      for (int m = 0; m < k; m++){
-        for (int j = 0; j < k; j++){
-          for ( int l = 0; l < num_rows_coefficient_mat ; l++){
+        // score and hessian contributions
+        arma::cube h_covariate_cube( num_coefficients , num_coefficients , num_coefficients , arma::fill::zeros  );
+        arma::vec score_contribution( num_coefficients , arma::fill::zeros );
+        arma::vec individual_prior = priors_entities_mat.row(i).t();
+        arma::vec s_covariate_vec = repmat( covariate_mat.row(i).t() , k , 1 );
+        arma::mat h_covariate_mat = repmat( covariate_mat.row(i).t() * covariate_mat.row(i) , k , k );
+        arma::mat h_i_shares( num_coefficients , num_coefficients , arma::fill::zeros );
+        arma::vec h_i_shares_vec( num_coefficients , arma::fill::zeros );
+        arma::mat h_i_prior( num_coefficients , num_coefficients , arma::fill::zeros );
+        arma::vec h_i_prior_vec( num_coefficients , arma::fill::zeros );
+        arma::vec h_ones_zeros_vec( num_coefficients , arma::fill::zeros );
+        arma::mat h_ones_zeros( num_coefficients , num_coefficients , arma::fill::zeros );
+        h_covariate_cube.each_slice() = h_covariate_mat;
+        arma::cube third_dim_cube( num_coefficients , num_coefficients , num_coefficients , arma::fill::zeros  );
+        arma::mat third_dim_mat( num_coefficients , num_coefficients , arma::fill::zeros  );
+        for (int s = 0; s < num_coefficients; s++){
+          third_dim_mat.fill(s_covariate_vec(s));
+          third_dim_cube.slice(s) = third_dim_mat;
+        }
+        h_covariate_cube %= third_dim_cube;
+        for (int m = 0; m < k; m++){
+          for (int j = 0; j < k; j++){
+            for ( int l = 0; l < num_rows_coefficient_mat ; l++){
+              if( m == 0 ){
+                h_i_shares_vec( l + j*num_rows_coefficient_mat ) = i_shares(j);
+                h_i_prior_vec( l + j*num_rows_coefficient_mat ) = individual_prior(j);
+              }
+              if( j == m ){
+                h_ones_zeros_vec( l + j*num_rows_coefficient_mat ) = 1;
+              }
+              else{
+                h_ones_zeros_vec( l + j*num_rows_coefficient_mat ) = 0;
+              }
+            }
             if( m == 0 ){
-              h_i_shares_vec( l + j*num_rows_coefficient_mat ) = i_shares(j);
-              h_i_prior_vec( l + j*num_rows_coefficient_mat ) = individual_prior(j);
-            }
-            if( j == m ){
-              h_ones_zeros_vec( l + j*num_rows_coefficient_mat ) = 1;
-            }
-            else{
-              h_ones_zeros_vec( l + j*num_rows_coefficient_mat ) = 0;
+              score_contribution = s_covariate_vec % ( h_i_shares_vec - h_i_prior_vec );
             }
           }
-          if( m == 0 ){
-            score_contribution = s_covariate_vec % ( h_i_shares_vec - h_i_prior_vec );
+          h_i_shares( arma::span::all , arma::span(m*num_rows_coefficient_mat , (num_rows_coefficient_mat-1) + m*num_rows_coefficient_mat ) ) = repmat( h_i_shares_vec , 1 , num_rows_coefficient_mat );
+          h_i_prior( arma::span::all , arma::span(m*num_rows_coefficient_mat , (num_rows_coefficient_mat-1) + m*num_rows_coefficient_mat ) ) = repmat( h_i_prior_vec , 1 , num_rows_coefficient_mat );
+          h_ones_zeros( arma::span::all , arma::span(m*num_rows_coefficient_mat , (num_rows_coefficient_mat-1) + m*num_rows_coefficient_mat ) ) = repmat( h_ones_zeros_vec , 1 , num_rows_coefficient_mat );
+        }
+        // objects for derivative of hessian
+        arma::cube l_i_shares_cube( num_coefficients , num_coefficients , num_coefficients , arma::fill::zeros  );
+        arma::cube k_i_shares_cube( num_coefficients , num_coefficients , num_coefficients , arma::fill::zeros  );
+        arma::cube h_i_shares_cube( num_coefficients , num_coefficients , num_coefficients , arma::fill::zeros  );
+        arma::cube l_i_prior_cube( num_coefficients , num_coefficients , num_coefficients , arma::fill::zeros  );
+        arma::cube k_i_prior_cube( num_coefficients , num_coefficients , num_coefficients , arma::fill::zeros  );
+        arma::cube h_i_prior_cube( num_coefficients , num_coefficients , num_coefficients , arma::fill::zeros  );
+
+        arma::mat l_i_shares_mat( num_coefficients , num_coefficients , arma::fill::zeros  );
+        arma::mat k_i_shares_mat( num_coefficients , num_coefficients , arma::fill::zeros  );
+        arma::mat h_i_shares_mat( num_coefficients , num_coefficients , arma::fill::zeros  );
+        arma::mat l_i_prior_mat( num_coefficients , num_coefficients , arma::fill::zeros  );
+        arma::mat k_i_prior_mat( num_coefficients , num_coefficients , arma::fill::zeros  );
+        arma::mat h_i_prior_mat( num_coefficients , num_coefficients , arma::fill::zeros  );
+
+        arma::rowvec h_i_shares_row = h_i_shares.row(0);
+        arma::rowvec h_i_prior_row = h_i_prior.row(0);
+
+        l_i_shares_mat.each_col() = h_i_shares_row.t();
+        k_i_shares_mat.each_row() = h_i_shares_row;
+        l_i_prior_mat.each_col() = h_i_prior_row.t();
+        k_i_prior_mat.each_row() = h_i_prior_row;
+        l_i_shares_cube.each_slice() = l_i_shares_mat;
+        k_i_shares_cube.each_slice() = k_i_shares_mat;
+        l_i_prior_cube.each_slice() = l_i_prior_mat;
+        k_i_prior_cube.each_slice() = k_i_prior_mat;
+
+        delta_lk.each_slice() = h_ones_zeros;
+        for (int l = 0; l < num_coefficients; l++){
+          for (int k = 0; k < num_coefficients; k++){
+            for (int h = 0; h < num_coefficients; h++){
+              double elem = delta_lk( l , k , h );
+              delta_lh( l , h , k ) = elem;
+              delta_kh( h , l ,  k ) = elem;
+            }
           }
         }
-        h_i_shares( arma::span::all , arma::span(m*num_rows_coefficient_mat , (num_rows_coefficient_mat-1) + m*num_rows_coefficient_mat ) ) = repmat( h_i_shares_vec , 1 , num_rows_coefficient_mat );
-        h_i_prior( arma::span::all , arma::span(m*num_rows_coefficient_mat , (num_rows_coefficient_mat-1) + m*num_rows_coefficient_mat ) ) = repmat( h_i_prior_vec , 1 , num_rows_coefficient_mat );
-        h_ones_zeros( arma::span::all , arma::span(m*num_rows_coefficient_mat , (num_rows_coefficient_mat-1) + m*num_rows_coefficient_mat ) ) = repmat( h_ones_zeros_vec , 1 , num_rows_coefficient_mat );
-      }
-      arma::mat hessian_contribution = h_covariate_mat % ( h_i_shares % ( h_ones_zeros - h_i_shares.t() )  - h_i_prior % ( h_ones_zeros - h_i_prior.t() ) );
-      score_vec += score_contribution;
-      hessian_mat += hessian_contribution;
-      score_contribution_mat.row(i) = score_contribution.t();
-      fisher_info += score_contribution * score_contribution.t();
-    }
 
-    // update LL value
-    new_ll_val +=  ( penalty * ( coefficients.t() * coefficients ) );
+        for (int s = 0; s < num_coefficients; s++){
+          h_i_shares_mat.fill(h_i_shares_row(s));
+          h_i_shares_cube.slice(s) = h_i_shares_mat;
+          h_i_prior_mat.fill(h_i_prior_row(s));
+          h_i_prior_cube.slice(s) = h_i_prior_mat;
+        }
+
+        // individual's hessian, score and fisher cotributions
+        arma::mat hessian_contribution = h_covariate_mat % ( h_i_shares % ( h_ones_zeros - h_i_shares.t() )  - h_i_prior % ( h_ones_zeros - h_i_prior.t() ) );
+        hessian_mat += hessian_contribution;
+        score_vec += score_contribution;
+        score_contribution_mat.row(i) = score_contribution.t();
+        fisher_info += score_contribution * score_contribution.t();
+
+        // individual's derivative of hessian contribution
+        if( penalty ){
+          arma::cube d_hessian_i_shares = l_i_shares_cube % ( delta_lk - k_i_shares_cube ) % ( delta_lh - h_i_shares_cube) - l_i_shares_cube % k_i_shares_cube % ( delta_kh - h_i_shares_cube );
+          arma::cube d_hessian_i_prior = l_i_prior_cube % ( delta_lk - k_i_prior_cube ) % ( delta_lh - h_i_prior_cube) - l_i_prior_cube % k_i_prior_cube % ( delta_kh - h_i_prior_cube );
+          arma::cube d_hessian_contribution = h_covariate_cube % ( d_hessian_i_shares + d_hessian_i_prior );
+          d_hessian_cube += d_hessian_contribution;
+
+          // // penalty conrtibution
+          // arma::mat inverted_hessian_contribution( num_coefficients_to_est , num_coefficients_to_est, arma::fill::zeros );
+          // arma::mat hessian_contribution_to_invert = -hessian_contribution;
+          // arma::mat lower_hessian_contribution_to_invert = hessian_contribution_to_invert( arma::span( num_rows_coefficient_mat , num_coefficients-1 ) , arma::span( num_rows_coefficient_mat , num_coefficients-1 ) );
+          // if( pinv( inverted_hessian_contribution , lower_hessian_contribution_to_invert ) ){
+          //   for(int c = 0; c < num_coefficients_to_est; c++){
+          //     arma::mat d_hessian_contribution_slice = d_hessian_contribution.slice(num_rows_coefficient_mat+c);
+          //     arma::mat lower_d_hessian_contribution_mat = d_hessian_contribution_slice( arma::span( num_rows_coefficient_mat , num_coefficients-1 ) , arma::span( num_rows_coefficient_mat , num_coefficients-1 ) );
+          //     penalty_contribution(i,c) = trace(inverted_hessian_contribution*lower_d_hessian_contribution_mat)/2;
+          //   }
+          // }
+        }
+
+      }
 
     //update responses
     arma::cube weigthed_output_cube = i_shares_cube % output_cube;
@@ -496,42 +578,76 @@ arma::field<arma::mat> stratEst_LCR_EM(arma::cube& output_cube, arma::cube& sum_
 
     // update coefficients
     if( estimate_coefficients ){
-      score_vec(arma::span( num_rows_coefficient_mat , num_coefficients-1 )) += penalty_vec % coefficients;
-      hessian_mat( arma::span( num_rows_coefficient_mat , num_coefficients-1 ) , arma::span( num_rows_coefficient_mat , num_coefficients-1 ) ) += diagmat( penalty_vec );
-      fisher_info( arma::span( num_rows_coefficient_mat , num_coefficients-1 ) , arma::span( num_rows_coefficient_mat , num_coefficients-1 ) ) += diagmat( penalty_vec );
-      arma::vec short_score_vec = score_vec(arma::span( num_rows_coefficient_mat , num_coefficients-1 ));
-      arma::mat lower_hessian_mat = hessian_mat( arma::span( num_rows_coefficient_mat , num_coefficients-1 ) , arma::span( num_rows_coefficient_mat , num_coefficients-1 ) );
-      arma::mat lower_fisher_info = fisher_info( arma::span( num_rows_coefficient_mat , num_coefficients-1 ) , arma::span( num_rows_coefficient_mat , num_coefficients-1 ) );
-      arma::mat to_invert_mat = -lower_hessian_mat;
-      arma::mat inverted_mat( num_coefficients_to_est , num_coefficients_to_est , arma::fill::none );
+          short_score_vec = score_vec( arma::span( num_rows_coefficient_mat , num_coefficients-1 ) );
+          arma::mat lower_hessian_mat = hessian_mat( arma::span( num_rows_coefficient_mat , num_coefficients-1 ) , arma::span( num_rows_coefficient_mat , num_coefficients-1 ) );
+          arma::mat lower_fisher = fisher_info( arma::span( num_rows_coefficient_mat , num_coefficients-1 ) , arma::span( num_rows_coefficient_mat , num_coefficients-1 ) );
+          arma::mat inverted_mat( num_coefficients_to_est , num_coefficients_to_est , arma::fill::none );
+          arma::mat to_invert_mat = -lower_hessian_mat;
       if( pinv( inverted_mat , to_invert_mat ) ){
-        arma::vec updated_coefficients = coefficients + stepsize_vec % ( inverted_mat*short_score_vec );
+              if( penalty == true ){
+                new_ll_val = new_ll_val - log(det(lower_fisher))/2;     // minus because lll_val is negative log likelihood
+                for(int c = 0; c < num_coefficients_to_est; c++){
+                  arma::mat d_hessian_slice = d_hessian_cube.slice(num_rows_coefficient_mat+c);
+                  arma::mat lower_d_hessian_mat = d_hessian_slice( arma::span( num_rows_coefficient_mat , num_coefficients-1 ) , arma::span( num_rows_coefficient_mat , num_coefficients-1 ) );
+                  penalty_vec(c) = trace(inverted_mat*lower_d_hessian_mat)/2;
+                }
+                short_score_vec -= penalty_vec;                        // minus because the negative log likelihood is minimized
+                //Rcout<< "ll val: \n"  << new_ll_val << "\n";
+                //Rcout<< "score vec: \n"  << short_score_vec << "\n";
+              }
+        changes_coefficients = stepsize_vec % ( inverted_mat*short_score_vec );
+        arma::vec updated_coefficients = coefficients + changes_coefficients;
         new_coefficients( coefficients_to_est ) = updated_coefficients( coefficients_to_est );
       }
       else{
         eval = max_eval+eval_pre;
       }
-      //create prior entities mat
+      //create prior entities mat & fisher info
       coefficient_mat = reshape( new_coefficients , num_rows_coefficient_mat , k-1 );
       priors_entities_mat.col(0).fill(1);
       priors_entities_mat.cols( 1 , k-1 ) = exp( covariate_mat * coefficient_mat );
+      //penalized_score_contribution_mat = score_contribution_mat.cols(arma::span( num_rows_coefficient_mat , num_coefficients-1 )) + penalty_contribution;
       for ( int i = 0; i < num_ids; i++){
         priors_entities_mat.row(i) /= accu( priors_entities_mat.row(i) );
+        //penalized_fisher_info += penalized_score_contribution_mat.row(i).t() * penalized_score_contribution_mat.row(i);
       }
     }
     else{
       new_coefficients = coefficients;
     }
 
+
     // update shares
     new_shares = mean( priors_entities_mat.t() , 1 );
 
+
     // check overshooting and calculate eps for tolerance
-    if (eval > eval_pre+1 ) { eps_now = (1 - (new_ll_val(0) / ll_val(0))); }          // current epsilon
-    if ( eps_now < tol_eval ){ eps_now = tol_eval; }
-    if ( new_ll_val(0) == 0 ){ eps_now = 0; }
-    if ( new_ll_val.is_finite() ){  eps = eps_now; }                                  // only continue if no overshoot
-    else { eps = arma::datum::nan; }                                                  // if overshooting occured report results from last eval
+    // if (eval > eval_pre+1 ) { eps_now = (1 - (new_ll_val(0) / ll_val(0))); }          // current epsilon
+    // if ( eps_now < tol_eval ){ eps_now = tol_eval; }
+    // if ( new_ll_val(0) == 0 ){ eps_now = 0; }
+    // if ( new_ll_val.is_finite() ){  eps = eps_now; }                                  // only continue if no overshoot
+    // else { eps = arma::datum::nan; }                                                  // if overshooting occured report results from last eval
+
+
+    // check overshooting and calculate eps for tolerance
+    if( estimate_coefficients && penalty ){
+      if( eval > eval_pre+1 ){
+        arma::vec abs_changes = abs( changes_coefficients );
+        if( abs_changes.max() <= 0.001 ){
+          coefficients_changed = false;
+        }
+        if ( new_ll_val.is_finite() == false ){
+          eps = arma::datum::nan;
+        }
+      }
+    }
+    else{
+      if (eval > eval_pre+1 ) { eps_now = (1 - (new_ll_val(0) / ll_val(0))); }          // current epsilon
+      if ( eps_now < tol_eval ){ eps_now = tol_eval; }
+      if ( new_ll_val(0) == 0 ){ eps_now = 0; }
+      if ( new_ll_val.is_finite() ){  eps = eps_now; }                                  // only continue if no overshoot
+      else { eps = arma::datum::nan; }
+    }                                                                                   // if overshooting occured report results from last eval
 
   } // end while
 
@@ -566,12 +682,394 @@ arma::field<arma::mat> stratEst_LCR_EM(arma::cube& output_cube, arma::cube& sum_
   F(13,0) = new_coefficients;
   F(14,0) = coefficient_mat;
   F(15,0) = priors_entities_mat;
-  F(16,0) = score_vec;
+  F(16,0) = short_score_vec;
   F(17,0) = hessian_mat;
   F(18,0) = fisher_info;
   F(19,0) = score_contribution_mat;
   F(20,0) = state_obs;
   return(F);
+
+  // arma::field<arma::mat> F(21,1);
+  // arma::vec shares = shares_mat.col(0);
+  // int num_ids = output_cube.n_slices;
+  // int num_rows_response_mat = response_mat.n_rows;
+  // int num_cols_response_mat = response_mat.n_cols;
+  // arma::vec unique_indices_responses = unique(indices_responses( find( indices_responses != 0 ) ));
+  // int num_responses_to_est = unique_indices_responses.n_elem;
+  // arma::vec unique_indices_trembles = unique(indices_trembles( find( indices_trembles != 0 ) ) );
+  // int num_trembles_to_est = unique_indices_trembles.n_elem;
+  // int num_coefficients_to_est = coefficients.n_elem;
+  // int num_coefficients = num_coefficients_to_est + coefficient_mat.n_rows;
+  // int num_rows_coefficient_mat = coefficient_mat.n_rows;
+  // int k = shares.n_elem;
+  // int free_params = num_responses_to_est + num_trembles_to_est + shares_to_est.n_elem;
+  // double eps = arma::datum::inf;
+  // double eps_now = arma::datum::inf;
+  // arma::vec ll_val( 1 , 1 , arma::fill::zeros );
+  // arma::vec pll_val( 1 , 1 , arma::fill::zeros );
+  // arma::vec entropy_k( 1 , arma::fill::ones);
+  // arma::vec aic_val( 1 , arma::fill::ones);
+  // arma::vec bic_val( 1 , arma::fill::ones);
+  // arma::vec icl_val( 1 , arma::fill::ones);
+  // arma::vec new_ll_val( 1 , 1 , arma::fill::zeros );
+  // arma::vec new_pll_val( 1 , 1 , arma::fill::zeros );
+  // arma::vec new_entropy_k( 1 , arma::fill::ones);
+  // arma::mat i_shares_mat( num_ids , k , arma::fill::zeros );
+  // arma::cube i_shares_cube( num_rows_response_mat , num_cols_response_mat , num_ids , arma::fill::zeros );
+  // arma::mat state_obs( num_rows_response_mat , 1 , arma::fill::zeros );
+  // arma::vec new_shares = shares;
+  // arma::mat new_responses = responses;
+  // arma::vec new_trembles = trembles;
+  // arma::vec new_coefficients = coefficients;
+  // arma::vec score_vec( num_coefficients , arma::fill::zeros );
+  // arma::vec short_score_vec( num_coefficients_to_est , arma::fill::zeros );
+  // arma::mat hessian_mat( num_coefficients , num_coefficients , arma::fill::zeros );
+  // arma::mat lower_hessian_mat( num_coefficients_to_est , num_coefficients_to_est , arma::fill::zeros );
+  // arma::mat fisher_info( num_coefficients , num_coefficients , arma::fill::zeros );
+  // arma::mat penalized_fisher_info( num_coefficients_to_est , num_coefficients_to_est , arma::fill::zeros );
+  // arma::cube d_hessian_cube( num_coefficients , num_coefficients , num_coefficients , arma::fill::zeros );
+  // arma::cube delta_lk( num_coefficients , num_coefficients , num_coefficients , arma::fill::zeros );
+  // arma::cube delta_lh( num_coefficients , num_coefficients , num_coefficients , arma::fill::zeros );
+  // arma::cube delta_kh( num_coefficients , num_coefficients , num_coefficients , arma::fill::zeros );
+  // arma::mat score_contribution_mat( num_ids , num_coefficients , arma::fill::zeros );
+  // arma::mat penalized_score_contribution_mat( num_ids , num_coefficients_to_est , arma::fill::zeros );
+  // arma::mat priors_entities_mat( num_ids , k , arma::fill::zeros );
+  // arma::umat indices_responses_to_sum = find( responses_to_sum == 1 );
+  // arma::umat indices_non_fixed_responses = find( indices_responses == 0 && responses_to_sum == 0 );
+  // arma::vec stepsize_vec( num_coefficients_to_est , arma::fill::ones );
+  // arma::vec penalty_vec( num_coefficients_to_est , arma::fill::zeros );
+  // arma::mat penalty_contribution( num_ids , num_coefficients_to_est , arma::fill::zeros );
+  // stepsize_vec.fill(newton_stepsize);
+  // int eval = eval_pre;
+  // bool coefficients_changed = true;
+  //
+  // // create indices response cube & indidices trembles ctube
+  // arma::cube indices_responses_cube( num_rows_response_mat , num_cols_response_mat , num_ids , arma::fill::zeros );
+  // for (int i = 0; i < num_ids; i++) {
+  //   indices_responses_cube.slice(i) = indices_responses;
+  // }
+  // arma::cube indices_trembles_tube( num_rows_response_mat , 1 , num_ids , arma::fill::zeros );
+  // for (int i = 0; i < num_ids; i++) {
+  //   indices_trembles_tube.slice(i) = indices_trembles.col(0);
+  // }
+  //
+  // //create prior entities mat
+  // priors_entities_mat.col(0).fill(1);
+  // priors_entities_mat.cols( 1 , k-1 ) = exp( covariate_mat * coefficient_mat );
+  // for ( int i = 0; i < num_ids; i++){
+  //   priors_entities_mat.row(i) /= accu( priors_entities_mat.row(i) );
+  // }
+  //
+  // while (  eval < max_eval+eval_pre && eps != tol_eval && eps != arma::datum::nan && coefficients_changed  ) {
+  //   eval++;
+  //   Rcpp::checkUserInterrupt();
+  //
+  //   // parameters are assigned to updated parameter values
+  //   shares = new_shares;
+  //   trembles = new_trembles;
+  //   responses = new_responses;
+  //   coefficients = new_coefficients;
+  //   ll_val = new_ll_val;
+  //   pll_val = new_pll_val;
+  //   entropy_k = new_entropy_k;
+  //
+  //   // calculate emission probabilities with trembles
+  //   arma::mat pr_mat = response_mat % (1 - tremble_mat) + ( 1 - response_mat ) % ( tremble_mat / (tremble_mat.n_cols - 1) );   // probability for emission with trembles
+  //
+  //   // new parameters are zero
+  //   new_shares( shares_to_est ).fill(0);
+  //   new_responses.fill(0);
+  //   new_trembles.fill(0);
+  //   new_ll_val(0) = 0;
+  //   new_pll_val(0) = 0;
+  //   new_entropy_k(0) = 0;
+  //   short_score_vec.fill(0);
+  //   hessian_mat.fill(0);
+  //   fisher_info.fill(0);
+  //   penalized_fisher_info.fill(0);
+  //   d_hessian_cube.fill(0);
+  //   penalty_vec.fill(0);
+  //
+  //   // loop through ids
+  //   for (int i = 0; i < num_ids; i++) {
+  //
+  //     // calculate the probability for each outcome in each state of each strategy
+  //     arma::mat pr_outcomes_states_strategies_entities_mat( num_rows_response_mat , num_cols_response_mat , arma::fill::zeros );
+  //     for ( int l = 0; l < num_cols_response_mat; l++){
+  //       for (int j = 0; j < num_rows_response_mat; j++){
+  //         pr_outcomes_states_strategies_entities_mat(j,l) = pow( pr_mat(j,l) , output_cube(j,l,i) );
+  //       }
+  //     }
+  //     arma::vec pr_states_strategies_entities_mat = prod( pr_outcomes_states_strategies_entities_mat , 1 );
+  //     arma::vec pr_entity_k( k , arma::fill::zeros );
+  //     for ( int j = 0; j < k; j++){
+  //       pr_entity_k(j) = prod( pr_states_strategies_entities_mat( find( strat_id == j+1 ) ) );
+  //     }
+  //
+  //     // log likelihood contribution of subject
+  //     pr_entity_k %= priors_entities_mat.row(i).t();
+  //     new_ll_val += -log( sum( pr_entity_k , 0 ) );
+  //
+  //     // share contribution of subject as posterior probability of i to use k / N
+  //     arma::vec i_shares = pr_entity_k.each_row() / sum( pr_entity_k , 0 );
+  //     new_shares( shares_to_est ) += ( i_shares( shares_to_est )  / num_ids );
+  //
+  //     i_shares_mat.row(i) = i_shares.t();
+  //     arma::mat lines_entity_k = repmat( i_shares , 1 , num_cols_response_mat );
+  //     arma::mat entity_slice( num_rows_response_mat , num_cols_response_mat );
+  //     for ( int l = 0; l < num_rows_response_mat; l++){
+  //       entity_slice.row(l) = lines_entity_k.row( strat_id( l ) - 1 );
+  //     }
+  //     i_shares_cube.slice(i) = entity_slice;
+  //
+  //     // entropy k contribution
+  //     arma::rowvec i_entropy_k = i_shares.t() % log( i_shares.t() );
+  //     i_entropy_k.replace(arma::datum::nan, 0);
+  //     new_entropy_k -= sum( i_entropy_k , 1 );
+  //
+  //     // score and hessian contributions
+  //     arma::cube h_covariate_cube( num_coefficients , num_coefficients , num_coefficients , arma::fill::zeros  );
+  //     arma::vec score_contribution( num_coefficients , arma::fill::zeros );
+  //     arma::vec individual_prior = priors_entities_mat.row(i).t();
+  //     arma::vec s_covariate_vec = repmat( covariate_mat.row(i).t() , k , 1 );
+  //     arma::mat h_covariate_mat = repmat( covariate_mat.row(i).t() * covariate_mat.row(i) , k , k );
+  //     arma::mat h_i_shares( num_coefficients , num_coefficients , arma::fill::zeros );
+  //     arma::vec h_i_shares_vec( num_coefficients , arma::fill::zeros );
+  //     arma::mat h_i_prior( num_coefficients , num_coefficients , arma::fill::zeros );
+  //     arma::vec h_i_prior_vec( num_coefficients , arma::fill::zeros );
+  //     arma::vec h_ones_zeros_vec( num_coefficients , arma::fill::zeros );
+  //     arma::mat h_ones_zeros( num_coefficients , num_coefficients , arma::fill::zeros );
+  //     h_covariate_cube.each_slice() = h_covariate_mat;
+  //     arma::cube third_dim_cube( num_coefficients , num_coefficients , num_coefficients , arma::fill::zeros  );
+  //     arma::mat third_dim_mat( num_coefficients , num_coefficients , arma::fill::zeros  );
+  //     for (int s = 0; s < num_coefficients; s++){
+  //       third_dim_mat.fill(s_covariate_vec(s));
+  //       third_dim_cube.slice(s) = third_dim_mat;
+  //     }
+  //     h_covariate_cube %= third_dim_cube;
+  //     for (int m = 0; m < k; m++){
+  //       for (int j = 0; j < k; j++){
+  //         for ( int l = 0; l < num_rows_coefficient_mat ; l++){
+  //           if( m == 0 ){
+  //             h_i_shares_vec( l + j*num_rows_coefficient_mat ) = i_shares(j);
+  //             h_i_prior_vec( l + j*num_rows_coefficient_mat ) = individual_prior(j);
+  //           }
+  //           if( j == m ){
+  //             h_ones_zeros_vec( l + j*num_rows_coefficient_mat ) = 1;
+  //           }
+  //           else{
+  //             h_ones_zeros_vec( l + j*num_rows_coefficient_mat ) = 0;
+  //           }
+  //         }
+  //         if( m == 0 ){
+  //           score_contribution = s_covariate_vec % ( h_i_shares_vec - h_i_prior_vec );
+  //         }
+  //       }
+  //       h_i_shares( arma::span::all , arma::span(m*num_rows_coefficient_mat , (num_rows_coefficient_mat-1) + m*num_rows_coefficient_mat ) ) = repmat( h_i_shares_vec , 1 , num_rows_coefficient_mat );
+  //       h_i_prior( arma::span::all , arma::span(m*num_rows_coefficient_mat , (num_rows_coefficient_mat-1) + m*num_rows_coefficient_mat ) ) = repmat( h_i_prior_vec , 1 , num_rows_coefficient_mat );
+  //       h_ones_zeros( arma::span::all , arma::span(m*num_rows_coefficient_mat , (num_rows_coefficient_mat-1) + m*num_rows_coefficient_mat ) ) = repmat( h_ones_zeros_vec , 1 , num_rows_coefficient_mat );
+  //     }
+  //     // objects for derivative of hessian
+  //     arma::cube l_i_shares_cube( num_coefficients , num_coefficients , num_coefficients , arma::fill::zeros  );
+  //     arma::cube k_i_shares_cube( num_coefficients , num_coefficients , num_coefficients , arma::fill::zeros  );
+  //     arma::cube h_i_shares_cube( num_coefficients , num_coefficients , num_coefficients , arma::fill::zeros  );
+  //     arma::cube l_i_prior_cube( num_coefficients , num_coefficients , num_coefficients , arma::fill::zeros  );
+  //     arma::cube k_i_prior_cube( num_coefficients , num_coefficients , num_coefficients , arma::fill::zeros  );
+  //     arma::cube h_i_prior_cube( num_coefficients , num_coefficients , num_coefficients , arma::fill::zeros  );
+  //
+  //     arma::mat l_i_shares_mat( num_coefficients , num_coefficients , arma::fill::zeros  );
+  //     arma::mat k_i_shares_mat( num_coefficients , num_coefficients , arma::fill::zeros  );
+  //     arma::mat h_i_shares_mat( num_coefficients , num_coefficients , arma::fill::zeros  );
+  //     arma::mat l_i_prior_mat( num_coefficients , num_coefficients , arma::fill::zeros  );
+  //     arma::mat k_i_prior_mat( num_coefficients , num_coefficients , arma::fill::zeros  );
+  //     arma::mat h_i_prior_mat( num_coefficients , num_coefficients , arma::fill::zeros  );
+  //
+  //     arma::rowvec h_i_shares_row = h_i_shares.row(0);
+  //     arma::rowvec h_i_prior_row = h_i_prior.row(0);
+  //
+  //     l_i_shares_mat.each_col() = h_i_shares_row.t();
+  //     k_i_shares_mat.each_row() = h_i_shares_row;
+  //     l_i_prior_mat.each_col() = h_i_prior_row.t();
+  //     k_i_prior_mat.each_row() = h_i_prior_row;
+  //     l_i_shares_cube.each_slice() = l_i_shares_mat;
+  //     k_i_shares_cube.each_slice() = k_i_shares_mat;
+  //     l_i_prior_cube.each_slice() = l_i_prior_mat;
+  //     k_i_prior_cube.each_slice() = k_i_prior_mat;
+  //
+  //     delta_lk.each_slice() = h_ones_zeros;
+  //     for (int l = 0; l < num_coefficients; l++){
+  //       for (int k = 0; k < num_coefficients; k++){
+  //         for (int h = 0; h < num_coefficients; h++){
+  //           double elem = delta_lk( l , k , h );
+  //           delta_lh( l , h , k ) = elem;
+  //           delta_kh( h , l ,  k ) = elem;
+  //         }
+  //       }
+  //     }
+  //
+  //     for (int s = 0; s < num_coefficients; s++){
+  //       h_i_shares_mat.fill(h_i_shares_row(s));
+  //       h_i_shares_cube.slice(s) = h_i_shares_mat;
+  //       h_i_prior_mat.fill(h_i_prior_row(s));
+  //       h_i_prior_cube.slice(s) = h_i_prior_mat;
+  //     }
+  //
+  //     // individual's hessian, score and fisher cotributions
+  //     arma::mat hessian_contribution = h_covariate_mat % ( h_i_shares % ( h_ones_zeros - h_i_shares.t() )  - h_i_prior % ( h_ones_zeros - h_i_prior.t() ) );
+  //     hessian_mat += hessian_contribution;
+  //     score_vec += score_contribution;
+  //     score_contribution_mat.row(i) = score_contribution.t();
+  //     fisher_info += score_contribution * score_contribution.t();
+  //
+  //     // individual's derivative of hessian contribution
+  //     if( penalty ){
+  //       arma::cube d_hessian_i_shares = l_i_shares_cube % ( delta_lk - k_i_shares_cube ) % ( delta_lh - h_i_shares_cube) - l_i_shares_cube % k_i_shares_cube % ( delta_kh - h_i_shares_cube );
+  //       arma::cube d_hessian_i_prior = l_i_prior_cube % ( delta_lk - k_i_prior_cube ) % ( delta_lh - h_i_prior_cube) - l_i_prior_cube % k_i_prior_cube % ( delta_kh - h_i_prior_cube );
+  //       arma::cube d_hessian_contribution = h_covariate_cube % ( d_hessian_i_shares + d_hessian_i_prior );
+  //       d_hessian_cube += d_hessian_contribution;
+  //
+  //       // // penalty conrtibution
+  //       // arma::mat inverted_hessian_contribution( num_coefficients_to_est , num_coefficients_to_est, arma::fill::zeros );
+  //       // arma::mat hessian_contribution_to_invert = -hessian_contribution;
+  //       // arma::mat lower_hessian_contribution_to_invert = hessian_contribution_to_invert( arma::span( num_rows_coefficient_mat , num_coefficients-1 ) , arma::span( num_rows_coefficient_mat , num_coefficients-1 ) );
+  //       // if( pinv( inverted_hessian_contribution , lower_hessian_contribution_to_invert ) ){
+  //       //   for(int c = 0; c < num_coefficients_to_est; c++){
+  //       //     arma::mat d_hessian_contribution_slice = d_hessian_contribution.slice(num_rows_coefficient_mat+c);
+  //       //     arma::mat lower_d_hessian_contribution_mat = d_hessian_contribution_slice( arma::span( num_rows_coefficient_mat , num_coefficients-1 ) , arma::span( num_rows_coefficient_mat , num_coefficients-1 ) );
+  //       //     penalty_contribution(i,c) = trace(inverted_hessian_contribution*lower_d_hessian_contribution_mat)/2;
+  //       //   }
+  //       // }
+  //     }
+  //
+  //   }
+  //
+  //   //update responses
+  //   arma::cube weigthed_output_cube = i_shares_cube % output_cube;
+  //   arma::cube weigthed_sums_cube = i_shares_cube % sum_outputs_cube;
+  //   for ( int j = 0; j < num_responses_to_est; j++){
+  //     new_responses(j) = accu( weigthed_output_cube( find( indices_responses_cube == j+1 ) ) ) / accu( weigthed_sums_cube( find( indices_responses_cube == j+1 ) ) );
+  //   }
+  //   new_responses.replace(arma::datum::nan, -1 );                             // clean responses (-1 indicates no obs)
+  //
+  //   // calculate state observations
+  //   state_obs = sum( weigthed_sums_cube.tube( 0 , 0 , num_rows_response_mat-1 , 0 ) , 2);
+  //
+  //   // fill response mat with normalized new values
+  //   for (int i = 0; i < num_responses_to_est ; i++) {
+  //     arma::umat responses_to_fill = find( indices_responses == i+1 );
+  //     if ( new_responses(i) == -1 ){
+  //       response_mat( responses_to_fill ).fill(-1);
+  //     }
+  //     else{
+  //       arma::mat response_value_mat = response_mat;
+  //       response_value_mat.fill( new_responses(i) );
+  //       response_mat( responses_to_fill ) = response_value_mat( responses_to_fill );
+  //     }
+  //   }
+  //   response_mat( indices_responses_to_sum ).fill(0);
+  //   arma::vec value_to_sum_vec = 1 - sum( response_mat , 1 );
+  //   arma::mat value_to_sum_mat = repmat( value_to_sum_vec , 1 , num_cols_response_mat );
+  //   response_mat( indices_responses_to_sum ) = value_to_sum_mat( indices_responses_to_sum );
+  //
+  //   // transform into discrete responses
+  //   if ( response == "pure" && num_responses_to_est > 0 ){
+  //     arma::umat indices_rows_with_estimated = find( sum( indices_responses , 1 )  > 0 );
+  //     arma::mat target_mat = response_mat.rows( indices_rows_with_estimated );
+  //     arma::mat response_mat_with_estimated = response_mat.rows( indices_rows_with_estimated );
+  //     int num_response_mat_with_estimated = response_mat_with_estimated.n_rows;
+  //     for (int i = 0; i < num_response_mat_with_estimated; i++) {
+  //       arma::rowvec target_row = response_mat_with_estimated.row( i );
+  //       arma::uword index_of_max = index_max( target_row );
+  //       target_row.fill(0);
+  //       target_row( index_of_max ) = 1;
+  //       target_mat.row(i) = target_row;
+  //     }
+  //     response_mat.rows( indices_rows_with_estimated ) = target_mat;
+  //     for (int i = 0; i < num_responses_to_est; i++) {
+  //       arma::mat new_discrete_response_value = unique( response_mat( find( indices_responses == i+1 ) ) );
+  //       new_responses(i) = new_discrete_response_value(0,0);
+  //     }
+  //   }
+  //
+  //   //update trembles
+  //   arma::cube response_cube( num_rows_response_mat , num_cols_response_mat , num_ids , arma::fill::zeros );
+  //   response_cube.each_slice() = response_mat;
+  //   arma::mat tremble_correction_factor_mat( num_rows_response_mat , num_cols_response_mat , arma::fill::ones );
+  //   arma::cube tremble_correction_factor_cube( num_rows_response_mat , num_cols_response_mat , num_ids, arma::fill::ones );
+  //   tremble_correction_factor_mat( find( response_mat == 0 ) ).fill( num_cols_response_mat-1 );
+  //   tremble_correction_factor_mat( find( response_mat == 1 ) ).fill( -1 );
+  //   tremble_correction_factor_cube.each_slice() = tremble_correction_factor_mat;
+  //   arma::cube weigthed_output_sum_diffs_cube = tremble_correction_factor_cube % i_shares_cube % ( output_cube - ( sum_outputs_cube % response_cube )  );
+  //   arma::cube weigthed_output_sum_diffs_tube = sum( weigthed_output_sum_diffs_cube , 1 );
+  //   arma::cube weigthed_sums_tube = sum( weigthed_sums_cube , 1 );
+  //   for ( int j = 0; j < num_trembles_to_est; j++){
+  //     new_trembles(j) = accu( weigthed_output_sum_diffs_tube( find( indices_trembles_tube == j+1 ) ) ) / accu( weigthed_sums_tube( find( indices_trembles_tube == j+1 ) ) );
+  //   }
+  //   new_trembles.replace(arma::datum::nan, -1 );
+  //
+  //   // fill tremble mat with new values
+  //   for (int i = 0; i < num_trembles_to_est ; i++) {
+  //     arma::mat tremble_value_mat  = tremble_mat;
+  //     arma::umat trembles_to_fill = find( indices_trembles == i+1 );
+  //     tremble_value_mat.fill( new_trembles(i) );
+  //     tremble_mat( trembles_to_fill ) = tremble_value_mat( trembles_to_fill );
+  //   }
+  //
+  //   // update coefficients
+  //   if( estimate_coefficients ){
+  //     short_score_vec = score_vec( arma::span( num_rows_coefficient_mat , num_coefficients-1 ) );
+  //     arma::mat lower_hessian_mat = hessian_mat( arma::span( num_rows_coefficient_mat , num_coefficients-1 ) , arma::span( num_rows_coefficient_mat , num_coefficients-1 ) );
+  //     arma::mat lower_fisher = fisher_info( arma::span( num_rows_coefficient_mat , num_coefficients-1 ) , arma::span( num_rows_coefficient_mat , num_coefficients-1 ) );
+  //     arma::mat inverted_mat( num_coefficients_to_est , num_coefficients_to_est , arma::fill::none );
+  //     arma::mat to_invert_mat = -lower_hessian_mat;
+  //     if( pinv( inverted_mat , to_invert_mat ) ){
+  //       if( penalty == true ){
+  //         new_ll_val = new_ll_val - log(det(lower_fisher))/2;
+  //         for(int c = 0; c < num_coefficients_to_est; c++){
+  //           arma::mat d_hessian_slice = d_hessian_cube.slice(num_rows_coefficient_mat+c);
+  //           arma::mat lower_d_hessian_mat = d_hessian_slice( arma::span( num_rows_coefficient_mat , num_coefficients-1 ) , arma::span( num_rows_coefficient_mat , num_coefficients-1 ) );
+  //           penalty_vec(c) = trace(inverted_mat*lower_d_hessian_mat)/2;
+  //         }
+  //         Rcout << "\n ll val: " << new_ll_val << "\n";
+  //         short_score_vec += penalty_vec;
+  //         Rcout << "\n penalty: " << - log(det(lower_fisher))/2 << "\n";
+  //
+  //       }
+  //       arma::vec updated_coefficients = coefficients + stepsize_vec % ( inverted_mat*( short_score_vec ) );
+  //       new_coefficients( coefficients_to_est ) = updated_coefficients( coefficients_to_est );
+  //       Rcout << "\n coefs: \n" << new_coefficients( coefficients_to_est ) << "\n";
+  //     }
+  //     else{
+  //       eval = max_eval+eval_pre;
+  //     }
+  //     //create prior entities mat & fisher info
+  //     coefficient_mat = reshape( new_coefficients , num_rows_coefficient_mat , k-1 );
+  //     priors_entities_mat.col(0).fill(1);
+  //     priors_entities_mat.cols( 1 , k-1 ) = exp( covariate_mat * coefficient_mat );
+  //     penalized_score_contribution_mat = score_contribution_mat.cols(arma::span( num_rows_coefficient_mat , num_coefficients-1 )) + penalty_contribution;
+  //     for ( int i = 0; i < num_ids; i++){
+  //       priors_entities_mat.row(i) /= accu( priors_entities_mat.row(i) );
+  //       penalized_fisher_info += penalized_score_contribution_mat.row(i).t() * penalized_score_contribution_mat.row(i);
+  //     }
+  //   }
+  //   else{
+  //     new_coefficients = coefficients;
+  //   }
+  //
+  //   // update shares
+  //   new_shares = mean( priors_entities_mat.t() , 1 );
+  //
+  //   // check overshooting and calculate eps for tolerance
+  //   if (eval > eval_pre+1 ) { eps_now = (1 - (new_ll_val(0) / ll_val(0))); }          // current epsilon
+  //   if ( eps_now < tol_eval ){ eps_now = tol_eval; }
+  //   if ( new_ll_val(0) == 0 ){ eps_now = 0; }
+  //   if ( new_ll_val.is_finite() ){  eps = eps_now; }                                  // only continue if no overshoot
+  //   else { eps = arma::datum::nan; }
+  //   if( eval > eval_pre+1 && estimate_coefficients ){
+  //     coefficients_changed = ( sum( abs( new_coefficients - coefficients ) ) > tol_eval );
+  //   }
+  //
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -698,8 +1196,8 @@ arma::field<arma::mat> stratEst_SE(arma::cube& output_cube, arma::cube& sum_outp
 
   if( LCR ){
     // SEs of coefficients
-    arma::mat inverse_fisher_info_coefficients = fisher_info_coefficients;
-    arma::mat covar_mat_coefficients( num_coefficients , num_coefficients, arma::fill::zeros );
+    arma::mat lower_hessian_mat = hessian_mat( arma::span( num_rows_coefficient_mat , num_coefficients-1 ) , arma::span( num_rows_coefficient_mat , num_coefficients-1 ) );
+    arma::mat inverse_neg_lower_hessian_mat = -lower_hessian_mat;
     if( CL ){
       arma::vec unique_clusters = unique( cluster_id_vec );
       int num_clusters = unique_clusters.n_elem;
@@ -709,22 +1207,28 @@ arma::field<arma::mat> stratEst_SE(arma::cube& output_cube, arma::cube& sum_outp
         score_contributions_clusters.slice(c) = score_contribution_cluster.t() * score_contribution_cluster;
       }
       arma::mat meat_mat = sum( score_contributions_clusters , 2 );
-      arma::mat inverse_neg_hessian_mat = hessian_mat;
-      if( pinv( inverse_neg_hessian_mat , -hessian_mat ) ){
-        covar_mat_coefficients = inverse_neg_hessian_mat * meat_mat * inverse_neg_hessian_mat;
-        arma::mat covar_lower_mat_coefficients = covar_mat_coefficients( arma::span( num_rows_coefficient_mat , num_coefficients-1 ) , arma::span( num_rows_coefficient_mat , num_coefficients-1 ) );
-        SE_coefficients = sqrt( covar_lower_mat_coefficients.diag() );
+      arma::mat lower_meat_mat = meat_mat( arma::span( num_rows_coefficient_mat , num_coefficients-1 ) , arma::span( num_rows_coefficient_mat , num_coefficients-1 ) );
+      if( pinv( inverse_neg_lower_hessian_mat , -lower_hessian_mat ) ){
+        coefficients_covar = inverse_neg_lower_hessian_mat * lower_meat_mat * inverse_neg_lower_hessian_mat;
+        SE_coefficients = sqrt( coefficients_covar.diag() );
       }
     }
     else{
-      if( pinv( inverse_fisher_info_coefficients , fisher_info_coefficients ) ){
-        covar_mat_coefficients = inverse_fisher_info_coefficients;
-        arma::mat covar_lower_mat_coefficients = covar_mat_coefficients( arma::span( num_rows_coefficient_mat , num_coefficients-1 ) , arma::span( num_rows_coefficient_mat , num_coefficients-1 ) );
+      arma::mat inverse_neg_lower_hessian_mat = lower_hessian_mat;
+      if( pinv( inverse_neg_lower_hessian_mat , -lower_hessian_mat ) ){
+        arma::mat covar_lower_mat_coefficients = inverse_neg_lower_hessian_mat;
+        coefficients_covar = covar_lower_mat_coefficients;
         SE_coefficients = sqrt( covar_lower_mat_coefficients.diag() );
       }
     }
 
     // SE of shares from covar mat coefficients via delta method
+    arma::mat covar_mat_coefficients( num_coefficients , num_coefficients, arma::fill::zeros );
+    arma::mat covar_lower_mat_coefficients = covar_mat_coefficients( arma::span( num_rows_coefficient_mat , num_coefficients-1 ) , arma::span( num_rows_coefficient_mat , num_coefficients-1 ) );
+    arma::mat inverse_neg_hessian_mat = -hessian_mat;
+    if( pinv( inverse_neg_hessian_mat , -hessian_mat ) ){
+      covar_mat_coefficients = inverse_neg_hessian_mat;
+    }
     int length_covariates = coefficient_mat.n_rows;
     arma::mat jacobian_mat_priors( k , num_coefficients , arma::fill::zeros );
     arma::mat zero_mat( k , num_coefficients , arma::fill::zeros );
@@ -812,11 +1316,7 @@ arma::field<arma::mat> stratEst_SE(arma::cube& output_cube, arma::cube& sum_outp
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // [[Rcpp::export]]
-List stratEst_cpp(arma::mat data, arma::mat strategies, arma::mat shares, arma::mat covariates, bool LCR, arma::vec cluster, std::string response = "mixed", std::string r_responses = "no", std::string r_trembles = "global", std::string select = "no", int min_strategies = 1 , std::string crit = "bic", std::string SE = "yes", int outer_runs = 10, double outer_tol_eval = 0, int outer_max_eval = 1000, int inner_runs = 100, double inner_tol_eval = 0, int inner_max_eval = 100, int LCR_runs = 100, int LCR_tol_eval = 0, int LCR_max_eval = 1000, int BS_samples = 1000, bool print_messages = true, bool integer_strategies = true ) {
-
-  // future development
-  int newton_stepsize = 1;
-  double penalty = 0;
+List stratEst_cpp(arma::mat data, arma::mat strategies, arma::mat shares, arma::mat covariates, bool LCR, arma::vec cluster, std::string response = "mixed", std::string r_responses = "no", std::string r_trembles = "global", std::string select = "no", int min_strategies = 1 , std::string crit = "bic", std::string SE = "yes", int outer_runs = 10, double outer_tol_eval = 0, int outer_max_eval = 1000, int inner_runs = 100, double inner_tol_eval = 0, int inner_max_eval = 100, int LCR_runs = 100, int LCR_tol_eval = 0, int LCR_max_eval = 1000, int BS_samples = 1000, bool print_messages = true, bool integer_strategies = true, double newton_stepsize = 1 , bool penalty = false ) {
 
   arma::field<arma::mat> R(21,1);
   int rows_data = data.n_rows;
@@ -1833,54 +2333,71 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::mat shares, arma::
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
   if( LCR ){
-    if( print_messages == true ){
-      Rcout<<"estimate latent-class regression model\n";
+    if( k == 1 ){
+      Rcout<<"warning: only one strategy remains after selection. Cannot proceed with latent class regeression.\n";
+      LCR = false;
     }
-    //initialize empty coefficients
-    int num_coefficients_to_est = ( covariate_mat.n_cols * (k-1) );
-    arma::mat R_shares = R(0,0);
-    arma::uvec shares_to_est_lcr = find_nonfinite( shares.col(0) );
-    arma::mat pre_eval_vec = R(9,0);
-    arma::field<arma::mat> R_LCR_inner(21,1);
-    arma::vec LL_inner_min( 1 , 1 , arma::fill::zeros );
-    LL_inner_min.fill( arma::datum::inf );
-    // inner runs (index ri)
-    for (int ri = 0; ri < LCR_runs; ri++) {
+    else{
+      bool replaced = false;
       if( print_messages == true ){
-        Rcout<< "lcr run " << ri+1  << " (of " << LCR_runs << ")     \r";
+        Rcout<<"estimate latent-class regression model\n";
       }
-      arma::vec start_coefficients( num_coefficients_to_est , arma::fill::zeros );
-      arma::mat coefficient_mat( covariate_mat.n_cols , k-1 , arma::fill::zeros );
       //initialize empty coefficients
+      arma::mat shares_no_lcr = R(0,0);
       int num_coefficients_to_est = ( covariate_mat.n_cols * (k-1) );
       arma::mat R_shares = R(0,0);
-      arma::vec start_intercepts = log( R_shares( arma::span( 1 , ( k-1 ) ) , 0 ) / R_shares(0,0) );
-      if( ri > 0 ){
-        arma::mat random_coefficient_mat( covariate_mat.n_cols , k-1 , arma::fill::randn );
-        coefficient_mat = random_coefficient_mat;
-      }
-      coefficient_mat.row(0) = start_intercepts.t();
-      arma::mat start_coefficients_mat  = reshape( coefficient_mat , num_coefficients_to_est , 1 );
-      start_coefficients = start_coefficients_mat.col(0);
+      arma::uvec shares_to_est_lcr = find_nonfinite( shares.col(0) );
       arma::mat pre_eval_vec = R(9,0);
-      arma::uvec coefficients_to_est = find_finite( start_coefficients );
-      arma::field<arma::mat> R_temp = stratEst_LCR_EM( output_cube, sum_outputs_cube, strat_id, covariate_mat, R(0,0), R(1,0), R(2,0), start_coefficients, R(3,0), R(4,0), coefficient_mat, shares_to_est_lcr, indices_responses, indices_trembles, true, coefficients_to_est, responses_to_sum, response, pre_eval_vec(0,0), LCR_tol_eval, LCR_max_eval, newton_stepsize, penalty );
-      arma::mat LL_inner_temp = R_temp(LL_index,0);
-      arma::mat R_temp_shares = R_temp(0,0);
-      arma::mat R_temp_coefficients = R_temp(13,0);
-      arma::mat R_temp_responses = R_temp(1,0);
-      arma::mat R_temp_trembles = R_temp(2,0);
-      if( LL_inner_temp.has_nan() || R_temp_shares.has_nan() || R_temp_coefficients.has_nan() || R_temp_responses.has_nan() || R_temp_trembles.has_nan() ){
-        failed_inner_LCR_runs(0,0) += 1;
-        LL_inner_temp.fill( arma::datum::inf );
+      arma::field<arma::mat> R_LCR_inner(21,1);
+      arma::vec LL_inner_min( 1 , 1 , arma::fill::zeros );
+      LL_inner_min.fill( arma::datum::inf );
+      // inner runs (index ri)
+      for (int ri = 0; ri < LCR_runs; ri++) {
+        Rcpp::checkUserInterrupt();
+        if( print_messages == true ){
+          Rcout<< "lcr run " << ri+1  << " (of " << LCR_runs << ")     \r";
+        }
+        arma::vec start_coefficients( num_coefficients_to_est , arma::fill::zeros );
+        arma::mat coefficient_mat( covariate_mat.n_cols , k-1 , arma::fill::zeros );
+        //initialize empty coefficients
+        int num_coefficients_to_est = ( covariate_mat.n_cols * (k-1) );
+        arma::mat R_shares = R(0,0);
+        arma::vec start_intercepts( 1 , ( k-1 )  , arma::fill::zeros );
+        if( ri > 0 ){
+          start_intercepts = log( R_shares( arma::span( 1 , ( k-1 ) ) , 0 ) / R_shares(0,0) );
+          arma::mat random_coefficient_mat( covariate_mat.n_cols , k-1 , arma::fill::randn );
+          coefficient_mat = random_coefficient_mat;
+        }
+        coefficient_mat.row(0) = start_intercepts.t();
+        arma::mat start_coefficients_mat  = reshape( coefficient_mat , num_coefficients_to_est , 1 );
+        start_coefficients = start_coefficients_mat.col(0);
+        arma::mat pre_eval_vec = R(9,0);
+        arma::uvec coefficients_to_est = find_finite( start_coefficients );
+        arma::field<arma::mat> R_temp = stratEst_LCR_EM( output_cube, sum_outputs_cube, strat_id, covariate_mat, R(0,0), R(1,0), R(2,0), start_coefficients, R(3,0), R(4,0), coefficient_mat, shares_to_est_lcr, indices_responses, indices_trembles, true, coefficients_to_est, responses_to_sum, response, pre_eval_vec(0,0), LCR_tol_eval, LCR_max_eval, newton_stepsize, penalty );
+        arma::mat LL_inner_temp = R_temp(LL_index,0);
+        arma::mat R_temp_shares = R_temp(0,0);
+        arma::mat R_temp_coefficients = R_temp(13,0);
+        arma::mat R_temp_responses = R_temp(1,0);
+        arma::mat R_temp_trembles = R_temp(2,0);
+        if( LL_inner_temp.has_nan() || R_temp_shares.has_nan() || R_temp_coefficients.has_nan() || R_temp_responses.has_nan() || R_temp_trembles.has_nan() ){
+          failed_inner_LCR_runs(0,0) += 1;
+          LL_inner_temp.fill( arma::datum::inf );
+        }
+        if (  LL_inner_temp(0,0) > 0 && LL_inner_temp(0,0) < LL_inner_min(0,0) ){
+          R = R_temp;
+          LL_inner_min(0,0) = LL_inner_temp(0,0);
+          replaced = true;
+        }
       }
-      if (  LL_inner_temp(0,0) > 0 && LL_inner_temp(0,0) < LL_inner_min(0,0) ){
-        R = R_temp;
-        LL_inner_min(0,0) = LL_inner_temp(0,0);
+      if( replaced == false ){
+        stop("Latent class regression failed. Likelihood values are infinite.");
       }
-    }
-    if( print_messages == true ){
-      Rcout<< "\nDONE\n";
+      if( print_messages == true ){
+        Rcout<< "\nDONE\n";
+      }
+      if( arma::max( vectorise(shares_no_lcr) - vectorise(R(0,0)) ) > 0.05 ){
+        Rcout<<"warning: shares of latent class model deviate substantially from the model without covariates.\n";
+      }
     }
   }
 
