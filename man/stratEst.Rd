@@ -59,9 +59,9 @@ stratEst(data, strategies, shares, sample.id, cluster.id, covariates,
 
 \item{bs.samples}{Positive integer which sets the number of bootstrap samples drawn with replacement.}
 
-\item{stepsize}{Positive number which sets the stepsize of the Fisher scoring algorithm. Default is 1.}
+\item{stepsize}{Positive number which sets the stepsize of the Fisher scoring algorithm used to update the coefficients of the latent class regression model. Default is one. Values smaller than one slow down the convergence of the algorithm.}
 
-\item{penalty}{A logical value indicating if the Firth penalty is used when estimating a latent class regression model. Default is FALSE.}
+\item{penalty}{A logical value indicating if the Firth penalty is used to estimate the coefficients of the latent class regression model. Default is FALSE. Independent of the logical value specified, the penalty is always used in the bootstrap of the standard errors of latent class regression coefficients.}
 
 \item{print.messages}{Logical, if \code{TRUE} messages are printed which illustrate the status of the estimation process.}
 }
