@@ -446,8 +446,8 @@ arma::field<arma::mat> stratEst_LCR_EM(arma::cube& output_cube, arma::cube& sum_
         arma::mat k_i_prior_mat( num_coefficients , num_coefficients , arma::fill::zeros  );
         arma::mat h_i_prior_mat( num_coefficients , num_coefficients , arma::fill::zeros  );
 
-        arma::rowvec h_i_shares_row = h_i_shares.row(0);
-        arma::rowvec h_i_prior_row = h_i_prior.row(0);
+        arma::rowvec h_i_shares_row = h_i_shares.col(0).t();
+        arma::rowvec h_i_prior_row = h_i_prior.col(0).t();
 
         l_i_shares_mat.each_col() = h_i_shares_row.t();
         k_i_shares_mat.each_row() = h_i_shares_row;
@@ -583,7 +583,7 @@ arma::field<arma::mat> stratEst_LCR_EM(arma::cube& output_cube, arma::cube& sum_
                   arma::mat lower_d_hessian_mat = d_hessian_slice( arma::span( num_rows_coefficient_mat , num_coefficients-1 ) , arma::span( num_rows_coefficient_mat , num_coefficients-1 ) );
                   penalty_vec(c) = trace(inverted_mat*lower_d_hessian_mat)/2;
                 }
-                short_score_vec -= penalty_vec;                               // minus because the negative log likelihood is minimized
+                short_score_vec += penalty_vec;                               // minus because the negative log likelihood is minimized
               }
         changes_coefficients = stepsize_vec % ( inverted_mat*short_score_vec );
         arma::vec updated_coefficients = coefficients + changes_coefficients;
