@@ -588,8 +588,8 @@ arma::field<arma::mat> stratEst_LCR_EM(arma::cube& output_cube, arma::cube& sum_
         changes_coefficients = stepsize_vec % ( inverted_mat*short_score_vec );
         arma::vec updated_coefficients = coefficients + changes_coefficients;
         new_coefficients( coefficients_to_est ) = updated_coefficients( coefficients_to_est );
-        //Rcout<< "ll val: \n"  << new_ll_val << "\n";
-        //Rcout<< "score vec: \n"  << short_score_vec << "\n";
+        Rcout<< "ll val: \n"  << new_ll_val << "\n";
+        Rcout<< "score vec: \n"  << short_score_vec << "\n";
       }
       else{
         eval = max_eval+eval_pre;
@@ -1962,7 +1962,7 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::mat shares, arma::
         //initialize empty coefficients
         int num_coefficients_to_est = ( covariate_mat.n_cols * (k-1) );
         arma::mat R_shares = R(0,0);
-        arma::vec start_intercepts( 1 , ( k-1 )  , arma::fill::zeros );
+        arma::vec start_intercepts( k-1  , arma::fill::zeros );
         if( ri > 0 ){
           start_intercepts = log( R_shares( arma::span( 1 , ( k-1 ) ) , 0 ) / R_shares(0,0) );
           arma::mat random_coefficient_mat( covariate_mat.n_cols , k-1 , arma::fill::randn );
