@@ -588,8 +588,8 @@ arma::field<arma::mat> stratEst_LCR_EM(arma::cube& output_cube, arma::cube& sum_
         changes_coefficients = stepsize_vec % ( inverted_mat*short_score_vec );
         arma::vec updated_coefficients = coefficients + changes_coefficients;
         new_coefficients( coefficients_to_est ) = updated_coefficients( coefficients_to_est );
-        Rcout<< "ll val: \n"  << new_ll_val << "\n";
-        Rcout<< "score vec: \n"  << short_score_vec << "\n";
+        //Rcout<< "ll val: \n"  << new_ll_val << "\n";
+        //Rcout<< "score vec: \n"  << short_score_vec << "\n";
       }
       else{
         eval = max_eval+eval_pre;
@@ -940,7 +940,7 @@ arma::field<arma::mat> stratEst_SE(arma::cube& output_cube, arma::cube& sum_outp
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // [[Rcpp::export]]
-List stratEst_cpp(arma::mat data, arma::mat strategies, arma::mat shares, arma::mat covariates, bool LCR, arma::vec cluster, std::string response = "mixed", std::string r_responses = "no", std::string r_trembles = "global", std::string select = "no", int min_strategies = 1 , std::string crit = "bic", std::string SE = "yes", int outer_runs = 10, double outer_tol_eval = 0, int outer_max_eval = 1000, int inner_runs = 100, double inner_tol_eval = 0, int inner_max_eval = 100, int LCR_runs = 100, double LCR_tol_eval = 0, int LCR_max_eval = 1000, int BS_samples = 1000, bool print_messages = true, bool integer_strategies = true, double newton_stepsize = 1 , bool penalty = false ) {
+List stratEst_cpp(arma::mat data, arma::mat strategies, arma::mat shares , arma::mat coefficients, arma::mat covariates, bool LCR, arma::vec cluster, std::string response = "mixed", std::string r_responses = "no", std::string r_trembles = "global", std::string select = "no", int min_strategies = 1 , std::string crit = "bic", std::string SE = "yes", int outer_runs = 10, double outer_tol_eval = 0, int outer_max_eval = 1000, int inner_runs = 100, double inner_tol_eval = 0, int inner_max_eval = 100, int LCR_runs = 100, double LCR_tol_eval = 0, int LCR_max_eval = 1000, int BS_samples = 1000, bool print_messages = true, bool integer_strategies = true, double newton_stepsize = 1 , bool penalty = false ) {
 
   arma::field<arma::mat> R(21,1);
   int rows_data = data.n_rows;

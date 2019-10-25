@@ -1,7 +1,7 @@
 #' Estimation function for strategy estimation
 #' @useDynLib stratEst,.registration = TRUE
 #' @importFrom Rcpp sourceCpp
-#' @param data Mandatory input object which contains the data for the estimation in the long format. Each row in \code{data} represents one observation of one individual. The object \code{data} must be a data frame object with variables in columns. Three columns are mandatory: A column named \code{id} which identifies the observations of the same individual across the rows of the data frame. A column named \code{input} which indicates the type of information observed by the individual before giving a response. A column named \code{output} which contains the behavioral response of the individual after observing the input. If an individual plays the same game for more than one period with the same partner, \code{data} must contain a variable \code{period} which identifies the period within the game. If an individual plays the same game more than once with different partners, \code{data} must contain a variable \code{game} (or \code{supergame}) which identifies data from different games. For data from prisoner's dilemma experiments, two more data formats are possible. Instead of using the variables \code{input} and \code{output}, the data frame may also contain the variables \code{cooperation} and \code{other_cooperation}, or alternatively, the variables  \code{cooperation} and \code{group}. The variable \code{cooperation} should be a dummy which indicates if the participant cooperated in the current period. The variable \code{other_cooperation} should be a dummy which indicates if the other player cooperated in the current period. The variable \code{group} should be an identifier variable with a unique value for each unique match of two individuals.
+#' @param data Mandatory data frame object which contains the data for the estimation. Data has to be in the long format with variables in columns. Each row in \code{data} represents one observation. Three columns are mandatory: A column named \code{id} which identifies the observations of the same individual across the rows of the data frame. A column named \code{input} which indicates the type of information observed by the individual before giving a response. A column named \code{output} which contains the behavioral response of the individual after observing the input. If an individual plays the same game for more than one period with the same partner, \code{data} must contain a variable \code{period} which identifies the period within the game. If an individual plays the same game more than once with different partners, \code{data} must contain a variable \code{game} (or \code{supergame}) which identifies data from different games. For data from prisoner's dilemma experiments, two more data formats are possible. Instead of using the variables \code{input} and \code{output}, the data frame may also contain the variables \code{cooperation} and \code{other_cooperation}, or alternatively, the variables  \code{cooperation} and \code{group}. The variable \code{cooperation} should be a dummy which indicates if the participant cooperated in the current period. The variable \code{other_cooperation} should be a dummy which indicates if the other player cooperated in the current period. The variable \code{group} should be an identifier variable with a unique value for each unique match of two individuals.
 #' @param strategies Mandatory input object. Can be either a positive integer or a matrix. If an integer is used, the estimation function will generate the respective number of memory-one strategies with as many states as there are unique input values in \code{data}. A matrix can be used to supply a set of customized strategies. In the matrix, each row corresponds to one state of a strategy, starting with the start state of an automaton. The first column enumerates the states of each strategy in ascending order. A value of one in the first column indicates the begin of a new strategy with its start state. The columns after the first column contain the collection of multinomial response vectors. The number of columns for the multinomial response vectors must correspond to the number of unique non-zero outputs in data. Without a reference output - which is labeled with a zero in the output column of data - the columns specify the complete multinomial response distribution for each unique value in the output column. In this case, the response probabilities in each row must sum to one. With a reference output, the response probability for the response labeled with zero is omitted and the response probabilities in each row must sum to a value smaller or equal to one. The remaining columns of the strategies matrix define the deterministic state transitions. The number of columns must equal the number of unique non-zero inputs in the data. The numbers in the first column indicate the next state of the automaton if the input is one. The numbers in the second column indicate the next state if the input is two and so on.
 #' @param shares A column vector of strategy shares. The number of elements must correspond to the number of strategies defined in the strategies matrix. Elements which are NA are estimated from the data. If the object is not supplied, a share is estimated for every strategy defined in the strategies matrix.
 #' @param sample.id A character indicating the variable in data which contains an id for samples. Individual observations must be nested in samples. The same must be true for clusters if specified. If more than one sample exists, shares are estimated for each sample. All other parameters are estimated for the data of all samples. If the object is not supplied, it is assumed that the data contains only one sample.
@@ -89,7 +89,7 @@
 #' strats <- rbind(ALLD,TFT)
 #' stratEst(data,strats,covariates = c("dummy"),lcr.runs = 500)
 #' @export
-stratEst <- function( data, strategies, shares , sample.id , cluster.id , covariates, response = "mixed", r.responses = "no", r.trembles = "global", select = "no", min.strategies = 1, crit = "bic", se = "yes", outer.runs = 10, outer.tol = 0, outer.max = 1000, inner.runs = 100, inner.tol = 0, inner.max = 10, lcr.runs = 1000, lcr.tol = 0, lcr.max = 1000, bs.samples = 1000, stepsize = 1 , penalty = F , print.messages = TRUE ){
+stratEst <- function( data, strategies, shares , coefficients , sample.id , cluster.id , covariates, response = "mixed", r.responses = "no", r.trembles = "global", select = "no", min.strategies = 1, crit = "bic", se = "yes", outer.runs = 10, outer.tol = 0, outer.max = 1000, inner.runs = 100, inner.tol = 0, inner.max = 10, lcr.runs = 1000, lcr.tol = 0, lcr.max = 1000, bs.samples = 1000, stepsize = 1 , penalty = F , print.messages = TRUE ){
   # crude argument checks
   # check data
   if( missing(data) ) {
@@ -282,8 +282,7 @@ stratEst <- function( data, strategies, shares , sample.id , cluster.id , covari
   }
 
   #check strategies
-  integer_strategies = F
-  if( is.matrix(strategies) == F ){
+  if( length(strategies) == 1 & sum( unique(strategies%%1) ) == 0 ){
     integer_strategies = T
     n_strats = strategies
     n_inputs = length( unique( input ) )
@@ -292,28 +291,106 @@ stratEst <- function( data, strategies, shares , sample.id , cluster.id , covari
     response_par = matrix(NA,n_inputs*n_strats,n_outputs)
     transition_mat = rep(1,n_inputs*n_strats) %*% t.default(c(2:n_inputs))
     strategies <- cbind(strat_states,response_par,transition_mat)
+    tremble <- rep( NA , nrow(strategies) )
+  }
+  else if( is.data.frame(strategies) ){
+    integer_strategies = F
+    state <- strategies$state
+    if( missing(state) ){
+      stop("The input object 'strategies' does not contain the variable 'state'.")
+    }
+    # check and generate responses
+    unique_outputs <- unique( output[output != 0] )
+    sorted_unique_outputs <- sort( unique_outputs )
+    num_unique_outputs <- length( sorted_unique_outputs )
+    response_mat <- matrix(NA,nrow(strategies),num_unique_outputs)
+    for( out in 1:num_unique_outputs ){
+      r_string <- as.character(paste( "r",as.character(sorted_unique_outputs[out]), sep=""))
+      if( r_string %in% colnames(strategies) ){
+        response_mat[,out] <- strategies[,r_string]
+      }
+      else{
+        message <- paste("stratEst error: There is an output with value ", sorted_unique_outputs[out] , " in the data but there is no column named '", r_string , "' in strategies.",sep="")
+        stop(message)
+      }
+    }
+    # check and generate transitions
+    unique_inputs <- unique( input[input != 0] )
+    order_inputs <- order( unique_inputs )
+    sorted_unique_inputs <- sort( unique_inputs )
+    num_unique_inputs <- length( sorted_unique_inputs )
+    transition_mat <- matrix(NA,nrow(strategies),num_unique_inputs)
+    for( ins in 1:num_unique_inputs ){
+      t_string <- paste( "t",as.character(sorted_unique_inputs[ins]), sep="")
+      if( t_string %in% colnames(strategies) ){
+        transition_mat[,ins] <- strategies[,t_string]
+      }
+      else{
+        message <- paste("stratEst error: There is an input with value ", sorted_unique_inputs[ins] , " in the data but there is no column named '", t_string , "' in strategies.",sep="")
+        stop(message)
+      }
+      if( sum( transition_mat[,ins]%%1==0 ) < nrow(strategies) ){
+        message <- paste("stratEst error: The transition columns in 'strategies' must be integers. Check the column named '", t_string , "'.",sep="")
+        stop(message)
+      }
+      # check for tremble column
+      if( "tremble" %in% colnames(strategies) ){
+        tremble <- strategies[,"tremble"]
+      }
+      else{
+        tremble <- rep( NA , nrow(strategies) )
+      }
+    }
+    # generate strategy id if missing
+    sid <- strategies$sid
+    if( is.null(sid) ){
+      sid <- rep(NA,nrow(strategies))
+      n_strats <- 0
+      for( i in 1:nrow(strategies) ){
+        if( state[i] == 1 ){
+          n_strats <- n_strats + 1
+        }
+        sid[i] <- n_strats
+      }
+    }
+    else{
+      n_strats <- length(unique(sid))
+    }
+    strategies_matrix = cbind(state,response_mat,transition_mat)
   }
   else{
-    n_strats = sum( as.numeric( strategies[,1] == 1 ) )
+    stop("The input object 'strategies' must either be an integer or a data frame.");
   }
+
   if ( ( select == "strategies" | select == "all" ) && n_strats == 1 ){
     stop("Strategies cannot be selected if there is only one strategy.");
   }
-  if ( n_strats <= min.strategies && ( select == "strategies" || select == "all" ) ){
-    stop("The number of strategies supplied cannot be smaller or equal to the minimum number strategies when performing strategy selection.");
-  }
+
 
   #check shares
   if( missing(shares) ) {
     shares = matrix( NA , n_strats , num_samples )
   }
 
+  #check coefficients
+  if( missing(coefficients) ) {
+   coefficients = matrix(0,1,1)
+  }
+  else{
+    if( LCR = F){
+      stop("There are no covariates specified for the coefficients. Use the input object 'covariates' to specify the names of the columns which contain the covariates in data.");
+    }
+   }
+
   # make coefficients input object and fixable
-  cpp.output <- stratEst_cpp( data, strategies, shares, covariate_mat, LCR, cluster, response, r.responses, r.trembles, select, min.strategies, crit, se, outer.runs, outer.tol, outer.max, inner.runs, inner.tol, inner.max, lcr.runs, lcr.tol, lcr.max, bs.samples, print.messages, integer_strategies, stepsize , penalty )
+  cpp.output <- stratEst_cpp( data, strategies_matrix, shares , coefficients, covariate_mat, LCR, cluster, response, r.responses, r.trembles, select, min.strategies, crit, se, outer.runs, outer.tol, outer.max, inner.runs, inner.tol, inner.max, lcr.runs, lcr.tol, lcr.max, bs.samples, print.messages, integer_strategies, stepsize , penalty )
   # make data.frame out of strategies and skip responses, trembles
   stratEst.return <- list("shares" = cpp.output$shares, "strategies" = cpp.output$strategies, "responses" = cpp.output$responses, "trembles" = cpp.output$trembles,  "coefficients" = cpp.output$coefficients, "response.mat" = cpp.output$response.mat, "tremble.mat" = cpp.output$tremble.mat, "coefficient.mat" =  cpp.output$coefficient.mat, "loglike" = cpp.output$fit[1,1], "crit.val" = cpp.output$fit[1,2], "eval" = cpp.output$solver[1,1], "tol.val" = cpp.output$solver[1,2], "entropy" = cpp.output$fit[1,3], "state.obs" = cpp.output$state.obs, "assignments" = cpp.output$assignments, "priors" = cpp.output$priors, "shares.se" = cpp.output$shares.se, "responses.se" = cpp.output$responses.se, "trembles.se" = cpp.output$trembles.se, "coefficients.se" = cpp.output$coefficients.se, "shares.covar" = cpp.output$stats.list$shares.covar, "shares.score" =  cpp.output$stats.list$shares.score, "shares.fisher" = cpp.output$stats.list$shares.fisher, "responses.covar" = cpp.output$stats.list$responses.covar, "responses.score" = cpp.output$stats.list$responses.score, "responses.fisher" = cpp.output$stats.list$responses.fisher, "trembles.covar" = cpp.output$stats.list$trembles.covar, "trembles.score" = cpp.output$stats.list$trembles.score, "trembles.fisher" = cpp.output$stats.list$trembles.fisher, "coefficients.covar" = cpp.output$stats.list$coefficients.covar, "coefficients.score" = cpp.output$stats.list$coefficients.score, "coefficients.fisher" = cpp.output$stats.list$coefficients.fisher, "convergence" = cpp.output$convergence );
   # delete empty list entries
   stratEst.return <- stratEst.return[lapply(stratEst.return,length)>0]
+  # reform strategies
+  cbind()
+
   # return result
   return(stratEst.return)
 
