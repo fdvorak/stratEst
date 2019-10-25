@@ -377,7 +377,7 @@ stratEst <- function( data, strategies, shares , coefficients , sample.id , clus
    coefficients = matrix(0,1,1)
   }
   else{
-    if( LCR = F){
+    if( LCR == F){
       stop("There are no covariates specified for the coefficients. Use the input object 'covariates' to specify the names of the columns which contain the covariates in data.");
     }
    }
