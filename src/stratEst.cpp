@@ -593,6 +593,7 @@ arma::field<arma::mat> stratEst_LCR_EM(arma::cube& output_cube, arma::cube& sum_
       }
       else{
         eval = max_eval+eval_pre;
+        new_ll_val.fill(arma::datum::nan);
       }
       //create prior entities mat & fisher info
       coefficient_mat = reshape( new_coefficients , num_rows_coefficient_mat , k-1 );
@@ -784,6 +785,11 @@ arma::field<arma::mat> stratEst_SE(arma::cube& output_cube, arma::cube& sum_outp
       responses_covar = covar_responses_mat;
       SE_responses = sqrt( covar_responses_mat.diag() );
     }
+    else{
+      SE_responses.fill(arma::datum::nan);
+      responses_covar.fill(arma::datum::nan);
+    }
+
   }
 
   // SEs of trembles
@@ -791,6 +797,9 @@ arma::field<arma::mat> stratEst_SE(arma::cube& output_cube, arma::cube& sum_outp
     arma::mat inverse_fisher_info_trembles = fisher_info_trembles;
     if( pinv( inverse_fisher_info_trembles , fisher_info_trembles ) ){
       SE_trembles = sqrt( inverse_fisher_info_trembles.diag() );
+    }
+    else{
+      SE_trembles.fill(arma::datum::nan);
     }
   }
 
@@ -812,6 +821,10 @@ arma::field<arma::mat> stratEst_SE(arma::cube& output_cube, arma::cube& sum_outp
         coefficients_covar = inverse_neg_lower_hessian_mat * lower_meat_mat * inverse_neg_lower_hessian_mat;
         SE_coefficients = sqrt( coefficients_covar.diag() );
       }
+      else{
+        coefficients_covar.fill(arma::datum::nan);
+        SE_coefficients.fill(arma::datum::nan);
+      }
     }
     else{
       arma::mat inverse_neg_lower_hessian_mat = lower_hessian_mat;
@@ -819,6 +832,10 @@ arma::field<arma::mat> stratEst_SE(arma::cube& output_cube, arma::cube& sum_outp
         arma::mat covar_lower_mat_coefficients = inverse_neg_lower_hessian_mat;
         coefficients_covar = covar_lower_mat_coefficients;
         SE_coefficients = sqrt( covar_lower_mat_coefficients.diag() );
+      }
+      else{
+        coefficients_covar.fill(arma::datum::nan);
+        SE_coefficients.fill(arma::datum::nan);
       }
     }
 
@@ -828,6 +845,9 @@ arma::field<arma::mat> stratEst_SE(arma::cube& output_cube, arma::cube& sum_outp
     arma::mat inverse_neg_hessian_mat = -hessian_mat;
     if( pinv( inverse_neg_hessian_mat , -hessian_mat ) ){
       covar_mat_coefficients = inverse_neg_hessian_mat;
+    }
+    else{
+      covar_mat_coefficients.fill(arma::datum::nan);
     }
     int length_covariates = coefficient_mat.n_rows;
     arma::mat jacobian_mat_priors( k , num_coefficients , arma::fill::zeros );
@@ -870,6 +890,10 @@ arma::field<arma::mat> stratEst_SE(arma::cube& output_cube, arma::cube& sum_outp
         arma::mat covar_shares_mat = jacobian_shares * inverse_fisher_info_shares * jacobian_shares.t() ;
         SE_shares = sqrt( covar_shares_mat.diag() );
         shares_covar = covar_shares_mat;
+      }
+      else{
+        SE_shares.fill(arma::datum::nan);
+        shares_covar.fill(arma::datum::nan);
       }
     }
   }
@@ -1087,14 +1111,14 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::mat shares, arma::
   int num_fixed_shares = fixed_shares.n_elem;
   if ( num_fixed_shares > 0 ){
     if( arma::max( fixed_shares ) > 1  ){
-      stop("Shares cannot exceed one.");
+      stop("Fixed shares cannot exceed one.");
     }
-    if( arma::max( fixed_shares ) < 0  ){
-      stop("Shares cannot be negative.");
+    if( arma::min( fixed_shares ) < 0  ){
+      stop("Fixed shares cannot be negative.");
     }
     arma::mat with_zero_share_mat = complete_share_mat;
     with_zero_share_mat.replace(arma::datum::nan, 0);
-    arma::vec sums_of_shares = sum( with_zero_share_mat , 0 );
+    arma::rowvec sums_of_shares = sum( with_zero_share_mat , 0 );
     if( any( sums_of_shares > 1 ) ){
       stop("The sum of all fixed values in a column of 'shares' cannot exceed one. It is not possible to proceed with the current values.");
     }

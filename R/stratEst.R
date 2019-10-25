@@ -302,6 +302,7 @@ stratEst <- function( data, strategies, shares , sample.id , cluster.id , covari
   if ( n_strats <= min.strategies && ( select == "strategies" || select == "all" ) ){
     stop("The number of strategies supplied cannot be smaller or equal to the minimum number strategies when performing strategy selection.");
   }
+
   #check shares
   if( missing(shares) ) {
     shares = matrix( NA , n_strats , num_samples )
@@ -315,6 +316,7 @@ stratEst <- function( data, strategies, shares , sample.id , cluster.id , covari
   stratEst.return <- stratEst.return[lapply(stratEst.return,length)>0]
   # return result
   return(stratEst.return)
+
 }
 
 .onUnload <- function (libpath) { library.dynam.unload("stratEst", libpath)}
