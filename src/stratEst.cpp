@@ -914,7 +914,7 @@ arma::field<arma::mat> stratEst_SE(arma::cube& output_cube, arma::cube& sum_outp
     }
   }
 
-  F(0,0) = SE_shares;
+  F(0,0) = reshape( SE_shares, k , num_samples );
   F(1,0) = SE_responses;
   F(2,0) = SE_trembles;
   F(3,0) = SE_coefficients;
@@ -2292,12 +2292,12 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::mat shares, arma::
   final_solver(0,1) = final_eps(0,0);
   if( SE == "bs" ){
     if( LCR ){
-      final_SE_shares = BS_shares_SE;
+      final_SE_shares = reshape( BS_shares_SE , k , num_samples );
       final_SE_coefficients = BS_coefficients_SE;
     }
     else{
       if( num_shares_to_est > 0 ){
-        final_SE_shares = BS_shares_SE;
+        final_SE_shares = reshape( BS_shares_SE , k , num_samples );
       }
     }
     if( num_responses_to_est > 0 && response == "mixed"){
