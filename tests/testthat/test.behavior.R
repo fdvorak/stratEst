@@ -12,10 +12,19 @@ test_that("behavior strategies",  {
   response = 0.25
   tremble = 0.10
 
-  TFT_candidate1 =  matrix(c(1,2,1,0,1,1,2,2),2,4)
-  TFT_candidate2 =  matrix(c(1,2,NA,NA,1,1,2,2),2,4)
+  state <- c(1,2)
+  r1 <- c(1,0)
+  t1 <- c(1,1)
+  t2 <- c(2,2)
 
-  strategies = rbind(TFT_candidate1,TFT_candidate2)
+
+  TFT1 =  as.data.frame(cbind(state,r1,t1,t2), row.names = c("TFT1.1","TFT1.2"))
+
+  r1 <- c(NA,NA)
+
+  TFT2 =   as.data.frame(cbind(state,r1,t1,t2), row.names = c("TFT2.1","TFT2.2"))
+
+  strategies = rbind(TFT1,TFT2)
   covariates = matrix(c(rep(1,N),rep(0,N/2),rep(1,N/2)),N,2)
 
   coefficient_mat = matrix(c(intercept,dummy),2,1)

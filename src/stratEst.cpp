@@ -8,7 +8,7 @@ using namespace Rcpp;
 
 arma::field<arma::mat> stratEst_EM(arma::cube& output_cube, arma::cube& sum_outputs_cube, arma::vec& strat_id, arma::mat shares, arma::vec responses, arma::vec trembles, arma::mat response_mat, arma::mat tremble_mat, arma::mat indices_shares, arma::mat indices_responses, arma::mat indices_trembles, arma::mat& responses_to_sum, std::string& response, int eval_pre , double tol_eval, int max_eval, arma::vec& sample_of_ids, arma::vec& num_ids_sample ) {
 
-  arma::field<arma::mat> F(21,1);
+  arma::field<arma::mat> F(23,1);
   int num_ids = output_cube.n_slices;
   int num_rows_response_mat = response_mat.n_rows;
   int num_cols_response_mat = response_mat.n_cols;
@@ -248,6 +248,8 @@ arma::field<arma::mat> stratEst_EM(arma::cube& output_cube, arma::cube& sum_outp
   F(11,0) = E;
   F(12,0) = i_shares_mat;
   F(20,0) = state_obs;
+  F(21,0) = indices_responses;
+  F(22,0) = indices_trembles;
   return(F);
 }
 
@@ -258,7 +260,7 @@ arma::field<arma::mat> stratEst_EM(arma::cube& output_cube, arma::cube& sum_outp
 
 arma::field<arma::mat> stratEst_LCR_EM(arma::cube& output_cube, arma::cube& sum_outputs_cube, arma::vec& strat_id, arma::mat& covariate_mat, arma::mat shares_mat, arma::vec responses, arma::vec trembles, arma::vec coefficients, arma::mat response_mat, arma::mat tremble_mat, arma::mat coefficient_mat , arma::uvec shares_to_est, arma::mat indices_responses, arma::mat indices_trembles, bool estimate_coefficients, arma::uvec coefficients_to_est, arma::mat& responses_to_sum, std::string& response, int eval_pre , double tol_eval, int max_eval, double newton_stepsize, bool penalty) {
 
-  arma::field<arma::mat> F(21,1);
+  arma::field<arma::mat> F(23,1);
   arma::vec shares = shares_mat.col(0);
   int num_ids = output_cube.n_slices;
   int num_rows_response_mat = response_mat.n_rows;
@@ -670,6 +672,8 @@ arma::field<arma::mat> stratEst_LCR_EM(arma::cube& output_cube, arma::cube& sum_
   F(18,0) = fisher_info;
   F(19,0) = score_contribution_mat;
   F(20,0) = state_obs;
+  F(21,0) = indices_responses;
+  F(22,0) = indices_trembles;
   return(F);
 }
 
@@ -940,9 +944,9 @@ arma::field<arma::mat> stratEst_SE(arma::cube& output_cube, arma::cube& sum_outp
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // [[Rcpp::export]]
-List stratEst_cpp(arma::mat data, arma::mat strategies, arma::mat shares , arma::mat coefficients, arma::mat covariates, bool LCR, arma::vec cluster, std::string response = "mixed", std::string r_responses = "no", std::string r_trembles = "global", std::string select = "no", int min_strategies = 1 , std::string crit = "bic", std::string SE = "yes", int outer_runs = 10, double outer_tol_eval = 0, int outer_max_eval = 1000, int inner_runs = 100, double inner_tol_eval = 0, int inner_max_eval = 100, int LCR_runs = 100, double LCR_tol_eval = 0, int LCR_max_eval = 1000, int BS_samples = 1000, bool print_messages = true, bool integer_strategies = true, double newton_stepsize = 1 , bool penalty = false ) {
+List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec sid, arma::mat shares , arma::vec trembles , arma::mat coefficients, arma::mat covariates, bool LCR, arma::vec cluster, std::string response = "mixed", std::string r_responses = "no", std::string r_trembles = "global", std::string select = "no", int min_strategies = 1 , std::string crit = "bic", std::string SE = "yes", int outer_runs = 10, double outer_tol_eval = 0, int outer_max_eval = 1000, int inner_runs = 100, double inner_tol_eval = 0, int inner_max_eval = 100, int LCR_runs = 100, double LCR_tol_eval = 0, int LCR_max_eval = 1000, int BS_samples = 1000, bool print_messages = true, bool integer_strategies = true, double newton_stepsize = 1 , bool penalty = false ) {
 
-  arma::field<arma::mat> R(21,1);
+  arma::field<arma::mat> R(23,1);
   int rows_data = data.n_rows;
   int cols_data = data.n_cols;
   int rows_strategies = strategies.n_rows;
@@ -1607,15 +1611,15 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::mat shares , arma:
       ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
       // best result for k
-      arma::field<arma::mat> R_k(21,1);
+      arma::field<arma::mat> R_k(23,1);
 
       // prepare outer runs (index or)
-      arma::field<arma::mat> R_outer(21,1);
+      arma::field<arma::mat> R_outer(23,1);
       double LL_outer_min = 0;
 
       // outer runs (index ro)
       for (int ro = 0; ro < outer_runs; ro++) {
-        arma::field<arma::mat> R_inner(21,1);
+        arma::field<arma::mat> R_inner(23,1);
         double LL_inner_min = 0;
 
         // inner runs (index ri)
@@ -1734,8 +1738,8 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::mat shares , arma:
       arma::mat new_indices_trembles = indices_trembles;
 
       if( select != "no" && select != "strategies" && ( num_responses_to_est > 1 || num_trembles_to_est > 1 ) ){
-        arma::field<arma::mat> R_temp(21,1);
-        arma::field<arma::mat> R_fused(21,1);
+        arma::field<arma::mat> R_temp(23,1);
+        arma::field<arma::mat> R_fused(23,1);
         R_fused = R_k;
         arma::mat crit_min = R_k( crit_index , 0 );
 
@@ -1926,7 +1930,7 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::mat shares , arma:
           Rcout<< "eliminate one strategy (information criterion)";
         }
         else{
-          Rcout<< "eliminate strategy " << killed << " (information criterion)";
+          Rcout<< "eliminate strategy " << survived( killed - 1 ) << " (information criterion)";
         }
       }
     }
@@ -1935,6 +1939,14 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::mat shares , arma:
     }
   } // end strategy selection loop
 
+  // dicument which strategy survived the selection
+  int num_elem_sid = sid.n_elem;
+  int num_survivors = survivors.n_elem;
+  arma::vec sid_zeros( num_elem_sid , arma::fill::zeros );
+  for (int suv = 0; suv < num_survivors; suv++) {
+    sid_zeros( find ( sid == survivors(suv) ) ).fill(1);
+  }
+  sid = sid( find( sid_zeros == 1 ) );
 
   //store fused objects
   arma::mat shares_new = R(0,0);
@@ -1972,7 +1984,7 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::mat shares , arma:
       arma::mat R_shares = R(0,0);
       arma::uvec shares_to_est_lcr = find_nonfinite( shares.col(0) );
       arma::mat pre_eval_vec = R(9,0);
-      arma::field<arma::mat> R_LCR_inner(21,1);
+      arma::field<arma::mat> R_LCR_inner(23,1);
       arma::vec LL_inner_min( 1 , 1 , arma::fill::zeros );
       LL_inner_min.fill( arma::datum::inf );
       // inner runs (index ri)
@@ -2067,7 +2079,7 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::mat shares , arma:
       if( print_messages == true ){
         Rcout<< "sample " << i+1 << " (of " << BS_samples <<")\r";
       }
-      arma::field<arma::mat> R_LCR_BS(21,1);
+      arma::field<arma::mat> R_LCR_BS(23,1);
       arma::field<arma::mat> R_NO_LCR_BS(13,1);
 
       int num_ids_to_sample = num_ids;
@@ -2252,8 +2264,9 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::mat shares , arma:
   arma::mat final_shares = R(0,0);
   arma::mat final_responses = R(1,0);
   arma::mat final_trembles = R(2,0);
-  arma::mat final_response_mat = R(3,0);
-  arma::mat final_tremble_mat = R(4,0);
+  arma::mat final_indices_responses = R(21,0);
+  arma::mat final_indices_trembles = R(22,0).col(0);
+  arma::mat final_tremble_vec = R(4,0).col(0);
   arma::mat final_LL =  R(5,0);
   arma::mat final_crit = R(crit_index,0);
   arma::mat final_eval = R(9,0);
@@ -2308,9 +2321,9 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::mat shares , arma:
     }
   }
 
-  List stats_list = List::create( Named("shares.covar") = final_covar_shares, Named("shares.score") =  final_score_shares, Named("shares.fisher") = final_fisher_shares, Named("responses.covar") = final_covar_responses, Named("responses.score") = final_score_responses, Named("responses.fisher") = final_fisher_responses, Named("trembles.covar") = final_covar_trembles, Named("trembles.score") = final_score_trembles, Named("trembles.fisher") = final_fisher_trembles, Named("coefficients.covar") = final_covar_coefficients, Named("coefficients.score") = final_score_coefficients, Named("coefficients.fisher") = final_fisher_coefficients );
+  List stats_list = List::create( Named("shares.covar") = final_covar_shares, Named("shares.score") =  final_score_shares, Named("shares.fisher") = final_fisher_shares, Named("responses.covar") = final_covar_responses, Named("responses.score") = final_score_responses, Named("responses.fisher") = final_fisher_responses, Named("trembles.covar") = final_covar_trembles, Named("trembles.score") = final_score_trembles, Named("trembles.fisher") = final_fisher_trembles, Named("coefficients.covar") = final_covar_coefficients, Named("coefficients.score") = final_score_coefficients, Named("coefficients.fisher") = final_fisher_coefficients, Named("tremble_vec") = final_tremble_vec );
 
-  List S = List::create( Named("strategies") = final_strategies, Named("shares") = final_shares, Named("shares.se") = final_SE_shares, Named("responses") = final_responses, Named("response.mat") = final_response_mat, Named("responses.se") = final_SE_responses, Named("trembles") = final_trembles, Named("tremble.mat") = final_tremble_mat, Named("trembles.se") = final_SE_trembles,  Named("coefficients") = final_coefficients, Named("coefficient.mat") = final_coefficient_mat, Named("coefficients.se") = final_SE_coefficients, Named("fit") = final_fit, Named("solver") = final_solver, Named("state.obs") = final_state_obs, Named("assignments") = final_i_class, Named("priors") = final_individual_priors, Named("stats.list") = stats_list, Named("convergence") = final_convergence );
+  List S = List::create( Named("strategies") = final_strategies, Named("shares") = final_shares, Named("shares.se") = final_SE_shares, Named("responses") = final_responses, Named("response.indices") = final_indices_responses, Named("responses.se") = final_SE_responses, Named("trembles") = final_trembles, Named("tremble.indices") = final_indices_trembles, Named("trembles.se") = final_SE_trembles,  Named("coefficients") = final_coefficients, Named("coefficient.mat") = final_coefficient_mat, Named("coefficients.se") = final_SE_coefficients, Named("fit") = final_fit, Named("solver") = final_solver, Named("state.obs") = final_state_obs, Named("assignments") = final_i_class, Named("priors") = final_individual_priors, Named("stats.list") = stats_list, Named("convergence") = final_convergence, Named("sid") = sid );
 
 
   return(S);

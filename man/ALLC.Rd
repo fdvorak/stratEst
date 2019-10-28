@@ -4,21 +4,23 @@
 \name{ALLC}
 \alias{ALLC}
 \title{ALLC}
-\format{A matrix with 1 row and 6 columns:
+\format{A data frame with 1 row and 6 columns:
 \describe{
-  \item{Rows}{Each row corresponds to one states of the automaton.}{}
-  \item{Column 1}{Enumerates the states of the automaton.}
-  \item{Column 2}{Probability to play C given the current state of the automaton. }
-  \item{Column 3}{State transition if the history of play in the last round was CC (input is 1).}
-  \item{Column 4}{State transition if the history of play in the last round was CD (input is 2).}
-  \item{Column 5}{State transition if the history of play in the last round was DC (input is 3).}
-  \item{Column 6}{State transition if the history of play in the last round was DD (input is 4).}
+  \item{Rows}{Each row corresponds to one state of the ALLC automaton.}{}
+  \item{Column \code{name}}{Contains the names of the rows of the automaton.}
+  \item{Column \code{state}}{Enumerates the states of the automaton.}
+  \item{Column \code{r1}}{Probability to play C (output is 1) if the automaton is in this state .}
+  \item{Column \code{trembles}}{Probability of a tremble in this state .}
+  \item{Column \code{t1}}{State transition if the action profile in the last round is CC (input is 1).}
+  \item{Column \code{t2}}{State transition if the action profile in the last round is CD (input is 2).}
+  \item{Column \code{t3}}{State transition if the action profile in the last round is DC (input is 3).}
+  \item{Column \code{t4}}{State transition if the action profile in the last round is DD (input is 4).}
 }}
 \usage{
 data(ALLC)
 }
 \description{
-Matrix representation of the prisoner's dilemma strategy which always plays C
+Prisoner's dilemma strategy which always cooperates as a data frame object.
 }
 \examples{
 strategies <- rbind(ALLC,ALLD,TFT,GRIM,PTFT)

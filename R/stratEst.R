@@ -93,7 +93,7 @@ stratEst <- function( data, strategies, shares , coefficients , sample.id , clus
   # crude argument checks
   # check data
   if( missing(data) ) {
-    stop("Mandatory input object data is missing.")
+    stop("stratEst error: Mandatory input object 'data' missing.")
   }
   data_frame <- as.data.frame(data)
   id <- data_frame$id
@@ -123,7 +123,7 @@ stratEst <- function( data, strategies, shares , coefficients , sample.id , clus
       sample <- data_frame[,sample.id]
     }
     else{
-      message_sample <- paste("The data does not contain the variable '",sample.id,"' "," specified as sample id.",sep="")
+      message_sample <- paste("stratEst error: The data does not contain the variable '",sample.id,"' "," specified as sample id.",sep="")
       stop(message_sample)
     }
   }
@@ -141,7 +141,7 @@ stratEst <- function( data, strategies, shares , coefficients , sample.id , clus
       cluster <- data_frame[,cluster.id]
     }
     else{
-      message_cluster <- paste("The data does not contain the variable '",cluster.id,"' "," specified as cluster id.",sep="")
+      message_cluster <- paste("stratEst error: The data does not contain the variable '",cluster.id,"' "," specified as cluster id.",sep="")
       stop(message_cluster)
     }
   }
@@ -159,7 +159,7 @@ stratEst <- function( data, strategies, shares , coefficients , sample.id , clus
         covariate_mat <- cbind(covariate_mat,data_frame[,covariates[i]])
       }
       else{
-        message_covariate <- paste("The data does not contain the variable '",covariates[i],"' "," specified as covariate.",sep="")
+        message_covariate <- paste("stratEst error: The data does not contain the variable '",covariates[i],"' "," specified as covariate.",sep="")
         stop(message_covariate)
       }
       LCR = TRUE
@@ -168,25 +168,25 @@ stratEst <- function( data, strategies, shares , coefficients , sample.id , clus
 
   # check mandatory data frame variables
   if( is.null(id) ) {
-    stop("Data does not contain the variable: id")
+    stop("stratEst error: Data does not contain the variable 'id'.")
   }
   if( ( is.null(input) == F |  is.null(output) == F ) & ( is.null(group) == F |  is.null(cooperation) == F )  ){
-    stop("Make sure data contains the variables input and output. For data from the prisoner's dilemma the variables cooperation and group or cooperation and other_cooperation can also be used istead.")
+    stop("stratEst error: Make sure data contains the variables input and output. For data from the prisoner's dilemma the variables cooperation and group or cooperation and other_cooperation can also be used istead.")
   }
   if( is.null(cooperation) == F & is.null(group) & is.null(other_cooperation) ) {
-    stop("If data contains the variable cooperation, it must contain the variable group or other_cooperation.")
+    stop("stratEst error: If data contains the variable cooperation, it must contain the variable group or other_cooperation.")
   }
   if( is.null(group) == F & is.null(cooperation) ) {
-    stop("If data contains the variable group, it must contain the variable cooperation.")
+    stop("stratEst error: If data contains the variable group, it must contain the variable cooperation.")
   }
   if( is.null(output) == F & is.null(input)  ){
-    stop("If data contains the variable output, it must contain the variable input.")
+    stop("stratEst error: If data contains the variable output, it must contain the variable input.")
   }
   if( is.null(input) == F & is.null(output)  ){
-    stop("If data contains the variable input, it must contain the variable output.")
+    stop("stratEst error: If data contains the variable input, it must contain the variable output.")
   }
   if( missing(strategies) ) {
-    stop("Mandatory input object strategies is missing. Use either an integer or a strategy matrix. ")
+    stop("stratEst error: Mandatory input object strategies is missing. Use either an integer or a strategy matrix. ")
   }
 
   # generate variable supergame if missing
@@ -203,62 +203,62 @@ stratEst <- function( data, strategies, shares , coefficients , sample.id , clus
 
   # check outer.runs
   if ( outer.runs < 0 | outer.runs%%1 != 0 ){
-    stop("Number of outer runs must be a positive integer. Default is 100.");
+    stop("stratEst error: Number of outer runs must be a positive integer. Default is 100.");
   }
 
   # check inner.runs
   if ( inner.runs < 0 | inner.runs%%1 != 0 ){
-    stop("Number of inner runs must be a positive integer. Default is 100.");
+    stop("stratEst error: Number of inner runs must be a positive integer. Default is 100.");
   }
 
   # check outer.max
   if ( outer.max < 0  | outer.max%%1 != 0){
-    stop("Number of outer max evaluations must be a positive integer. Default is 1000.");
+    stop("stratEst error: Number of outer max evaluations must be a positive integer. Default is 1000.");
   }
 
   # check inner.max
   if ( inner.max < 0 | inner.max%%1 != 0 ){
-    stop("Number of inner max evaluations must be a positive integer. Default is 100.");
+    stop("stratEst error: Number of inner max evaluations must be a positive integer. Default is 100.");
   }
 
   # check response
   if ( response != "mixed" & response != "pure" ){
-    stop("The input object response has to be one of the following: \"mixed\" or \"pure\". Default is \"mixed\".");
+    stop("stratEst error: The input object response has to be one of the following: \"mixed\" or \"pure\". Default is \"mixed\".");
   }
 
   # check r.responses
   if ( r.responses != "no" & r.responses != "strategies" & r.responses != "states" & r.responses != "global"  ){
-    stop("The input object r.responses has to be one of the following: \"no\", \"strategies\", \"states\" or \"global\". Default is \"no\".");
+    stop("stratEst error: The input object r.responses has to be one of the following: \"no\", \"strategies\", \"states\" or \"global\". Default is \"no\".");
   }
 
   # check r.trembles
   if ( r.trembles != "no" & r.trembles != "strategies" & r.trembles != "states" & r.trembles != "global"  ){
-    stop("The input object r.trembles has to be one of the following: \"no\", \"strategies\", \"states\" or \"global\". Default is \"no\".");
+    stop("stratEst error: The input object r.trembles has to be one of the following: \"no\", \"strategies\", \"states\" or \"global\". Default is \"no\".");
   }
 
   # check select
   if ( select != "no" & select != "strategies" & select != "responses"  & select != "trembles" & select != "both" & select != "all" ){
-    stop("The input object select has to be one of the following: \"no\", \"strategies\", \"responses\", \"trembles\", \"both\", or \"all\". Default is \"no\".");
+    stop("stratEst error: The input object select has to be one of the following: \"no\", \"strategies\", \"responses\", \"trembles\", \"both\", or \"all\". Default is \"no\".");
   }
 
   # check crit
   if ( crit != "aic" & crit != "bic" & crit != "icl" ){
-    stop("The input object crit has to be one of the following: \"aic\", \"bic\", or \"icl\". Default is \"bic\".");
+    stop("stratEst error: The input object crit has to be one of the following: \"aic\", \"bic\", or \"icl\". Default is \"bic\".");
   }
 
   # check bs.samples
   if ( bs.samples < 0  | bs.samples%%1 != 0){
-    stop("The number of bootstrap samples must be a positive integer. Default is 1000.");
+    stop("stratEst error: The number of bootstrap samples must be a positive integer. Default is 1000.");
   }
 
   # check stepsize
   if ( stepsize < 0 ){
-    stop("The newton.stepsize must be a positive number. Default is 1.");
+    stop("stratEst error: The newton.stepsize must be a positive number. Default is 1.");
   }
 
   # check penalty
   if (  is.logical(penalty) == F){
-    stop("The input argument 'penalty' must be boolean. Default is FALSE.");
+    stop("stratEst error: The input argument 'penalty' must be boolean. Default is FALSE.");
   }
 
   # sort data
@@ -282,7 +282,7 @@ stratEst <- function( data, strategies, shares , coefficients , sample.id , clus
   }
 
   #check strategies
-  if( length(strategies) == 1 & sum( unique(strategies%%1) ) == 0 ){
+  if( length(strategies) == 1 & sum( strategies%%1 == 0 ) == length(strategies) & sum( strategies > 0 ) == length(strategies) ){
     integer_strategies = T
     n_strats = strategies
     n_inputs = length( unique( input ) )
@@ -290,24 +290,27 @@ stratEst <- function( data, strategies, shares , coefficients , sample.id , clus
     strat_states = rep(c(1:n_inputs),n_strats)
     response_par = matrix(NA,n_inputs*n_strats,n_outputs)
     transition_mat = rep(1,n_inputs*n_strats) %*% t.default(c(2:n_inputs))
-    strategies <- cbind(strat_states,response_par,transition_mat)
-    tremble <- rep( NA , nrow(strategies) )
+    strategies_matrix <- cbind(strat_states,response_par,transition_mat)
+    trembles <- rep( NA , nrow(strategies_matrix) )
+    sid <- rep(c(1:n_strats), each = n_inputs )
   }
   else if( is.data.frame(strategies) ){
     integer_strategies = F
     state <- strategies$state
     if( missing(state) ){
-      stop("The input object 'strategies' does not contain the variable 'state'.")
+      stop("stratEst error: The input object 'strategies' does not contain the variable 'state'.")
     }
     # check and generate responses
     unique_outputs <- unique( output[output != 0] )
     sorted_unique_outputs <- sort( unique_outputs )
     num_unique_outputs <- length( sorted_unique_outputs )
     response_mat <- matrix(NA,nrow(strategies),num_unique_outputs)
+    response_mat_col_index <- rep(NA,num_unique_outputs)
     for( out in 1:num_unique_outputs ){
       r_string <- as.character(paste( "r",as.character(sorted_unique_outputs[out]), sep=""))
       if( r_string %in% colnames(strategies) ){
         response_mat[,out] <- strategies[,r_string]
+        response_mat_col_index[out] <- grep(paste("^",r_string,"$",sep=""), colnames(strategies))
       }
       else{
         message <- paste("stratEst error: There is an output with value ", sorted_unique_outputs[out] , " in the data but there is no column named '", r_string , "' in strategies.",sep="")
@@ -320,10 +323,12 @@ stratEst <- function( data, strategies, shares , coefficients , sample.id , clus
     sorted_unique_inputs <- sort( unique_inputs )
     num_unique_inputs <- length( sorted_unique_inputs )
     transition_mat <- matrix(NA,nrow(strategies),num_unique_inputs)
+    transition_mat_col_index <- rep(NA,num_unique_inputs)
     for( ins in 1:num_unique_inputs ){
       t_string <- paste( "t",as.character(sorted_unique_inputs[ins]), sep="")
       if( t_string %in% colnames(strategies) ){
         transition_mat[,ins] <- strategies[,t_string]
+        transition_mat_col_index[ins] <- grep(paste("^",t_string,"$",sep=""), colnames(strategies))
       }
       else{
         message <- paste("stratEst error: There is an input with value ", sorted_unique_inputs[ins] , " in the data but there is no column named '", t_string , "' in strategies.",sep="")
@@ -357,13 +362,14 @@ stratEst <- function( data, strategies, shares , coefficients , sample.id , clus
       n_strats <- length(unique(sid))
     }
     strategies_matrix = cbind(state,response_mat,transition_mat)
+    trembles <- rep( NA , nrow(strategies_matrix) )
   }
   else{
-    stop("The input object 'strategies' must either be an integer or a data frame.");
+    stop("stratEst error: The input object 'strategies' must be an integer or a data frame.");
   }
 
   if ( ( select == "strategies" | select == "all" ) && n_strats == 1 ){
-    stop("Strategies cannot be selected if there is only one strategy.");
+    stop("stratEst error: Strategies cannot be selected if there is only one strategy.");
   }
 
 
@@ -378,18 +384,48 @@ stratEst <- function( data, strategies, shares , coefficients , sample.id , clus
   }
   else{
     if( LCR == F){
-      stop("There are no covariates specified for the coefficients. Use the input object 'covariates' to specify the names of the columns which contain the covariates in data.");
+      stop("stratEst error: There are no covariates specified. Use the input object 'covariates' to specify the names of the columns which contain the covariates in data.");
     }
    }
 
   # make coefficients input object and fixable
-  cpp.output <- stratEst_cpp( data, strategies_matrix, shares , coefficients, covariate_mat, LCR, cluster, response, r.responses, r.trembles, select, min.strategies, crit, se, outer.runs, outer.tol, outer.max, inner.runs, inner.tol, inner.max, lcr.runs, lcr.tol, lcr.max, bs.samples, print.messages, integer_strategies, stepsize , penalty )
+  cpp.output <- stratEst_cpp( data, strategies_matrix, sid, shares , trembles , coefficients, covariate_mat, LCR, cluster, response, r.responses, r.trembles, select, min.strategies, crit, se, outer.runs, outer.tol, outer.max, inner.runs, inner.tol, inner.max, lcr.runs, lcr.tol, lcr.max, bs.samples, print.messages, integer_strategies, stepsize , penalty )
   # make data.frame out of strategies and skip responses, trembles
-  stratEst.return <- list("shares" = cpp.output$shares, "strategies" = cpp.output$strategies, "responses" = cpp.output$responses, "trembles" = cpp.output$trembles,  "coefficients" = cpp.output$coefficients, "response.mat" = cpp.output$response.mat, "tremble.mat" = cpp.output$tremble.mat, "coefficient.mat" =  cpp.output$coefficient.mat, "loglike" = cpp.output$fit[1,1], "crit.val" = cpp.output$fit[1,2], "eval" = cpp.output$solver[1,1], "tol.val" = cpp.output$solver[1,2], "entropy" = cpp.output$fit[1,3], "state.obs" = cpp.output$state.obs, "assignments" = cpp.output$assignments, "priors" = cpp.output$priors, "shares.se" = cpp.output$shares.se, "responses.se" = cpp.output$responses.se, "trembles.se" = cpp.output$trembles.se, "coefficients.se" = cpp.output$coefficients.se, "shares.covar" = cpp.output$stats.list$shares.covar, "shares.score" =  cpp.output$stats.list$shares.score, "shares.fisher" = cpp.output$stats.list$shares.fisher, "responses.covar" = cpp.output$stats.list$responses.covar, "responses.score" = cpp.output$stats.list$responses.score, "responses.fisher" = cpp.output$stats.list$responses.fisher, "trembles.covar" = cpp.output$stats.list$trembles.covar, "trembles.score" = cpp.output$stats.list$trembles.score, "trembles.fisher" = cpp.output$stats.list$trembles.fisher, "coefficients.covar" = cpp.output$stats.list$coefficients.covar, "coefficients.score" = cpp.output$stats.list$coefficients.score, "coefficients.fisher" = cpp.output$stats.list$coefficients.fisher, "convergence" = cpp.output$convergence );
+  stratEst.return <- list("shares" = cpp.output$shares, "strategies" = cpp.output$strategies, "responses" = cpp.output$responses, "trembles" = cpp.output$trembles,  "coefficients" = cpp.output$coefficients, "response.indices" = cpp.output$response.indices, "tremble.indices" = cpp.output$tremble.indices, "coefficient.mat" =  cpp.output$coefficient.mat, "loglike" = cpp.output$fit[1,1], "crit.val" = cpp.output$fit[1,2], "eval" = cpp.output$solver[1,1], "tol.val" = cpp.output$solver[1,2], "entropy" = cpp.output$fit[1,3], "state.obs" = cpp.output$state.obs, "assignments" = cpp.output$assignments, "priors" = cpp.output$priors, "shares.se" = cpp.output$shares.se, "responses.se" = cpp.output$responses.se, "trembles.se" = cpp.output$trembles.se, "coefficients.se" = cpp.output$coefficients.se, "shares.covar" = cpp.output$stats.list$shares.covar, "shares.score" =  cpp.output$stats.list$shares.score, "shares.fisher" = cpp.output$stats.list$shares.fisher, "responses.covar" = cpp.output$stats.list$responses.covar, "responses.score" = cpp.output$stats.list$responses.score, "responses.fisher" = cpp.output$stats.list$responses.fisher, "trembles.covar" = cpp.output$stats.list$trembles.covar, "trembles.score" = cpp.output$stats.list$trembles.score, "trembles.fisher" = cpp.output$stats.list$trembles.fisher, "coefficients.covar" = cpp.output$stats.list$coefficients.covar, "coefficients.score" = cpp.output$stats.list$coefficients.score, "coefficients.fisher" = cpp.output$stats.list$coefficients.fisher, "convergence" = cpp.output$convergence );
+
+
+  # strategies post-processing
+  if( integer_strategies ){
+  }
+  else{
+    post_sid <- cpp.output$sid
+    unique_post_sid <- unique(post_sid)
+    strategies <- strategies[sid %in% unique_post_sid , ]
+    for( out in 1:num_unique_outputs ){
+      strategies[,response_mat_col_index[out]] <- stratEst.return$strategies[,(1+out)]
+    }
+    for( ins in 1:num_unique_inputs ){
+      strategies[,transition_mat_col_index[ins]] <- stratEst.return$strategies[,(1+num_unique_outputs+ins)]
+    }
+    if( length(cpp.output$trembles) >= 1 ){
+    strategies$tremble <- cpp.output$stats.list$tremble_vec
+    }
+    stratEst.return$strategies <- strategies
+  }
+
+  # parameters which could not be estimated NA
+  stratEst.return$strategies[ stratEst.return$strategies == -1 ] = NA
+
+
   # delete empty list entries
+  if( length(stratEst.return$responses) == 0 ){
+    stratEst.return$response.indices = NULL
+  }
+  if( length(stratEst.return$trembles) == 0 ){
+    stratEst.return$tremble.indices = NULL
+  }
+
   stratEst.return <- stratEst.return[lapply(stratEst.return,length)>0]
-  # reform strategies
-  cbind()
 
   # return result
   return(stratEst.return)
