@@ -1032,12 +1032,6 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec sid, arma::mat
     data.col(4).replace( non_zero_unique_outputs(i) , i+1 );
   }
 
-  // check if strategies have the correct number of columns
-  // int num_cols_strategies = strategies.n_cols;
-  // if( num_cols_strategies - 1  != (num_non_zero_inputs + num_non_zero_outputs) ){
-  //   stop("The strategy matrix has not the correct number of columns. Strategies must have one state column, one response column per non-zero output and one transission column per non-zero input.");
-  // }
-
   //check fixed responses
   arma::vec output = data.col(4);
   arma::vec outputs = unique( output );

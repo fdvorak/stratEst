@@ -107,8 +107,15 @@ test_that("multivariate output test",  {
 
     P = stratEst(data,5,response="pure",outer.runs = 2, print.messages = F)
     M = stratEst(data,5,response="mixed",outer.runs = 2, print.messages = F)
-    expect_equal(num_responses[m]+5,ncol(P$strategies))
-    expect_equal(num_responses[m]+5,ncol(M$strategies))
+
+    r_string = paste("r",as.character(num_responses[m]),sep="")
+
+    P_l = length( P$strategies[[r_string]] )
+    M_l = length( M$strategies[[r_string]] )
+
+    expect_equal( 25 , P_l )
+    expect_equal( 25  , M_l )
+
   }
 })
 

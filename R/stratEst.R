@@ -284,15 +284,20 @@ stratEst <- function( data, strategies, shares , coefficients , sample.id , clus
   #check strategies
   if( length(strategies) == 1 & sum( strategies%%1 == 0 ) == length(strategies) & sum( strategies > 0 ) == length(strategies) ){
     integer_strategies = T
-    n_strats = strategies
-    n_inputs = length( unique( input ) )
-    n_outputs = sum( unique( output ) != 0 )
-    strat_states = rep(c(1:n_inputs),n_strats)
-    response_par = matrix(NA,n_inputs*n_strats,n_outputs)
-    transition_mat = rep(1,n_inputs*n_strats) %*% t.default(c(2:n_inputs))
+    num_strats = strategies
+    unique_outputs = sort( unique( output[output != 0] ) )
+    unique_inputs = sort(unique( input ))
+    unique_non_zero_inputs = sort(unique( input[input != 0] ))
+    num_unique_inputs = length( unique_inputs )
+    num_unique_non_zero_inputs = length( unique_non_zero_inputs )
+    has_zero_input <- num_unique_inputs - num_unique_non_zero_inputs
+    num_unique_outputs = length( unique_outputs )
+    strat_states = rep(c(1:num_unique_inputs),num_strats)
+    response_par = matrix(NA,num_unique_inputs*num_strats,num_unique_outputs)
+    transition_mat = rep(1,num_unique_inputs*num_strats) %*% t.default(c((1+has_zero_input):num_unique_inputs))
     strategies_matrix <- cbind(strat_states,response_par,transition_mat)
     trembles <- rep( NA , nrow(strategies_matrix) )
-    sid <- rep(c(1:n_strats), each = n_inputs )
+    sid <- rep(c(1:num_strats), each = num_unique_inputs )
   }
   else if( is.data.frame(strategies) ){
     integer_strategies = F
@@ -301,19 +306,18 @@ stratEst <- function( data, strategies, shares , coefficients , sample.id , clus
       stop("stratEst error: The input object 'strategies' does not contain the variable 'state'.")
     }
     # check and generate responses
-    unique_outputs <- unique( output[output != 0] )
-    sorted_unique_outputs <- sort( unique_outputs )
-    num_unique_outputs <- length( sorted_unique_outputs )
+    unique_outputs <- sort( unique( output[output != 0] ) )
+    num_unique_outputs <- length( unique_outputs )
     response_mat <- matrix(NA,nrow(strategies),num_unique_outputs)
     response_mat_col_index <- rep(NA,num_unique_outputs)
     for( out in 1:num_unique_outputs ){
-      r_string <- as.character(paste( "r",as.character(sorted_unique_outputs[out]), sep=""))
+      r_string <- as.character(paste( "r",as.character(unique_outputs[out]), sep=""))
       if( r_string %in% colnames(strategies) ){
         response_mat[,out] <- strategies[,r_string]
         response_mat_col_index[out] <- grep(paste("^",r_string,"$",sep=""), colnames(strategies))
       }
       else{
-        message <- paste("stratEst error: There is an output with value ", sorted_unique_outputs[out] , " in the data but there is no column named '", r_string , "' in strategies.",sep="")
+        message <- paste("stratEst error: There is an output with value ", unique_outputs[out] , " in the data but there is no column named '", r_string , "' in strategies.",sep="")
         stop(message)
       }
     }
@@ -350,16 +354,16 @@ stratEst <- function( data, strategies, shares , coefficients , sample.id , clus
     sid <- strategies$sid
     if( is.null(sid) ){
       sid <- rep(NA,nrow(strategies))
-      n_strats <- 0
+      num_strats <- 0
       for( i in 1:nrow(strategies) ){
         if( state[i] == 1 ){
-          n_strats <- n_strats + 1
+          num_strats <- num_strats + 1
         }
-        sid[i] <- n_strats
+        sid[i] <- num_strats
       }
     }
     else{
-      n_strats <- length(unique(sid))
+      num_strats <- length(unique(sid))
     }
     strategies_matrix = cbind(state,response_mat,transition_mat)
     trembles <- rep( NA , nrow(strategies_matrix) )
@@ -368,14 +372,14 @@ stratEst <- function( data, strategies, shares , coefficients , sample.id , clus
     stop("stratEst error: The input object 'strategies' must be an integer or a data frame.");
   }
 
-  if ( ( select == "strategies" | select == "all" ) && n_strats == 1 ){
+  if ( ( select == "strategies" | select == "all" ) && num_strats == 1 ){
     stop("stratEst error: Strategies cannot be selected if there is only one strategy.");
   }
 
 
   #check shares
   if( missing(shares) ) {
-    shares = matrix( NA , n_strats , num_samples )
+    shares = matrix( NA , num_strats , num_samples )
   }
 
   #check coefficients
@@ -396,6 +400,28 @@ stratEst <- function( data, strategies, shares , coefficients , sample.id , clus
 
   # strategies post-processing
   if( integer_strategies ){
+    state <- stratEst.return$strategies[,1]
+    response_mat <- matrix(stratEst.return$strategies[,2:(1+num_unique_outputs)],nrow(stratEst.return$strategies), num_unique_outputs)
+    r_names <- rep(NA,num_unique_outputs)
+    for( outs in 1:num_unique_outputs ){
+      r_names[outs] <-paste("r",as.character(unique_outputs[outs]),sep="")
+    }
+    colnames(response_mat, do.NULL = FALSE)
+    colnames(response_mat) <- r_names
+
+    transition_mat <- matrix(stratEst.return$strategies[,(1+num_unique_outputs+1):(1+num_unique_outputs+num_unique_non_zero_inputs)],nrow(stratEst.return$strategies), num_unique_non_zero_inputs)
+    t_names <- rep(NA,num_unique_non_zero_inputs )
+    for( ins in 1:num_unique_non_zero_inputs ){
+      t_names[ins] <-paste("t",as.character(unique_non_zero_inputs[ins]),sep="")
+    }
+    colnames(transition_mat, do.NULL = FALSE)
+    colnames(transition_mat) <- t_names
+
+    strategies <- as.data.frame(cbind(state,response_mat,transition_mat))
+    if( length(cpp.output$trembles) >= 1 ){
+      strategies$tremble <- cpp.output$stats.list$tremble_vec
+    }
+    stratEst.return$strategies <- strategies
   }
   else{
     post_sid <- cpp.output$sid
