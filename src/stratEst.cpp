@@ -282,6 +282,7 @@ arma::field<arma::mat> stratEst_LCR_EM(arma::cube& output_cube, arma::cube& sum_
   arma::vec bic_val( 1 , arma::fill::ones);
   arma::vec icl_val( 1 , arma::fill::ones);
   arma::vec new_ll_val( 1 , 1 , arma::fill::zeros );
+  arma::vec next_ll_val( 1 , 1 , arma::fill::zeros );
   arma::vec new_entropy_k( 1 , arma::fill::ones);
   arma::mat i_shares_mat( num_ids , k , arma::fill::zeros );
   arma::cube i_shares_cube( num_rows_response_mat , num_cols_response_mat , num_ids , arma::fill::zeros );
@@ -303,6 +304,7 @@ arma::field<arma::mat> stratEst_LCR_EM(arma::cube& output_cube, arma::cube& sum_
   arma::mat score_contribution_mat( num_ids , num_coefficients , arma::fill::zeros );
   arma::mat penalized_score_contribution_mat( num_ids , num_coefficients_to_est , arma::fill::zeros );
   arma::mat priors_entities_mat( num_ids , k , arma::fill::zeros );
+  arma::mat pr_entities_k_mat( num_ids , k , arma::fill::zeros );
   arma::umat indices_responses_to_sum = find( responses_to_sum == 1 );
   arma::umat indices_non_fixed_responses = find( indices_responses == 0 && responses_to_sum == 0 );
   arma::vec stepsize_vec( num_coefficients_to_est , arma::fill::ones );
@@ -370,6 +372,7 @@ arma::field<arma::mat> stratEst_LCR_EM(arma::cube& output_cube, arma::cube& sum_
         }
 
         // log likelihood contribution of subject
+        pr_entities_k_mat.row(i) = pr_entity_k.t();
         pr_entity_k %= priors_entities_mat.row(i).t();
         new_ll_val += -log( sum( pr_entity_k , 0 ) );
 
@@ -579,7 +582,6 @@ arma::field<arma::mat> stratEst_LCR_EM(arma::cube& output_cube, arma::cube& sum_
           arma::mat to_invert_mat = -lower_hessian_mat;                       // observed fisher is negative hesiian since we are minimizing the log likelihood
       if( pinv( inverted_mat , to_invert_mat ) ){
               if( penalty == true ){
-                new_ll_val = new_ll_val - log(det(-lower_hessian_mat))/2;     // minus because lll_val is negative log likelihood
                 for(int c = 0; c < num_coefficients_to_est; c++){
                   arma::mat d_hessian_slice = d_hessian_cube.slice(num_rows_coefficient_mat+c);
                   arma::mat lower_d_hessian_mat = d_hessian_slice( arma::span( num_rows_coefficient_mat , num_coefficients-1 ) , arma::span( num_rows_coefficient_mat , num_coefficients-1 ) );
@@ -587,22 +589,40 @@ arma::field<arma::mat> stratEst_LCR_EM(arma::cube& output_cube, arma::cube& sum_
                 }
                 short_score_vec += penalty_vec;                               // minus because the negative log likelihood is minimized
               }
-        changes_coefficients = stepsize_vec % ( inverted_mat*short_score_vec );
-        arma::vec updated_coefficients = coefficients + changes_coefficients;
-        new_coefficients( coefficients_to_est ) = updated_coefficients( coefficients_to_est );
-        //Rcout<< "ll val: \n"  << new_ll_val << "\n";
+        int correction_step = 0;
+        do{
+          correction_step = correction_step + 1;
+          changes_coefficients = stepsize_vec % ( inverted_mat*short_score_vec );
+          arma::vec updated_coefficients = coefficients + changes_coefficients;
+          new_coefficients( coefficients_to_est ) = updated_coefficients( coefficients_to_est );
+
+          //create prior entities mat & fisher info
+          coefficient_mat = reshape( new_coefficients , num_rows_coefficient_mat , k-1 );
+          priors_entities_mat.col(0).fill(1);
+          priors_entities_mat.cols( 1 , k-1 ) = exp( covariate_mat * coefficient_mat );
+          next_ll_val(0) = 0;
+          for ( int i = 0; i < num_ids; i++){
+            priors_entities_mat.row(i) /= accu( priors_entities_mat.row(i) );
+            next_ll_val += -log( sum( pr_entities_k_mat.row(i) % priors_entities_mat.row(i) ) );
+          }
+          if( next_ll_val(0) > new_ll_val(0) ){
+            stepsize_vec.fill(0.5*stepsize_vec(0));
+          }
+          else{
+            stepsize_vec.fill(pow(stepsize_vec(0),0.5));
+          }
+        }
+        while ( next_ll_val(0) > new_ll_val(0) && correction_step < 1000 );
+        if( penalty ){
+          new_ll_val = new_ll_val - log( det(-lower_hessian_mat) )/2;     // minus because ll_val is negative log likelihood
+        }
+        //Rcout<< "ll val: \n"  << next_ll_val << "\n";
         //Rcout<< "score vec: \n"  << short_score_vec << "\n";
+        //Rcout<< "stepsize: \n"  << stepsize_vec << "\n";
       }
       else{
         eval = max_eval+eval_pre;
         new_ll_val.fill(arma::datum::nan);
-      }
-      //create prior entities mat & fisher info
-      coefficient_mat = reshape( new_coefficients , num_rows_coefficient_mat , k-1 );
-      priors_entities_mat.col(0).fill(1);
-      priors_entities_mat.cols( 1 , k-1 ) = exp( covariate_mat * coefficient_mat );
-      for ( int i = 0; i < num_ids; i++){
-        priors_entities_mat.row(i) /= accu( priors_entities_mat.row(i) );
       }
     }
     else{
@@ -621,7 +641,7 @@ arma::field<arma::mat> stratEst_LCR_EM(arma::cube& output_cube, arma::cube& sum_
         }
       }
       if (eval > eval_pre+1 ) { eps_now = (1 - (new_ll_val(0) / ll_val(0))); }          // current epsilon
-      if ( eps_now < tol_eval ){ eps_now = tol_eval; }
+      //if ( eps_now < tol_eval ){ eps_now = tol_eval; }
       if ( new_ll_val(0) == 0 ){ eps_now = 0; }
       if ( new_ll_val.is_finite() ){  eps = eps_now; }                                  // only continue if no overshoot
       else { eps = arma::datum::nan; }
@@ -700,6 +720,8 @@ arma::field<arma::mat> stratEst_SE(arma::cube& output_cube, arma::cube& sum_outp
   convergence.fill(-1);
   arma::mat score_responses_slice( num_rows_response_mat , num_cols_response_mat , arma::fill::zeros );
   arma::mat score_trembles_slice( num_rows_response_mat , num_cols_response_mat , arma::fill::zeros );
+  arma::mat score_contribution_responses_mat( num_ids , num_responses_to_est , arma::fill::zeros );
+  arma::mat score_contribution_trembles_mat( num_ids , num_trembles_to_est , arma::fill::zeros );
 
   arma::mat pr_mat = response_mat % (1 - tremble_mat) + ( 1 - response_mat ) % ( tremble_mat / (tremble_mat.n_cols - 1) );
 
@@ -742,6 +764,7 @@ arma::field<arma::mat> stratEst_SE(arma::cube& output_cube, arma::cube& sum_outp
       for (int j = 0; j < num_responses_to_est ; j++) {
         score_contribution_responses(j) =   accu( score_responses_slice( find( indices_responses == j+1 ) ) );
       }
+      score_contribution_responses_mat.row(i) = score_contribution_responses.t();
       score_responses += score_contribution_responses;
       fisher_info_responses += score_contribution_responses * score_contribution_responses.t();
     }
@@ -754,6 +777,7 @@ arma::field<arma::mat> stratEst_SE(arma::cube& output_cube, arma::cube& sum_outp
       for (int j = 0; j < num_trembles_to_est ; j++) {
         score_contribution_trembles(j) +=  accu( score_trembles_slice( find( indices_trembles == j+1 ) ) );
       }
+      score_contribution_trembles_mat.row(i) = score_contribution_trembles.t();
       score_trembles += score_contribution_trembles;
       fisher_info_trembles += score_contribution_trembles * score_contribution_trembles.t();
     }
@@ -762,36 +786,56 @@ arma::field<arma::mat> stratEst_SE(arma::cube& output_cube, arma::cube& sum_outp
   // SEs of responses
   if( response == "mixed" && num_responses_to_est > 0 ){
     arma::mat inverse_fisher_info_responses = fisher_info_responses;
-    if( pinv( inverse_fisher_info_responses , fisher_info_responses ) ){
-      arma::mat identity_responses( num_responses_to_est , num_responses_to_est , arma::fill::eye );
-      arma::mat rows_mat_responses = repmat( responses , 1 , num_responses_to_est );
-      arma::mat cols_mat_responses = repmat( responses.t() , num_responses_to_est , 1 );
-      arma::mat no_sum_constraint_responses = cols_mat_responses;
-      for (int i = 0; i < num_responses_to_est ; i++) {
-        for (int j = 0; j < num_responses_to_est ; j++) {
-          arma::rowvec unique_indices_responses_row( num_cols_response_mat , arma::fill::zeros );
-          for (int l = 0; l < num_rows_response_mat ; l++) {
-            arma::rowvec indices_responses_row = indices_responses.row(l);
-            if( any( indices_responses_row == i+1 ) ){
-              indices_responses_row( find( indices_responses_row == i+1 ) );
-              unique_indices_responses_row = indices_responses_row;
-              l = num_rows_response_mat;
-            }
-          }
-          if( any( unique_indices_responses_row == j+1 ) ){
-            no_sum_constraint_responses(i,j) = 0;
-          }
-        }
+    if( false ){
+      arma::vec unique_clusters = unique( cluster_id_vec );
+      int num_clusters = unique_clusters.n_elem;
+      arma::cube score_contributions_clusters( num_responses_to_est ,num_responses_to_est , num_clusters , arma::fill::zeros );
+      for (int c = 0; c < num_clusters ; c++) {
+        arma::mat score_contribution_cluster = sum( score_contribution_responses_mat.rows( find( cluster_id_vec == unique_clusters(c) ) ) , 0 );
+        score_contributions_clusters.slice(c) = score_contribution_cluster.t() * score_contribution_cluster;
       }
-      identity_responses += no_sum_constraint_responses;
-      arma::mat jacobian_responses = rows_mat_responses % ( identity_responses - cols_mat_responses );
-      arma::mat covar_responses_mat = jacobian_responses * inverse_fisher_info_responses * jacobian_responses.t() ;
-      responses_covar = covar_responses_mat;
-      SE_responses = sqrt( covar_responses_mat.diag() );
+      arma::mat meat_mat = sum( score_contributions_clusters , 2 );
+      if( pinv( inverse_fisher_info_responses , fisher_info_responses ) ){
+        responses_covar = inverse_fisher_info_responses * meat_mat * inverse_fisher_info_responses;
+        SE_responses = sqrt( responses_covar.diag() );
+      }
+      else{
+        responses_covar.fill(arma::datum::nan);
+        SE_responses.fill(arma::datum::nan);
+      }
     }
     else{
-      SE_responses.fill(arma::datum::nan);
-      responses_covar.fill(arma::datum::nan);
+      if( pinv( inverse_fisher_info_responses , fisher_info_responses ) ){
+        arma::mat identity_responses( num_responses_to_est , num_responses_to_est , arma::fill::eye );
+        arma::mat rows_mat_responses = repmat( responses , 1 , num_responses_to_est );
+        arma::mat cols_mat_responses = repmat( responses.t() , num_responses_to_est , 1 );
+        arma::mat no_sum_constraint_responses = cols_mat_responses;
+        for (int i = 0; i < num_responses_to_est ; i++) {
+          for (int j = 0; j < num_responses_to_est ; j++) {
+            arma::rowvec unique_indices_responses_row( num_cols_response_mat , arma::fill::zeros );
+            for (int l = 0; l < num_rows_response_mat ; l++) {
+              arma::rowvec indices_responses_row = indices_responses.row(l);
+              if( any( indices_responses_row == i+1 ) ){
+                indices_responses_row( find( indices_responses_row == i+1 ) );
+                unique_indices_responses_row = indices_responses_row;
+                l = num_rows_response_mat;
+              }
+            }
+            if( any( unique_indices_responses_row == j+1 ) ){
+              no_sum_constraint_responses(i,j) = 0;
+            }
+          }
+        }
+        identity_responses += no_sum_constraint_responses;
+        arma::mat jacobian_responses = rows_mat_responses % ( identity_responses - cols_mat_responses );
+        arma::mat covar_responses_mat = jacobian_responses * inverse_fisher_info_responses * jacobian_responses.t() ;
+        responses_covar = covar_responses_mat;
+        SE_responses = sqrt( covar_responses_mat.diag() );
+      }
+      else{
+        SE_responses.fill(arma::datum::nan);
+        responses_covar.fill(arma::datum::nan);
+      }
     }
 
   }
@@ -799,11 +843,32 @@ arma::field<arma::mat> stratEst_SE(arma::cube& output_cube, arma::cube& sum_outp
   // SEs of trembles
   if( num_trembles_to_est > 0 ){
     arma::mat inverse_fisher_info_trembles = fisher_info_trembles;
-    if( pinv( inverse_fisher_info_trembles , fisher_info_trembles ) ){
-      SE_trembles = sqrt( inverse_fisher_info_trembles.diag() );
+    if( false ){
+      arma::vec unique_clusters = unique( cluster_id_vec );
+      int num_clusters = unique_clusters.n_elem;
+      arma::cube score_contributions_clusters( num_trembles_to_est , num_trembles_to_est , num_clusters , arma::fill::zeros );
+      for (int c = 0; c < num_clusters ; c++) {
+        arma::mat score_contribution_cluster = sum( score_contribution_trembles_mat.rows( find( cluster_id_vec == unique_clusters(c) ) ) , 0 );
+        score_contributions_clusters.slice(c) = score_contribution_cluster.t() * score_contribution_cluster;
+      }
+      arma::mat meat_mat = sum( score_contributions_clusters , 2 );
+      if( pinv( inverse_fisher_info_trembles , fisher_info_trembles ) ){
+        trembles_covar = inverse_fisher_info_trembles * meat_mat * inverse_fisher_info_trembles;
+        SE_trembles = sqrt( trembles_covar.diag() );
+      }
+      else{
+        trembles_covar.fill(arma::datum::nan);
+        SE_trembles.fill(arma::datum::nan);
+      }
     }
     else{
-      SE_trembles.fill(arma::datum::nan);
+      arma::mat inverse_fisher_info_trembles = fisher_info_trembles;
+      if( pinv( inverse_fisher_info_trembles , fisher_info_trembles ) ){
+        SE_trembles = sqrt( inverse_fisher_info_trembles.diag() );
+      }
+      else{
+        SE_trembles.fill(arma::datum::nan);
+      }
     }
   }
 
@@ -1051,13 +1116,16 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec sid, arma::mat
       arma::vec fixed_mixed_responses_row = fixed_responses_row( find( fixed_responses_row != 0 && fixed_responses_row != 1 ) );
       int num_fixed_responses_row =  fixed_responses_row.n_elem;
       if( num_fixed_responses_row > 0 ){
-        if( arma::max( fixed_responses_row ) > 1  ){
+        if( arma::max( fixed_responses_row ) > 1+1e5  ){
           stop("Fixed responses cannot exceed one.");
+        }
+        else if( arma::max( fixed_responses_row ) > 1 && arma::max( fixed_responses_row ) <=  1+1e5 ){
+          fixed_responses_row( find( fixed_responses_row == arma::max( fixed_responses_row ) ) ).fill(1);
         }
         if( arma::max( fixed_responses_row ) < 0  ){
           stop("Fixed responses cannot be negative.");
         }
-        if( accu( fixed_responses_row ) > 1 ){
+        if( accu( fixed_responses_row ) > 1+1e5 ){
           stop("The sum of fixed shares cannot exceed one. stratEst cannot proceed with the current values.");
         }
         else if(  num_fixed_responses_row == num_outputs && accu( fixed_responses_row ) != 1 ){
@@ -1171,7 +1239,7 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec sid, arma::mat
   arma::vec cluster_id_vec( num_ids , arma::fill::zeros );
   bool CL = cluster.n_elem > 1;
   if( CL ){
-    SE = "bs";
+    //SE = "bs";
     arma::uvec zeros_cluster = find( cluster <= 0 );
     int num_zeros_cluster = zeros_cluster.n_elem;
     if ( num_zeros_cluster != 0 ){
@@ -1993,10 +2061,13 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec sid, arma::mat
         int num_coefficients_to_est = ( covariate_mat.n_cols * (k-1) );
         arma::mat R_shares = R(0,0);
         arma::vec start_intercepts( k-1  , arma::fill::zeros );
+        // if( ri == 1  ){
+        //   start_intercepts = log( R_shares( arma::span( 1 , ( k-1 ) ) , 0 ) / R_shares(0,0) );
+        // }
         if( ri > 0 ){
           start_intercepts = log( R_shares( arma::span( 1 , ( k-1 ) ) , 0 ) / R_shares(0,0) );
           arma::mat random_coefficient_mat( covariate_mat.n_cols , k-1 , arma::fill::randn );
-          coefficient_mat = random_coefficient_mat;
+          coefficient_mat = random_coefficient_mat/10 ;
         }
         coefficient_mat.row(0) = start_intercepts.t();
         arma::mat start_coefficients_mat  = reshape( coefficient_mat , num_coefficients_to_est , 1 );

@@ -84,7 +84,7 @@
 #'
 #' ## Latent class regression with data from Dal Bo and Frechette (2011)
 #' ## For the two treatments with R = 32, introduce a dummy which is one if delta = 3/4
-#' dummy <- as.numeric(DF2011$treatment > 3 )
+#' dummy <- as.numeric( DF2011$treatment > 3 )
 #' data <- as.data.frame(cbind(DF2011,dummy))
 #' strats <- rbind(ALLD,TFT)
 #' stratEst(data,strats,covariates = c("dummy"),lcr.runs = 500)
