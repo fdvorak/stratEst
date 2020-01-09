@@ -4,24 +4,22 @@
 \name{WSLS}
 \alias{WSLS}
 \title{WSLS}
-\format{An object of class \code{data.frame} with 2 rows and 6 columns.}
+\format{A data frame with 8 variables:
+\describe{
+  \item{\code{state}}{Indicates the state of the automaton.}
+  \item{\code{r0}}{Probability to play D (output is 0).}
+  \item{\code{r1}}{Probability to play C (output is 1).}
+  \item{\code{tremble}}{Probability of a tremble.}
+  \item{\code{t1}}{State transition if the action profile is CC (input is 1).}
+  \item{\code{t2}}{State transition if the action profile is CD (input is 2).}
+  \item{\code{t3}}{State transition if the action profile is DC (input is 3).}
+  \item{\code{t4}}{State transition if the action profile is DD (input is 4).}
+}}
 \usage{
 data(WSLS)
 }
 \description{
 Matrix representation of the prisoner's dilemma strategy which plays C if both players chose the same move last round, otherwise it plays D.
-}
-\details{
-#' @format A matrix with 1 row and 6 columns:
-\describe{
-  \item{Rows}{Each row corresponds to one states of the automaton.}{}
-  \item{Column 1}{Enumerates the states of the automaton.}
-  \item{Column 2}{Probability to play C given the current state of the automaton. }
-  \item{Column 3}{State transition if the history of play in the last round was CC (input is 1).}
-  \item{Column 4}{State transition if the history of play in the last round was CD (input is 2).}
-  \item{Column 5}{State transition if the history of play in the last round was DC (input is 3).}
-  \item{Column 6}{State transition if the history of play in the last round was DD (input is 4).}
-}
 }
 \examples{
 strategies <- rbind(PTFT,GRIM,ALLD,ALLC,TFT)

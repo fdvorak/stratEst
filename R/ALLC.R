@@ -1,18 +1,17 @@
 #' ALLC
 #'
-#' Prisoner's dilemma strategy which always cooperates as a data frame object.
+#' Prisoner's dilemma strategy that always cooperates.
 #'
-#' @format A data frame with 1 row and 6 columns:
+#' @format A data frame with 8 variables:
 #' \describe{
-#'   \item{Rows}{Each row corresponds to one state of the ALLC automaton.}{}
-#'   \item{Column \code{name}}{Contains the names of the rows of the automaton.}
-#'   \item{Column \code{state}}{Enumerates the states of the automaton.}
-#'   \item{Column \code{r1}}{Probability to play C (output is 1) if the automaton is in this state .}
-#'   \item{Column \code{trembles}}{Probability of a tremble in this state .}
-#'   \item{Column \code{t1}}{State transition if the action profile in the last round is CC (input is 1).}
-#'   \item{Column \code{t2}}{State transition if the action profile in the last round is CD (input is 2).}
-#'   \item{Column \code{t3}}{State transition if the action profile in the last round is DC (input is 3).}
-#'   \item{Column \code{t4}}{State transition if the action profile in the last round is DD (input is 4).}
+#'   \item{\code{state}}{Indicates the state of the automaton.}
+#'   \item{\code{r0}}{Probability to play D (output is 0).}
+#'   \item{\code{r1}}{Probability to play C (output is 1).}
+#'   \item{\code{tremble}}{Probability of a tremble.}
+#'   \item{\code{t1}}{State transition if the action profile is CC (input is 1).}
+#'   \item{\code{t2}}{State transition if the action profile is CD (input is 2).}
+#'   \item{\code{t3}}{State transition if the action profile is DC (input is 3).}
+#'   \item{\code{t4}}{State transition if the action profile is DD (input is 4).}
 #' }
 #' @usage data(ALLC)
 #' @examples

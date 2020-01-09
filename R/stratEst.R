@@ -3,7 +3,8 @@
 #' @importFrom Rcpp sourceCpp
 #' @param data Mandatory data frame object which contains the data for the estimation. Data has to be in the long format with variables in columns. Each row in \code{data} represents one observation. Three columns are mandatory: A column named \code{id} which identifies the observations of the same individual across the rows of the data frame. A column named \code{input} which indicates the type of information observed by the individual before giving a response. A column named \code{output} which contains the behavioral response of the individual after observing the input. If an individual plays the same game for more than one period with the same partner, \code{data} must contain a variable \code{period} which identifies the period within the game. If an individual plays the same game more than once with different partners, \code{data} must contain a variable \code{game} (or \code{supergame}) which identifies data from different games. For data from prisoner's dilemma experiments, two more data formats are possible. Instead of using the variables \code{input} and \code{output}, the data frame may also contain the variables \code{cooperation} and \code{other_cooperation}, or alternatively, the variables  \code{cooperation} and \code{group}. The variable \code{cooperation} should be a dummy which indicates if the participant cooperated in the current period. The variable \code{other_cooperation} should be a dummy which indicates if the other player cooperated in the current period. The variable \code{group} should be an identifier variable with a unique value for each unique match of two individuals.
 #' @param strategies Mandatory input object. Can be either a positive integer or a matrix. If an integer is used, the estimation function will generate the respective number of memory-one strategies with as many states as there are unique input values in \code{data}. A matrix can be used to supply a set of customized strategies. In the matrix, each row corresponds to one state of a strategy, starting with the start state of an automaton. The first column enumerates the states of each strategy in ascending order. A value of one in the first column indicates the begin of a new strategy with its start state. The columns after the first column contain the collection of multinomial response vectors. The number of columns for the multinomial response vectors must correspond to the number of unique non-zero outputs in data. Without a reference output - which is labeled with a zero in the output column of data - the columns specify the complete multinomial response distribution for each unique value in the output column. In this case, the response probabilities in each row must sum to one. With a reference output, the response probability for the response labeled with zero is omitted and the response probabilities in each row must sum to a value smaller or equal to one. The remaining columns of the strategies matrix define the deterministic state transitions. The number of columns must equal the number of unique non-zero inputs in the data. The numbers in the first column indicate the next state of the automaton if the input is one. The numbers in the second column indicate the next state if the input is two and so on.
-#' @param shares A column vector of strategy shares. The number of elements must correspond to the number of strategies defined in the strategies matrix. Elements which are NA are estimated from the data. If the object is not supplied, a share is estimated for every strategy defined in the strategies matrix.
+#' @param shares A matrix of strategy shares. The number of columns must correspond to the number of samples in the data. The number of rows must correspond to the number of strategies defined in the strategies matrix. Elements which are NA are estimated from the data. If the object is not supplied, one share is estimated for every strategy defined in the strategies matrix for every sample.
+#' @param coefficients Column vector which contains the latent class regression coefficients. The elements correspond to the vector of estimates.
 #' @param sample.id A character indicating the variable in data which contains an id for samples. Individual observations must be nested in samples. The same must be true for clusters if specified. If more than one sample exists, shares are estimated for each sample. All other parameters are estimated for the data of all samples. If the object is not supplied, it is assumed that the data contains only one sample.
 #' @param cluster.id A character indicating the variable in data which contains an id for clusters. Individual observations must be nested in clusters. for block-bootstrapped standard errors. Note that estimates will nevertheless be biased due to the non-linearity of the model.
 #' @param covariates A character vector indicating the covariates in data for latent class regression. Rows with the same id must have the values of covariates. Missing value are not allowed. Whenever a character vector is supplied for the input object 'covariates', a latent class regression model is estimated.
@@ -72,9 +73,7 @@
 #' input <- c(0,1,2,3,0,1,3,2)
 #' output <- c(2,2,1,2,2,1,2,1)
 #' data <- as.data.frame(cbind(id,game,period,input,output))
-#' strategies <- matrix(c(1,2,3,1,2,0.5,0,1,0.1,NA,0.5,1,0,0.9,NA,2,2,2,2,1,
-#' 3,3,3,2,1,2,2,2,2,1,3,3,3,2,1),5,7)
-#' model <- stratEst(data,strategies)
+#' model <- stratEst(data,strategies = 2)
 #'
 #' ## Replication of Dal Bo and Frechette (2011), Table 7 on page 424
 #' ## Results for the first treatment with delta = 1/2 and R = 32 (column 1 of Table 7)
@@ -87,7 +86,7 @@
 #' dummy <- as.numeric( DF2011$treatment > 3 )
 #' data <- as.data.frame(cbind(DF2011,dummy))
 #' strats <- rbind(ALLD,TFT)
-#' stratEst(data,strats,covariates = c("dummy"),lcr.runs = 500)
+#' stratEst(data,strats,covariates = c("dummy"),lcr.runs = 100)
 #' @export
 stratEst <- function( data, strategies, shares , coefficients , sample.id , cluster.id , covariates, response = "mixed", r.responses = "no", r.trembles = "global", select = "no", min.strategies = 1, crit = "bic", se = "yes", outer.runs = 10, outer.tol = 0, outer.max = 1000, inner.runs = 100, inner.tol = 0, inner.max = 10, lcr.runs = 1000, lcr.tol = 0, lcr.max = 1000, bs.samples = 1000, stepsize = 1 , penalty = F , print.messages = TRUE ){
   # crude argument checks
@@ -397,6 +396,21 @@ stratEst <- function( data, strategies, shares , coefficients , sample.id , clus
   # make data.frame out of strategies and skip responses, trembles
   stratEst.return <- list("shares" = cpp.output$shares, "strategies" = cpp.output$strategies, "responses" = cpp.output$responses, "trembles" = cpp.output$trembles,  "coefficients" = cpp.output$coefficients, "response.indices" = cpp.output$response.indices, "tremble.indices" = cpp.output$tremble.indices, "coefficient.mat" =  cpp.output$coefficient.mat, "loglike" = cpp.output$fit[1,1], "crit.val" = cpp.output$fit[1,2], "eval" = cpp.output$solver[1,1], "tol.val" = cpp.output$solver[1,2], "entropy" = cpp.output$fit[1,3], "state.obs" = cpp.output$state.obs, "assignments" = cpp.output$assignments, "priors" = cpp.output$priors, "shares.se" = cpp.output$shares.se, "responses.se" = cpp.output$responses.se, "trembles.se" = cpp.output$trembles.se, "coefficients.se" = cpp.output$coefficients.se, "shares.covar" = cpp.output$stats.list$shares.covar, "shares.score" =  cpp.output$stats.list$shares.score, "shares.fisher" = cpp.output$stats.list$shares.fisher, "responses.covar" = cpp.output$stats.list$responses.covar, "responses.score" = cpp.output$stats.list$responses.score, "responses.fisher" = cpp.output$stats.list$responses.fisher, "trembles.covar" = cpp.output$stats.list$trembles.covar, "trembles.score" = cpp.output$stats.list$trembles.score, "trembles.fisher" = cpp.output$stats.list$trembles.fisher, "coefficients.covar" = cpp.output$stats.list$coefficients.covar, "coefficients.score" = cpp.output$stats.list$coefficients.score, "coefficients.fisher" = cpp.output$stats.list$coefficients.fisher, "convergence" = cpp.output$convergence );
 
+  # shares post-processing
+  shares_matrix <- stratEst.return$shares
+  shares_matrix <- as.data.frame(shares_matrix)
+  sample_names <- rep(NA,num_samples)
+  for( smps in 1:num_samples ){
+    sample_names[smps] <-paste("sample",as.character(smps),sep=" ")
+  }
+  colnames(shares_matrix, do.NULL = FALSE)
+  colnames(shares_matrix) <- sample_names
+  strs_names <- rep(NA,nrow(stratEst.return$shares))
+  for( strs in 1:nrow(stratEst.return$shares) ){
+    strs_names[strs] <-paste("strategy",as.character(strs),sep=" ")
+  }
+  row.names(shares_matrix) <- strs_names
+  #stratEst.return$shares <- shares_matrix
 
   # strategies post-processing
   if( integer_strategies ){

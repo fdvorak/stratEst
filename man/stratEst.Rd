@@ -18,7 +18,9 @@ stratEst(data, strategies, shares, coefficients, sample.id, cluster.id,
 
 \item{strategies}{Mandatory input object. Can be either a positive integer or a matrix. If an integer is used, the estimation function will generate the respective number of memory-one strategies with as many states as there are unique input values in \code{data}. A matrix can be used to supply a set of customized strategies. In the matrix, each row corresponds to one state of a strategy, starting with the start state of an automaton. The first column enumerates the states of each strategy in ascending order. A value of one in the first column indicates the begin of a new strategy with its start state. The columns after the first column contain the collection of multinomial response vectors. The number of columns for the multinomial response vectors must correspond to the number of unique non-zero outputs in data. Without a reference output - which is labeled with a zero in the output column of data - the columns specify the complete multinomial response distribution for each unique value in the output column. In this case, the response probabilities in each row must sum to one. With a reference output, the response probability for the response labeled with zero is omitted and the response probabilities in each row must sum to a value smaller or equal to one. The remaining columns of the strategies matrix define the deterministic state transitions. The number of columns must equal the number of unique non-zero inputs in the data. The numbers in the first column indicate the next state of the automaton if the input is one. The numbers in the second column indicate the next state if the input is two and so on.}
 
-\item{shares}{A column vector of strategy shares. The number of elements must correspond to the number of strategies defined in the strategies matrix. Elements which are NA are estimated from the data. If the object is not supplied, a share is estimated for every strategy defined in the strategies matrix.}
+\item{shares}{A matrix of strategy shares. The number of columns must correspond to the number of samples in the data. The number of rows must correspond to the number of strategies defined in the strategies matrix. Elements which are NA are estimated from the data. If the object is not supplied, one share is estimated for every strategy defined in the strategies matrix for every sample.}
+
+\item{coefficients}{Column vector which contains the latent class regression coefficients. The elements correspond to the vector of estimates.}
 
 \item{sample.id}{A character indicating the variable in data which contains an id for samples. Individual observations must be nested in samples. The same must be true for clusters if specified. If more than one sample exists, shares are estimated for each sample. All other parameters are estimated for the data of all samples. If the object is not supplied, it is assumed that the data contains only one sample.}
 
@@ -109,9 +111,7 @@ period <- c(1,2,3,4,1,2,3,4)
 input <- c(0,1,2,3,0,1,3,2)
 output <- c(2,2,1,2,2,1,2,1)
 data <- as.data.frame(cbind(id,game,period,input,output))
-strategies <- matrix(c(1,2,3,1,2,0.5,0,1,0.1,NA,0.5,1,0,0.9,NA,2,2,2,2,1,
-3,3,3,2,1,2,2,2,2,1,3,3,3,2,1),5,7)
-model <- stratEst(data,strategies)
+model <- stratEst(data,strategies = 2)
 
 ## Replication of Dal Bo and Frechette (2011), Table 7 on page 424
 ## Results for the first treatment with delta = 1/2 and R = 32 (column 1 of Table 7)
@@ -121,10 +121,10 @@ stratEst(data,strategies)
 
 ## Latent class regression with data from Dal Bo and Frechette (2011)
 ## For the two treatments with R = 32, introduce a dummy which is one if delta = 3/4
-dummy <- as.numeric(DF2011$treatment > 3 )
+dummy <- as.numeric( DF2011$treatment > 3 )
 data <- as.data.frame(cbind(DF2011,dummy))
 strats <- rbind(ALLD,TFT)
-stratEst(data,strats,covariates = c("dummy"),lcr.runs = 500)
+stratEst(data,strats,covariates = c("dummy"),lcr.runs = 100)
 }
 \references{
 Breitmoser, Y. (2015): Cooperation, but no reciprocity: Individual strategies in the repeated prisoner's dilemma, \emph{American Economic Review}, 105, 2882-2910.
