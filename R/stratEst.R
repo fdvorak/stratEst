@@ -1,56 +1,83 @@
-#' Estimation function for strategy estimation
+#' Strategy Estimation Function
 #' @useDynLib stratEst,.registration = TRUE
 #' @importFrom Rcpp sourceCpp
-#' @param data Mandatory data frame object which contains the data for the estimation. Data has to be in the long format with variables in columns. Each row in \code{data} represents one observation. Three columns are mandatory: A column named \code{id} which identifies the observations of the same individual across the rows of the data frame. A column named \code{input} which indicates the type of information observed by the individual before giving a response. A column named \code{output} which contains the behavioral response of the individual after observing the input. If an individual plays the same game for more than one period with the same partner, \code{data} must contain a variable \code{period} which identifies the period within the game. If an individual plays the same game more than once with different partners, \code{data} must contain a variable \code{game} (or \code{supergame}) which identifies data from different games. For data from prisoner's dilemma experiments, two more data formats are possible. Instead of using the variables \code{input} and \code{output}, the data frame may also contain the variables \code{cooperation} and \code{other_cooperation}, or alternatively, the variables  \code{cooperation} and \code{group}. The variable \code{cooperation} should be a dummy which indicates if the participant cooperated in the current period. The variable \code{other_cooperation} should be a dummy which indicates if the other player cooperated in the current period. The variable \code{group} should be an identifier variable with a unique value for each unique match of two individuals.
-#' @param strategies Mandatory input object. Can be either a positive integer or a matrix. If an integer is used, the estimation function will generate the respective number of memory-one strategies with as many states as there are unique input values in \code{data}. A matrix can be used to supply a set of customized strategies. In the matrix, each row corresponds to one state of a strategy, starting with the start state of an automaton. The first column enumerates the states of each strategy in ascending order. A value of one in the first column indicates the begin of a new strategy with its start state. The columns after the first column contain the collection of multinomial response vectors. The number of columns for the multinomial response vectors must correspond to the number of unique non-zero outputs in data. Without a reference output - which is labeled with a zero in the output column of data - the columns specify the complete multinomial response distribution for each unique value in the output column. In this case, the response probabilities in each row must sum to one. With a reference output, the response probability for the response labeled with zero is omitted and the response probabilities in each row must sum to a value smaller or equal to one. The remaining columns of the strategies matrix define the deterministic state transitions. The number of columns must equal the number of unique non-zero inputs in the data. The numbers in the first column indicate the next state of the automaton if the input is one. The numbers in the second column indicate the next state if the input is two and so on.
-#' @param shares A matrix of strategy shares. The number of columns must correspond to the number of samples in the data. The number of rows must correspond to the number of strategies defined in the strategies matrix. Elements which are NA are estimated from the data. If the object is not supplied, one share is estimated for every strategy defined in the strategies matrix for every sample.
+#' @param data A \code{stratEst.data} object or \code{data.frame}. The variables \code{id}, \code{game}, \code{period}, \code{input}, and \code{output} are mandatory. The variable \code{id} identifies observations of the same individual across games and periods. The factor \code{input} indicates the dicrete information observed by the individual before making a response. The factor \code{output} indicates the behavioral response observed.
+#' @param strategies A list of strategies. Each strategy is a data.frame of class \code{stratEst.strategy}. Each row of the data.frame represents one state of the strategy. The first row defines the initial state which is entered if the variable input is NA. Column names which start with the string 'output.' indicate the columns which contain the multinomial response probabilities of the strategy. For example, a column labeled 'output.x' contains the probability to observe the output 'x'. The column 'tremble' contains a tremble probability for pure responses. Column names which start with the string 'input.' indicate the columns which contain the deterministic state transition of the strategy. For example, a column with name 'input.x' indicates the state transition after observing input 'x'.
+#' @param shares A vector of strategy shares. The elements to the order of strategies in the list \code{strategies}. Shares which are \code{NA} are estimated from the data. With more than one sample and sample specific shares, a list of column vectors is required.
 #' @param coefficients Column vector which contains the latent class regression coefficients. The elements correspond to the vector of estimates.
-#' @param sample.id A character indicating the variable in data which contains an id for samples. Individual observations must be nested in samples. The same must be true for clusters if specified. If more than one sample exists, shares are estimated for each sample. All other parameters are estimated for the data of all samples. If the object is not supplied, it is assumed that the data contains only one sample.
-#' @param cluster.id A character indicating the variable in data which contains an id for clusters. Individual observations must be nested in clusters. for block-bootstrapped standard errors. Note that estimates will nevertheless be biased due to the non-linearity of the model.
-#' @param covariates A character vector indicating the covariates in data for latent class regression. Rows with the same id must have the values of covariates. Missing value are not allowed. Whenever a character vector is supplied for the input object 'covariates', a latent class regression model is estimated.
-#' @param response String which can be set to \code{"pure"} or \code{"mixed"}. If set to \code{"pure"} all response probabilities estimated from the data are pure responses. If set to \code{"mixed"} all response probabilities estimated from the data are mixed responses. The default is \code{"mixed"}.
+#' @param covariates A character vector indicating the names of the variables in data that are the covariates of the latent class regression model. Rows with the same id must have the values of covariates. Missing value are not allowed.
+#' @param sample.id A character indicating the name of the variable which identifies the samples. Individual observations must be nested in samples. The same must be true for clusters if specified. If more than one sample exists, shares are estimated for each sample. All other parameters are estimated for the data of all samples. If the object is not supplied, it is assumed that the data contains only one sample.
+#' @param response A string which can be set to \code{"pure"} or \code{"mixed"}. If set to \code{"pure"} all estimated response probabilities are pure, i.e. either zero or one. If set to \code{"mixed"} all estimated response probabilities are mixed. The default is \code{"mixed"}.
+#' @param sample.specific A character vector defining which model parameters are sample specific. If the vector contains the character \code{"shares"} (\code{"responses"}, \code{"trembles"}), the estimation function estimates a set of shares (responses, trembles) for each sample in the data. If the vector does not contains the character \code{"shares"} (\code{"responses"}, \code{"trembles"}) one set of shares (responses, trembles) is estimated for the pooled data of all samples. Default is \code{c("shares","responses","trembles")}.
 #' @param r.responses A string which can be set to \code{"no"}, \code{"strategies"}, \code{"states"} or \code{"global"}. If set to \code{"strategies"}, the estimation function estimates strategies with one strategy specific vector of responses in every state of the strategy. If set to \code{"states"}, one state specific vector of responses is estimated for each state. If set to \code{"global"}, a single vector of responses is estimated which applies in every state of each strategy. Default is \code{"no"}.
-#' @param r.trembles String which can be set to \code{"no"}, \code{"strategies"}, \code{"states"} or \code{"global"}. If set to \code{"strategies"}, the estimation unction estimates strategies with one strategy specific tremble probability. If set to  \code{"states"}, one state specific tremble probability is estimated for each state. If set to \code{"global"}, a single tremble is estimated which applies in every state of each strategy. Default is \code{"global"}.
-#' @param select String which can be set to \code{"no"}, \code{"strategies"}, \code{"responses"}, \code{"trembles"}, \code{"both"}, and \code{"all"}. If set to \code{"strategies"}, \code{"responses"}, \code{"trembles"}, the number of strategies, responses, trembles respectively are selected based on the selection criterion specified in option \code{"crit"}. If set to \code{"both"}, the number of responses and trembles are selected. If set to \code{"all"}, the number of strategies, responses, and trembles are selected. Note that the selection of responses and trembles occurs within the scope of the restriction set to these parameters (E.g. if \code{r.responses} is set to \code{"strategies"}, \code{select = "responses"} will select responses within each strategy). Default is \code{"no"}.
-#' @param min.strategies Integer which specifies the minimum number of strategies for strategy selection. The selection procedure stops if the minimum is reached.
-#' @param crit String which can be set to \code{"bic"}, \code{"aic"} or \code{"icl"}. If set to \code{"bic"}, model selection based on the Bayesian Information criterion is performed. If set to \code{"aic"}, the Akaike Information criterion is used. If set to \code{"icl"} the Integrated Classification Likelihood criterion is used. Default is \code{"bic"}.
-#' @param se String which can be set to \code{"no"}, \code{"yes"} or \code{"bs"}. If set to \code{"no"}, standard errors are not reported. If set to \code{"yes"}, analytic standard errors are reported. If set to \code{"bs"}, bootstrapped standard errors are reported for responses and trembles. Default is \code{"yes"}.
-#' @param outer.runs Positive integer which stets the number of outer runs of the solver. Default is 10.
-#' @param outer.tol Positive number which stets the tolerance of the continuation condition of the outer runs. The iterative algorithm stops if the relative decrease of the log-likelihood is smaller than \code{outer.tol}. Default is 0.
-#' @param outer.max Positive integer which stets the maximum number of iterations of the outer runs of the solver. The iterative algorithm stops if it did not converge after \code{"outer.max"} iterations. Default is 1000.
-#' @param inner.runs  Positive integer which stets the number of inner runs of the solver. Default is 100.
-#' @param inner.tol Positive number which stets the tolerance of the continuation condition of the inner EM runs. The iterative algorithm stops if the relative decrease of the log-likelihood is smaller than \code{inner.tol}. Default is 0.
-#' @param inner.max Positive integer which stets the maximum number of iterations of the inner EM runs. The iterative algorithm stops if it did not converge after \code{inner.max} iterations. Default is 100.
-#' @param lcr.runs Positive integer which stets the number of estimation runs for latent class regression. Default is 100.
-#' @param lcr.tol Positive number which stets the tolerance of the continuation condition of the Latent Class Regression runs. The iterative algorithm stops if the relative decrease of the log-likelihood is smaller than \code{lcr.tol}. Default is 0.
-#' @param lcr.max Positive integer which stets the maximum number of iterations of the Latent Class Regression EM runs. The iterative algorithm stops if it did not converge after \code{lcr.max} iterations. Default is 1000.
-#' @param bs.samples Positive integer which sets the number of bootstrap samples drawn with replacement.
-#' @param stepsize Positive number which sets the stepsize of the Fisher scoring algorithm used to update the coefficients of the latent class regression model. Default is one. Values smaller than one slow down the convergence of the algorithm.
-#' @param penalty A logical value indicating if the Firth penalty is used to estimate the coefficients of the latent class regression model. Default is FALSE. Independent of the logical value specified, the penalty is always used in the bootstrap of the standard errors of latent class regression coefficients.
-#' @param print.messages Logical, if \code{TRUE} messages are printed which illustrate the status of the estimation process.
+#' @param r.trembles A string which can be set to \code{"no"}, \code{"strategies"}, \code{"states"} or \code{"global"}. If set to \code{"strategies"}, the estimation unction estimates strategies with one strategy specific tremble probability. If set to  \code{"states"}, one state specific tremble probability is estimated for each state. If set to \code{"global"}, a single tremble probability is estimated which globally. Default is \code{"global"}.
+#' @param select A character vector indicating which model parameters are selected. If the vector contains the character \code{"strategies"} (\code{"responses"}, \code{"trembles"}), the number of strategies (responses, trembles) is selected based on the selection criterion specified in \code{"crit"}. The selection of responses and trembles occurs obeying the restriction specified in \code{r.responses} and \code{r.trembles}. (E.g. if \code{r.responses} is set to \code{"strategies"}, \code{select = "responses"} will select responses within each strategy). Default is \code{NULL}.
+#' @param min.strategies An integer which specifies the minimum number of strategies in case of strategy selection. The strategy selection procedure stops if the minimum is reached.
+#' @param crit A string which can be set to \code{"bic"}, \code{"aic"} or \code{"icl"}. If set to \code{"bic"}, model selection based on the Bayesian Information criterion is performed. If set to \code{"aic"}, the Akaike Information criterion is used. If set to \code{"icl"} the Integrated Classification Likelihood criterion is used. Default is \code{"bic"}.
+#' @param se A string which can be set to \code{"analytic"} or \code{"bootstrap"}. If set to \code{"bootstrap"}, bootstrapped standard errors are reported. Default is \code{"analytic"}.
+#' @param outer.runs A positive integer which stets the number of outer runs of the solver. Default is 1.
+#' @param outer.tol A positive number which stets the tolerance of the continuation condition of the outer runs. The iterative algorithm stops if the relative decrease of the log-likelihood is smaller than \code{outer.tol}. Default is 0.
+#' @param outer.max A positive integer which stets the maximum number of iterations of the outer runs of the solver. The iterative algorithm stops if it did not converge after \code{"outer.max"} iterations. Default is 1000.
+#' @param inner.runs  A positive integer which stets the number of inner runs of the solver. Default is 10.
+#' @param inner.tol A positive number which stets the tolerance of the continuation condition of the inner EM runs. The iterative algorithm stops if the relative decrease of the log-likelihood is smaller than \code{inner.tol}. Default is 0.
+#' @param inner.max A positive integer which stets the maximum number of iterations of the inner EM runs. The iterative algorithm stops if it did not converge after \code{inner.max} iterations. Default is 10.
+#' @param lcr.runs A positive integer which stets the number of estimation runs for latent class regression. Default is 100.
+#' @param lcr.tol A positive number which stets the tolerance of the continuation condition of the Latent Class Regression runs. The iterative algorithm stops if the relative decrease of the log-likelihood is smaller than \code{lcr.tol}. Default is 0.
+#' @param lcr.max A positive integer which stets the maximum number of iterations of the Latent Class Regression EM runs. The iterative algorithm stops if it did not converge after \code{lcr.max} iterations. Default is 1000.
+#' @param bs.samples A positive integer which sets the number of bootstrap samples drawn with replacement.
+#' @param quantiles A numeric vector indicating the quantiles of the sampling distribution of the estimated parameters. The quantiles are identified based on the standard error or based on bootstrapping the sampling distribution of the parameter.
+#' @param stepsize A positive number which sets the stepsize of the Fisher scoring algorithm used to estimate the coefficients of the latent class regression model. Default is one. Values smaller than one slow down the convergence of the algorithm.
+#' @param penalty A logical indicating if the Firth penalty is used to estimate the coefficients of the latent class regression model. Default is \code{FALSE}. Irrespective of the value specified here, the penalty is used in the case of a bootstrap of the standard errors of latent class regression coefficients.
+#' @param verbose A logical, if \code{TRUE} messages of the estimation process and a summary of the estimated model is printed to the console. Default is \code{TRUE}.
 #' @note The strategy estimation method was introduced by (Dal Bo & Frechette 2011) to estimate the relative frequency of a fixed set of pure strategies in the indefinitely repeated prisoner's dilemma. Breitmoser (2015) extended the method to the estimation of behavior strategies. The \pkg{stratEst} package uses the EM algorithm (Dempster, Laird & Rubin 1977) and the Newton-Raphson method to obtain maximum-likelihood estimates for the population shares and response parameters of a set of candidate strategies. The package builds on other software contributions of the R community. To increase speed the estimation procedures, the package uses integration of C++ and R achieved by the Rcpp package (Eddelbuettel & Francois 2011) and the open source linear algebra library for the C++ language RppArmadillo (Sanderson & Curtin 2016).
-#' @return The function returns a list with the following elements.
-#' \item{shares}{Matrix which contains the estimates of population shares for the strategies. The order of rows corresponds to the order of strategies defined in the input object 'strategies'. Columns correspond to the samples defined in 'samples'. Can be used as input object of the estimation function.}
-#' \item{strategies}{Matrix which contains the strategies of the model. Can be used as input object of the of the estimation function.}
-#' \item{responses}{Column vector which contains the response probabilities of the strategies. The value -1 indicates that the corresponding response could not be estimated since data does not contain observations the model assigns to the corresponding state.}
-#' \item{trembles}{Column vector which contains the tremble probabilities of the strategies. The value -1 indicates that the corresponding response could not be estimated since data does not contain observations the model assigns to the corresponding state.}
-#' \item{coefficients}{Column vector which contains the Latent Class Regression coefficients for strategies.}
-#' \item{response.mat}{Matrix which contains the estimates of the response probabilities for the columns of the strategy matrix which represent the response probabilities.}
-#' \item{tremble.mat}{Matrix which contains the estimates of the tremble probabilities for the columns of the strategy matrix which represent the response probabilities.}
-#' \item{coefficient.mat}{Matrix which contains the latent class regression coefficients of strategies in columns. Note that the coefficients of the first strategy are one by definition.}
-#' \item{loglike}{The log-Likelihood value corresponding to the reported estimates. Bigger values indicate a better fit of the model to the data.}
-#' \item{crit.val}{The value of the selection criterion defined under \code{crit}. Bigger values indicate a better fit of the model.}
-#' \item{eval}{Number of iterations of the solver. The reported number is the sum of iterations performed in the inner and the outer run which led to the reported estimates.}
-#' \item{tol.val}{The tolerance value in the last iteration.}
-#' \item{entropy}{Entropy of the assignments.}
+#' @return An object of class \code{stratEst}. A list with the following elements.
+#' \item{strategies}{A list of fitted strategies.}
+#' \item{shares}{Matrix of strategy shares. The order of rows corresponds to the order of strategies defined in the input object \code{strategies}.}
+#' \item{responses}{Matrix of response probabilities. The value \code{NA} indicates that the corresponding response could not be estimated since data does not contain observations the model assigns to the corresponding state.}
+#' \item{trembles}{Matrix of tremble probabilities of the strategies. The value \code{NA} indicates that the corresponding response could not be estimated since data does not contain observations the model assigns to the corresponding state.}
+#' \item{coefficients}{Matrix of latent class regression coefficients for strategies.}
+#' \item{shares.par}{Estimated strategy shares.}
+#' \item{responses.par}{Estimated response probabilities.}
+#' \item{trembles.par}{Estimated tremble probabilities.}
+#' \item{coefficients.par}{Estimated latent class regression coefficients.}
+#' \item{shares.indices}{Indices of strategy shares.}
+#' \item{responses.indices}{Indices of response probabilities.}
+#' \item{trembles.indices}{Indices of tremble probabilities.}
+#' \item{coefficients.indices}{Indices of latent class regression coefficients.}
+#' \item{loglike}{The log-likelihood of the model. Larger values indicate a better fit of the model to the data.}
+#' \item{crit.val}{The value of the selection criterion defined under \code{crit}. Larger values indicate a better fit of the model.}
+#' \item{eval}{Number of iterations of the solver. The reported number is the sum of iterations performed in the inner and the outer run which produced the reported estimates.}
+#' \item{tol.val}{The percentual decrease of the log-likelihood in the last iteration of the algorithm. }
+#' \item{convergence}{Maximum absolute score of the model parameters. Small values indicate convergence of the algorithm to a (local) maximum of the negative log likelihood.}
+#' \item{entropy}{Entropy of the posterior probability assignments of indviduals to strategies.}
 #' \item{state.obs}{A column vector with the number of weighted observations for each strategy state corresponding to the rows of \code{strategies}.}
-#' \item{assignments}{Matrix which contains the posterior probability assignments of individuals to strategies. The rows of the matrix correspond to the ID sorted in ascending order beginning with the individual with the lowest ID. The columns correspond to the strategies, starting with the first strategy defined in the strategy matrix in column one.}
-#' \item{priors}{Matrix which contains the individual prior probabilities of individuals as predicted by the covariate vectors of the individuals. The rows correspond to the ID sorted in ascending order beginning with the individual with the lowest ID. The columns correspond to the strategies, starting with the first strategy defined in the strategy matrix.}
-#' \item{shares.se}{Matrix which contains the standard errors of the estimated shares. The elements correspond to the matrix of estimates.}
-#' \item{responses.se}{Column vector which contains the standard errors of the reported responses. The elements correspond to the vector of estimates.}
-#' \item{trembles.se}{Column vector which contains the standard errors of the reported trembles. The elements correspond to the vector of estimates.}
-#' \item{coefficients.se}{Column vector which contains the standard errors of the reported coefficients. The elements correspond to the vector of estimates.}
-#' \item{convergence}{Row vector which reports the maximum value of the score vector of shares, responses, trembles, and latent class regression coefficients. Small values indicate convergence of the algorithm to a (local) maximum of the negative log likelihood. Because of the sum to one constraint the score of the shares will not be close to zero if some of the shares are fixed.}
+#' \item{posterior.assignments}{Posterior probability of each individual to use a strategy.}
+#' \item{prior.assignments}{Prior probability of each individual to use a strategy as predicted by the individual covariates.}
+#' \item{shares.se}{Standard errors of the estimated shares.}
+#' \item{responses.se}{Standard errors of the estimated responses.}
+#' \item{trembles.se}{Standard errors of the estimated trembles.}
+#' \item{coefficients.se}{Standard errors of the estimated coefficients.}
+#' \item{shares.score}{Score of the estimated shares.}
+#' \item{responses.score}{Score of the reported responses.}
+#' \item{trembles.score}{Score of the reported trembles.}
+#' \item{coefficients.score}{Score of the reported coefficients.}
+#' \item{shares.fisher}{Fisher information of the estimated shares.}
+#' \item{responses.fisher}{Fisher information of the reported responses.}
+#' \item{trembles.fisher}{Fisher information of the reported trembles.}
+#' \item{coefficients.fisher}{Fisher information of the reported coefficients.}
+#' \item{num.obs}{Number of observations.}
+#' \item{num.ids}{Number of individuals.}
+#' \item{num.par}{Total number of model parameters.}
+#' \item{free.par}{Total numbe rof free model parameters.}
+#' \item{res.degrees}{Residual degrees of freedom (num.ids - free.par).}
+#' \item{shares.quantiles}{Quantiles of the estimated shares.}
+#' \item{responses.quantiles}{Quantiles of the estimated response probabilities.}
+#' \item{trembles.quantiles}{Quantiles of the estimated tremble probabilities.}
+#' \item{coefficients.quantiles}{Quantiles of the estimated latent class regression coefficients.}
+#' \item{gammas}{Gamma parameter of the model.}
+#' \item{gammas.par}{Estimated gamma parameters.}
+#' \item{gammas.se}{Standard errors of the gamma parameters.}#
+#' \item{crit}{Values of the information criteria.}
 #' @description Performs variants of the strategy estimation method.
 #' @details The estimation function \code{stratEst()} returns maximum-likelihood estimates for the population shares and response parameters of a set of candidate strategies given some data from an economic experiment. Candidate strategies can be supplied by the user in the form of deterministic finite-state automata. The number and the complexity of strategies can be restricted by the user or selected based on information criteria. stratEst also features latent class regression to assess the influence of covariates on strategy choice.
 #' @references
@@ -64,408 +91,176 @@
 #'
 #' Sanderson, C. and R. Curtin (2016): Armadillo: a template-based C++ library for linear algebra. \emph{Journal of Open Source Software}, 1-26.
 #' @examples
-#' ## Fictitious data from a helping game
-#' ## Participant 62 plays reciprocal strategy.
-#' ## Participant 87 plays alternating strategy.
-#' id <- c(62,62,62,62,87,87,87,87)
-#' game <- c(4,4,4,4,4,4,4,4)
-#' period <- c(1,2,3,4,1,2,3,4)
-#' input <- c(0,1,2,3,0,1,3,2)
-#' output <- c(2,2,1,2,2,1,2,1)
-#' data <- as.data.frame(cbind(id,game,period,input,output))
-#' model <- stratEst(data,strategies = 2)
+#' ## Estimate strategies in the rock-paper-scissors game (roshambo.me).
+#' ## Compare the fit of a mixed strategy to a mixture of two conditional strategies.
+#' model.mixed <- stratEst( data.RPS , strategies.RPS[c("mixed")])
+#' model.conditional <- stratEst( data.RPS , strategies.RPS[c("anti","cyclic")])
+#' print(model.mixed$loglike)
+#' print(model.conditional$loglike)
 #'
-#' ## Replication of Dal Bo and Frechette (2011), Table 7 on page 424
-#' ## Results for the first treatment with delta = 1/2 and R = 32 (column 1 of Table 7)
-#' data <- DF2011[DF2011$treatment == 1,]
-#' strategies <- rbind(ALLD,ALLC,GRIM,TFT,WSLS,T2)
-#' stratEst(data,strategies)
+#' ## Replication of Dal Bo and Frechette (2011), Table 7, page 424
+#' model.DF2011 <- stratEst(data.DF2011,strategies.DF2011,sample.id="treatment" )
 #'
-#' ## Latent class regression with data from Dal Bo and Frechette (2011)
-#' ## For the two treatments with R = 32, introduce a dummy which is one if delta = 3/4
-#' dummy <- as.numeric( DF2011$treatment > 3 )
-#' data <- as.data.frame(cbind(DF2011,dummy))
-#' strats <- rbind(ALLD,TFT)
-#' stratEst(data,strats,covariates = c("dummy"),lcr.runs = 100)
+#' ## Replication of Fudenberg, Rand, Dreber (2012), Table 3, page 733
+#' # Note: The estimates for treatment bc = 4 reported in the paper represent a local optimum.
+#' model.FRD2012 <- stratEst(data.FRD2012,strategies.FRD2012,sample.id="bc")
+#'
 #' @export
-stratEst <- function( data, strategies, shares , coefficients , sample.id , cluster.id , covariates, response = "mixed", r.responses = "no", r.trembles = "global", select = "no", min.strategies = 1, crit = "bic", se = "yes", outer.runs = 10, outer.tol = 0, outer.max = 1000, inner.runs = 100, inner.tol = 0, inner.max = 10, lcr.runs = 1000, lcr.tol = 0, lcr.max = 1000, bs.samples = 1000, stepsize = 1 , penalty = F , print.messages = TRUE ){
-  # crude argument checks
+stratEst <- function( data , strategies , shares , coefficients , covariates , sample.id ,  response = "mixed" , sample.specific = c("shares","responses","trembles") , r.responses = "no" , r.trembles = "global" , select = NULL , min.strategies = 1 , crit = "bic" , se = "analytic" , outer.runs = 1 , outer.tol = 1e-10 , outer.max = 1000 , inner.runs = 10 , inner.tol = 1e-10 , inner.max = 10 , lcr.runs = 100 , lcr.tol = 1e-10 , lcr.max = 1000 , bs.samples = 1000 , quantiles = c(0.01,0.05,0.5,0.95,0.99) , stepsize = 1 , penalty = F , verbose = TRUE ){
+
   # check data
   if( missing(data) ) {
     stop("stratEst error: Mandatory input object 'data' missing.")
   }
-  data_frame <- as.data.frame(data)
-  id <- data_frame$id
-  supergame <- data_frame$game
-  if( is.null(supergame) ) {
-    supergame <- data_frame$supergame
+  else{
+    stratEst.return.data <- stratEst.check.data( data )
+    data <- stratEst.return.data$data
+    id <- stratEst.return.data$id
+    game <- stratEst.return.data$game
+    period <- stratEst.return.data$period
+    input <- stratEst.return.data$input
+    output <- stratEst.return.data$output
+    input_factor <- stratEst.return.data$input.factor
+    output_factor <- stratEst.return.data$output.factor
+    levels_input <- stratEst.return.data$levels.input
+    levels_output <- stratEst.return.data$levels.output
   }
-  period <- data_frame$period
-  group <- data_frame$group
-  cooperation <- data_frame$cooperation
-  if( is.null(cooperation) ) {
-    cooperation <- data_frame$coop
-  }
-  other_cooperation <- data_frame$other_cooperation
-  if( is.null(other_cooperation) ) {
-    other_cooperation <- data_frame$o_coop
-  }
-  input <- data_frame$input
-  output <- data_frame$output
 
-  # generate variable sample if missing
+  # check sample.id
   if( missing(sample.id) ){
     sample <- rep(1,length(id))
+    num_samples <- 1
+    sample_is_factor = FALSE
+    sample_levels = FALSE
   }
   else{
-    if( sample.id %in% colnames(data_frame) ){
-      sample <- data_frame[,sample.id]
-    }
-    else{
-      message_sample <- paste("stratEst error: The data does not contain the variable '",sample.id,"' "," specified as sample id.",sep="")
-      stop(message_sample)
-    }
+    stratEst.check.sample.id.return <- stratEst.check.sample.id( data , sample.id )
+    sample <- stratEst.check.sample.id.return$sample
+    sample_factor <- stratEst.check.sample.id.return$sample.factor
+    num_samples <- stratEst.check.sample.id.return$num.sample
+    sample_levels <- stratEst.check.sample.id.return$sample.levels
+    data$sample <- sample
+    sample_is_factor = TRUE
   }
 
-  data_frame$sample <- sample
-  num_samples <- length(unique(sample))
-
-
-  # generate variable cluster if missing
-  if( missing(cluster.id) ){
+  # check cluster.id
+  #if( T ){
     cluster <- matrix(0,1,1)
-  }
-  else{
-    if( cluster.id %in% colnames(data_frame) ){
-      cluster <- data_frame[,cluster.id]
-    }
-    else{
-      message_cluster <- paste("stratEst error: The data does not contain the variable '",cluster.id,"' "," specified as cluster id.",sep="")
-      stop(message_cluster)
-    }
-  }
+  #}
+  # else{
+  #   stratEst.check.cluster.id.return <- stratEst.check.cluster.id( data , cluster.id )
+  #   cluster <- stratEst.check.cluster.id.return$cluster
+  #   cluster_factor <- stratEst.check.cluster.id.return$cluster.factor
+  # }
 
-
-  # generate variable covariates if missing
+  # check covariates
   if( missing(covariates) ){
     covariate_mat <- matrix(0,1,1)
     LCR = FALSE
   }
   else{
-    covariate_mat <- NULL
-    for( i in 1:length(covariates) ){
-      if( covariates[i] %in% colnames(data_frame) ){
-        covariate_mat <- cbind(covariate_mat,data_frame[,covariates[i]])
-      }
-      else{
-        message_covariate <- paste("stratEst error: The data does not contain the variable '",covariates[i],"' "," specified as covariate.",sep="")
-        stop(message_covariate)
-      }
-      LCR = TRUE
-    }
+    covariate_mat <- stratEst.check.covariates( data , covariates )
+    LCR = TRUE
   }
 
-  # check mandatory data frame variables
-  if( is.null(id) ) {
-    stop("stratEst error: Data does not contain the variable 'id'.")
-  }
-  if( ( is.null(input) == F |  is.null(output) == F ) & ( is.null(group) == F |  is.null(cooperation) == F )  ){
-    stop("stratEst error: Make sure data contains the variables input and output. For data from the prisoner's dilemma the variables cooperation and group or cooperation and other_cooperation can also be used istead.")
-  }
-  if( is.null(cooperation) == F & is.null(group) & is.null(other_cooperation) ) {
-    stop("stratEst error: If data contains the variable cooperation, it must contain the variable group or other_cooperation.")
-  }
-  if( is.null(group) == F & is.null(cooperation) ) {
-    stop("stratEst error: If data contains the variable group, it must contain the variable cooperation.")
-  }
-  if( is.null(output) == F & is.null(input)  ){
-    stop("stratEst error: If data contains the variable output, it must contain the variable input.")
-  }
-  if( is.null(input) == F & is.null(output)  ){
-    stop("stratEst error: If data contains the variable input, it must contain the variable output.")
-  }
+  # check other inputs
+  stratEst.check.other.return <- stratEst.check.other( response , sample.specific , r.responses , r.trembles , select , min.strategies , crit , se , outer.runs , outer.tol , outer.max , inner.runs , inner.tol , inner.max , lcr.runs , lcr.tol , lcr.max , bs.samples , stepsize , penalty , verbose , quantiles )
+  select_strategies = stratEst.check.other.return$select.strategies
+  select_responses = stratEst.check.other.return$select.responses
+  select_trembles = stratEst.check.other.return$select.trembles
+  specific_shares = stratEst.check.other.return$specific.shares
+  specific_responses = stratEst.check.other.return$specific.responses
+  specific_trembles = stratEst.check.other.return$specific.trembles
+  specific_coefficients = stratEst.check.other.return$specific.coefficients
+  quantile_vec = stratEst.check.other.return$quantile.vec
+  print.messages = stratEst.check.other.return$print.messages
+  print.summary = stratEst.check.other.return$print.summary
+
+  # check strategies
   if( missing(strategies) ) {
-    stop("stratEst error: Mandatory input object strategies is missing. Use either an integer or a strategy matrix. ")
-  }
-
-  # generate variable supergame if missing
-  if( is.null(supergame) ) {
-    data_frame$supergame <- rep(1,length(id))
-    supergame <- data_frame$supergame
-  }
-
-  # generate variable period if missing
-  if( is.null(period) ){
-    data_frame$period <- rep(1,length(id))
-    period <- data_frame$period
-  }
-
-  # check outer.runs
-  if ( outer.runs < 0 | outer.runs%%1 != 0 ){
-    stop("stratEst error: Number of outer runs must be a positive integer. Default is 100.");
-  }
-
-  # check inner.runs
-  if ( inner.runs < 0 | inner.runs%%1 != 0 ){
-    stop("stratEst error: Number of inner runs must be a positive integer. Default is 100.");
-  }
-
-  # check outer.max
-  if ( outer.max < 0  | outer.max%%1 != 0){
-    stop("stratEst error: Number of outer max evaluations must be a positive integer. Default is 1000.");
-  }
-
-  # check inner.max
-  if ( inner.max < 0 | inner.max%%1 != 0 ){
-    stop("stratEst error: Number of inner max evaluations must be a positive integer. Default is 100.");
-  }
-
-  # check response
-  if ( response != "mixed" & response != "pure" ){
-    stop("stratEst error: The input object response has to be one of the following: \"mixed\" or \"pure\". Default is \"mixed\".");
-  }
-
-  # check r.responses
-  if ( r.responses != "no" & r.responses != "strategies" & r.responses != "states" & r.responses != "global"  ){
-    stop("stratEst error: The input object r.responses has to be one of the following: \"no\", \"strategies\", \"states\" or \"global\". Default is \"no\".");
-  }
-
-  # check r.trembles
-  if ( r.trembles != "no" & r.trembles != "strategies" & r.trembles != "states" & r.trembles != "global"  ){
-    stop("stratEst error: The input object r.trembles has to be one of the following: \"no\", \"strategies\", \"states\" or \"global\". Default is \"no\".");
-  }
-
-  # check select
-  if ( select != "no" & select != "strategies" & select != "responses"  & select != "trembles" & select != "both" & select != "all" ){
-    stop("stratEst error: The input object select has to be one of the following: \"no\", \"strategies\", \"responses\", \"trembles\", \"both\", or \"all\". Default is \"no\".");
-  }
-
-  # check crit
-  if ( crit != "aic" & crit != "bic" & crit != "icl" ){
-    stop("stratEst error: The input object crit has to be one of the following: \"aic\", \"bic\", or \"icl\". Default is \"bic\".");
-  }
-
-  # check bs.samples
-  if ( bs.samples < 0  | bs.samples%%1 != 0){
-    stop("stratEst error: The number of bootstrap samples must be a positive integer. Default is 1000.");
-  }
-
-  # check stepsize
-  if ( stepsize < 0 ){
-    stop("stratEst error: The newton.stepsize must be a positive number. Default is 1.");
-  }
-
-  # check penalty
-  if (  is.logical(penalty) == F){
-    stop("stratEst error: The input argument 'penalty' must be boolean. Default is FALSE.");
-  }
-
-  # sort data
-  # transform PD data into input output data structure
-  if( is.null(cooperation) == FALSE ){
-    # sort data frame
-    data_frame <- data_frame[order(data_frame$period), ]
-    data_frame <- data_frame[order(data_frame$supergame), ]
-    data_frame <- data_frame[order(data_frame$id), ]
-    # transform data
-    data <- transform_pd( data_frame )
-    input <- data[,4]
-    output <- data[,5]
+    stop("stratEst error: Mandatory input object 'strategies' is missing. Specify an integer or create a data.frame object.")
   }else{
-    # prepare data
-    data <- cbind(id,supergame,period,input,output,sample)
-    # sort data
-    data <- data[order(data[,3]), ]
-    data <- data[order(data[,2]), ]
-    data <- data[order(data[,1]), ]
+    stratEst.check.strategies.return <- stratEst.check.strategies( strategies , input_factor , output_factor , input , output , select_strategies )
+    strategies_matrix <- stratEst.check.strategies.return$strategies.matrix
+    trembles <- stratEst.check.strategies.return$trembles
+    num_strats <- stratEst.check.strategies.return$num_strats
+    unique_inputs <- stratEst.check.strategies.return$unique.inputs
+    unique_outputs <- stratEst.check.strategies.return$unique.outputs
+    num_unique_inputs <- stratEst.check.strategies.return$num.unique.inputs
+    num_unique_outputs <- stratEst.check.strategies.return$num.unique.outputs
+    sid <- stratEst.check.strategies.return$sid
+    integer_strategies <- stratEst.check.strategies.return$integer.strategies
+    response_mat_col_index <- stratEst.check.strategies.return$response.mat.col.index
+    names_strategies <- stratEst.check.strategies.return$names.strategies
   }
-
-  #check strategies
-  if( length(strategies) == 1 & sum( strategies%%1 == 0 ) == length(strategies) & sum( strategies > 0 ) == length(strategies) ){
-    integer_strategies = T
-    num_strats = strategies
-    unique_outputs = sort( unique( output[output != 0] ) )
-    unique_inputs = sort(unique( input ))
-    unique_non_zero_inputs = sort(unique( input[input != 0] ))
-    num_unique_inputs = length( unique_inputs )
-    num_unique_non_zero_inputs = length( unique_non_zero_inputs )
-    has_zero_input <- num_unique_inputs - num_unique_non_zero_inputs
-    num_unique_outputs = length( unique_outputs )
-    strat_states = rep(c(1:num_unique_inputs),num_strats)
-    response_par = matrix(NA,num_unique_inputs*num_strats,num_unique_outputs)
-    transition_mat = rep(1,num_unique_inputs*num_strats) %*% t.default(c((1+has_zero_input):num_unique_inputs))
-    strategies_matrix <- cbind(strat_states,response_par,transition_mat)
-    trembles <- rep( NA , nrow(strategies_matrix) )
-    sid <- rep(c(1:num_strats), each = num_unique_inputs )
-  }
-  else if( is.data.frame(strategies) ){
-    integer_strategies = F
-    state <- strategies$state
-    if( missing(state) ){
-      stop("stratEst error: The input object 'strategies' does not contain the variable 'state'.")
-    }
-    # check and generate responses
-    unique_outputs <- sort( unique( output[output != 0] ) )
-    num_unique_outputs <- length( unique_outputs )
-    response_mat <- matrix(NA,nrow(strategies),num_unique_outputs)
-    response_mat_col_index <- rep(NA,num_unique_outputs)
-    for( out in 1:num_unique_outputs ){
-      r_string <- as.character(paste( "r",as.character(unique_outputs[out]), sep=""))
-      if( r_string %in% colnames(strategies) ){
-        response_mat[,out] <- strategies[,r_string]
-        response_mat_col_index[out] <- grep(paste("^",r_string,"$",sep=""), colnames(strategies))
-      }
-      else{
-        message <- paste("stratEst error: There is an output with value ", unique_outputs[out] , " in the data but there is no column named '", r_string , "' in strategies.",sep="")
-        stop(message)
-      }
-    }
-    # check and generate transitions
-    unique_inputs <- unique( input[input != 0] )
-    order_inputs <- order( unique_inputs )
-    sorted_unique_inputs <- sort( unique_inputs )
-    num_unique_inputs <- length( sorted_unique_inputs )
-    transition_mat <- matrix(NA,nrow(strategies),num_unique_inputs)
-    transition_mat_col_index <- rep(NA,num_unique_inputs)
-    for( ins in 1:num_unique_inputs ){
-      t_string <- paste( "t",as.character(sorted_unique_inputs[ins]), sep="")
-      if( t_string %in% colnames(strategies) ){
-        transition_mat[,ins] <- strategies[,t_string]
-        transition_mat_col_index[ins] <- grep(paste("^",t_string,"$",sep=""), colnames(strategies))
-      }
-      else{
-        message <- paste("stratEst error: There is an input with value ", sorted_unique_inputs[ins] , " in the data but there is no column named '", t_string , "' in strategies.",sep="")
-        stop(message)
-      }
-      if( sum( transition_mat[,ins]%%1==0 ) < nrow(strategies) ){
-        message <- paste("stratEst error: The transition columns in 'strategies' must be integers. Check the column named '", t_string , "'.",sep="")
-        stop(message)
-      }
-      # check for tremble column
-      if( "tremble" %in% colnames(strategies) ){
-        tremble <- strategies[,"tremble"]
-      }
-      else{
-        tremble <- rep( NA , nrow(strategies) )
-      }
-    }
-    # generate strategy id if missing
-    sid <- strategies$sid
-    if( is.null(sid) ){
-      sid <- rep(NA,nrow(strategies))
-      num_strats <- 0
-      for( i in 1:nrow(strategies) ){
-        if( state[i] == 1 ){
-          num_strats <- num_strats + 1
-        }
-        sid[i] <- num_strats
-      }
-    }
-    else{
-      num_strats <- length(unique(sid))
-    }
-    strategies_matrix = cbind(state,response_mat,transition_mat)
-    trembles <- rep( NA , nrow(strategies_matrix) )
-  }
-  else{
-    stop("stratEst error: The input object 'strategies' must be an integer or a data frame.");
-  }
-
-  if ( ( select == "strategies" | select == "all" ) && num_strats == 1 ){
-    stop("stratEst error: Strategies cannot be selected if there is only one strategy.");
-  }
-
 
   #check shares
   if( missing(shares) ) {
     shares = matrix( NA , num_strats , num_samples )
+  }else{
+    shares <- stratEst.check.shares( shares , LCR , specific_shares , num_samples , num_strats , sample.id , sample_levels , select_strategies )
   }
 
   #check coefficients
   if( missing(coefficients) ) {
-   coefficients = matrix(0,1,1)
-  }
-  else{
-    if( LCR == F){
-      stop("stratEst error: There are no covariates specified. Use the input object 'covariates' to specify the names of the columns which contain the covariates in data.");
+    if( LCR ){
+      coefficient_mat = matrix(NA,length(covariates),num_strats,1)
+      coefficient_mat[,1] = 0
+    }else{
+      coefficient_mat = matrix(0,1,1)
     }
-   }
-
-  # make coefficients input object and fixable
-  cpp.output <- stratEst_cpp( data, strategies_matrix, sid, shares , trembles , coefficients, covariate_mat, LCR, cluster, response, r.responses, r.trembles, select, min.strategies, crit, se, outer.runs, outer.tol, outer.max, inner.runs, inner.tol, inner.max, lcr.runs, lcr.tol, lcr.max, bs.samples, print.messages, integer_strategies, stepsize , penalty )
-  # make data.frame out of strategies and skip responses, trembles
-  stratEst.return <- list("shares" = cpp.output$shares, "strategies" = cpp.output$strategies, "responses" = cpp.output$responses, "trembles" = cpp.output$trembles,  "coefficients" = cpp.output$coefficients, "response.indices" = cpp.output$response.indices, "tremble.indices" = cpp.output$tremble.indices, "coefficient.mat" =  cpp.output$coefficient.mat, "loglike" = cpp.output$fit[1,1], "crit.val" = cpp.output$fit[1,2], "eval" = cpp.output$solver[1,1], "tol.val" = cpp.output$solver[1,2], "entropy" = cpp.output$fit[1,3], "state.obs" = cpp.output$state.obs, "assignments" = cpp.output$assignments, "priors" = cpp.output$priors, "shares.se" = cpp.output$shares.se, "responses.se" = cpp.output$responses.se, "trembles.se" = cpp.output$trembles.se, "coefficients.se" = cpp.output$coefficients.se, "shares.covar" = cpp.output$stats.list$shares.covar, "shares.score" =  cpp.output$stats.list$shares.score, "shares.fisher" = cpp.output$stats.list$shares.fisher, "responses.covar" = cpp.output$stats.list$responses.covar, "responses.score" = cpp.output$stats.list$responses.score, "responses.fisher" = cpp.output$stats.list$responses.fisher, "trembles.covar" = cpp.output$stats.list$trembles.covar, "trembles.score" = cpp.output$stats.list$trembles.score, "trembles.fisher" = cpp.output$stats.list$trembles.fisher, "coefficients.covar" = cpp.output$stats.list$coefficients.covar, "coefficients.score" = cpp.output$stats.list$coefficients.score, "coefficients.fisher" = cpp.output$stats.list$coefficients.fisher, "convergence" = cpp.output$convergence );
-
-  # shares post-processing
-  shares_matrix <- stratEst.return$shares
-  shares_matrix <- as.data.frame(shares_matrix)
-  sample_names <- rep(NA,num_samples)
-  for( smps in 1:num_samples ){
-    sample_names[smps] <-paste("sample",as.character(smps),sep=" ")
-  }
-  colnames(shares_matrix, do.NULL = FALSE)
-  colnames(shares_matrix) <- sample_names
-  strs_names <- rep(NA,nrow(stratEst.return$shares))
-  for( strs in 1:nrow(stratEst.return$shares) ){
-    strs_names[strs] <-paste("strategy",as.character(strs),sep=" ")
-  }
-  row.names(shares_matrix) <- strs_names
-  #stratEst.return$shares <- shares_matrix
-
-  # strategies post-processing
-  if( integer_strategies ){
-    state <- stratEst.return$strategies[,1]
-    response_mat <- matrix(stratEst.return$strategies[,2:(1+num_unique_outputs)],nrow(stratEst.return$strategies), num_unique_outputs)
-    r_names <- rep(NA,num_unique_outputs)
-    for( outs in 1:num_unique_outputs ){
-      r_names[outs] <-paste("r",as.character(unique_outputs[outs]),sep="")
+  }else{
+    if( is.null( coefficients ) ){
+        if( LCR ){
+        coefficient_mat = matrix(NA,length(covariates),num_strats,1)
+        coefficient_mat[,1] = 0
+      }else{
+        coefficient_mat = matrix(0,1,1)
+      }
+    }else{
+      coefficient_mat <- stratEst.check.coefficients( coefficients , covariates , num_strats , names_strategies )
+      if( LCR == F ){
+        warning("stratEst warning: No covariates specified. The input object 'coefficients' is ignored.");
+      }
     }
-    colnames(response_mat, do.NULL = FALSE)
-    colnames(response_mat) <- r_names
-
-    transition_mat <- matrix(stratEst.return$strategies[,(1+num_unique_outputs+1):(1+num_unique_outputs+num_unique_non_zero_inputs)],nrow(stratEst.return$strategies), num_unique_non_zero_inputs)
-    t_names <- rep(NA,num_unique_non_zero_inputs )
-    for( ins in 1:num_unique_non_zero_inputs ){
-      t_names[ins] <-paste("t",as.character(unique_non_zero_inputs[ins]),sep="")
-    }
-    colnames(transition_mat, do.NULL = FALSE)
-    colnames(transition_mat) <- t_names
-
-    strategies <- as.data.frame(cbind(state,response_mat,transition_mat))
-    if( length(cpp.output$trembles) >= 1 ){
-      strategies$tremble <- cpp.output$stats.list$tremble_vec
-    }
-    stratEst.return$strategies <- strategies
-  }
-  else{
-    post_sid <- cpp.output$sid
-    unique_post_sid <- unique(post_sid)
-    strategies <- strategies[sid %in% unique_post_sid , ]
-    for( out in 1:num_unique_outputs ){
-      strategies[,response_mat_col_index[out]] <- stratEst.return$strategies[,(1+out)]
-    }
-    for( ins in 1:num_unique_inputs ){
-      strategies[,transition_mat_col_index[ins]] <- stratEst.return$strategies[,(1+num_unique_outputs+ins)]
-    }
-    if( length(cpp.output$trembles) >= 1 ){
-    strategies$tremble <- cpp.output$stats.list$tremble_vec
-    }
-    stratEst.return$strategies <- strategies
   }
 
-  # parameters which could not be estimated NA
-  stratEst.return$strategies[ stratEst.return$strategies == -1 ] = NA
+  #########################################################################################################
+  # PREPARE AND ORDER DATA
+  #########################################################################################################
 
+  # prepare data
+  data_matrix <- cbind(id,game,period,input,output,sample)
 
-  # delete empty list entries
-  if( length(stratEst.return$responses) == 0 ){
-    stratEst.return$response.indices = NULL
+  # sort data
+  data_matrix <- data_matrix[order(data_matrix[,3]), ]
+  data_matrix <- data_matrix[order(data_matrix[,2]), ]
+  data_matrix <- data_matrix[order(data_matrix[,1]), ]
+
+  # unique ids
+  num_obs <- nrow(data_matrix)
+  unique_ids <- sort(unique(id))
+  num_unique_ids <- length(unique_ids)
+
+  #########################################################################################################
+  # ESTIMATION
+  #########################################################################################################
+
+  # create cpp output
+  cpp.output <- stratEst_cpp( data_matrix, strategies_matrix, sid , shares , trembles , coefficient_mat, covariate_mat, LCR, cluster, quantile_vec , response, specific_shares , specific_responses , specific_trembles , specific_coefficients , r.responses, r.trembles, select_strategies , select_responses , select_trembles , min.strategies, crit, se, outer.runs, outer.tol, outer.max, inner.runs, inner.tol, inner.max, lcr.runs, lcr.tol, lcr.max, bs.samples , print.messages, integer_strategies, stepsize , penalty )
+
+  # stratEst.return object
+  stratEst.return <- list("strategies" = cpp.output$strategies, "shares" = cpp.output$shares, "coefficients" = cpp.output$coefficients, "responses" = cpp.output$responses, "trembles" = cpp.output$trembles, "shares.par" = cpp.output$shares.list$shares.par, "responses.par" = cpp.output$responses.list$responses.par, "trembles.par" = cpp.output$trembles.list$trembles.par, "coefficients.par" =  cpp.output$coefficients.list$coefficients.par,  "shares.indices" = cpp.output$shares.list$shares.indices, "responses.indices" = cpp.output$responses.list$responses.indices, "trembles.indices" = cpp.output$trembles.list$trembles.indices, "coefficients.indices" = cpp.output$coefficients.list$coefficients.indices, "loglike" = cpp.output$fit[1,1], "crit.val" = cpp.output$fit[1,2], "eval" = cpp.output$solver[1,1], "tol.val" = cpp.output$solver[1,2], "convergence" = cpp.output$convergence, "entropy" = cpp.output$fit[1,3], "state.obs" = cpp.output$state.obs, "posterior.assignment" = cpp.output$assignments, "prior.assignment" = cpp.output$priors, "shares.se" = cpp.output$shares.list$shares.se, "responses.se" = cpp.output$responses.list$responses.se, "trembles.se" = cpp.output$trembles.list$trembles.se, "coefficients.se" = cpp.output$coefficients.list$coefficients.se, "shares.covar" = cpp.output$shares.list$shares.covar, "shares.score" =  cpp.output$shares.list$shares.score, "shares.fisher" = cpp.output$shares.list$shares.fisher, "responses.covar" = cpp.output$responses.list$responses.covar, "responses.score" = cpp.output$responses.list$responses.score, "responses.fisher" = cpp.output$responses.list$responses.fisher, "trembles.covar" = cpp.output$trembles.list$trembles.covar, "trembles.score" = cpp.output$trembles.list$trembles.score, "trembles.fisher" = cpp.output$trembles.list$trembles.fisher, "coefficients.covar" = cpp.output$coefficients.list$coefficients.covar, "coefficients.score" = cpp.output$coefficients.list$coefficients.score, "coefficients.fisher" = cpp.output$coefficients.list$coefficients.fisher );
+
+  # post-processing
+  stratEst.return <- stratEst.post( cpp.output , stratEst.return , strategies , covariates , response , unique_ids , num_unique_ids , input , output , unique_inputs , unique_outputs , num_unique_inputs , num_unique_outputs , sample , sample.id , sample_factor , num_samples , specific_shares , specific_responses , specific_trembles , sample_is_factor , integer_strategies , cpp.output$lcr , response_mat_col_index , crit , num_obs , se , quantile_vec )
+
+  class(stratEst.return) <- c("stratEst","list")
+
+  # print summary
+  if( print.summary ){
+    summary( stratEst.return )
   }
-  if( length(stratEst.return$trembles) == 0 ){
-    stratEst.return$tremble.indices = NULL
-  }
-
-  stratEst.return <- stratEst.return[lapply(stratEst.return,length)>0]
 
   # return result
   return(stratEst.return)

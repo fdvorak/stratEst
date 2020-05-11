@@ -17,14 +17,10 @@ test_that("behavior strategies",  {
   t1 <- c(1,1)
   t2 <- c(2,2)
 
+  TFT1 = stratEst.strategy( inputs = c("1","2") , outputs = c("0","1") , num.states = 2 , responses = c(0,1,1,0) , transitions = c(1,2,1,2))
+  TFT2 = stratEst.strategy( inputs = c("1","2") , outputs = c("0","1") , num.states = 2  , transitions = c(1,2,1,2))
 
-  TFT1 =  as.data.frame(cbind(state,r1,t1,t2), row.names = c("TFT1.1","TFT1.2"))
-
-  r1 <- c(NA,NA)
-
-  TFT2 =   as.data.frame(cbind(state,r1,t1,t2), row.names = c("TFT2.1","TFT2.2"))
-
-  strategies = rbind(TFT1,TFT2)
+  strategies = list("TFT1"=TFT1,"TFT2"=TFT2)
   covariates = matrix(c(rep(1,N),rep(0,N/2),rep(1,N/2)),N,2)
 
   coefficient_mat = matrix(c(intercept,dummy),2,1)
@@ -48,7 +44,7 @@ test_that("behavior strategies",  {
   strategy_mat = rbind(TFT1,TFT2)
 
   id = rep(NA,Obs*2*N)
-  supergame = rep(1,Obs*2*N)
+  game = rep(1,Obs*2*N)
   period = rep(c(1:(Obs*2)),N)
   input = rep(c(rep(1,Obs),rep(2,Obs)),N)
   output = rep(NA,Obs*2*N)
@@ -63,18 +59,18 @@ test_that("behavior strategies",  {
   output <- ifelse( rand_vec >= pr_vec , 0 , 1 )
 
   covar = as.numeric(id>100)
-  data <- as.data.frame(cbind(id,supergame,period,input,output,covar))
 
+  data <- as.data.frame(cbind(id,game,period,input,output,covar))
+  data <- stratEst.data(data,input.vars = "input" , output = "output")
 
-  model = stratEst( data, strategies, covariates = "covar" , select="all", se="yes", crit = "icl", inner.runs = 100, inner.max = 10, outer.runs = 1,outer.max = 200,outer.tol = 0,lcr.runs = 100, print.messages = F)
+  model = stratEst( data, strategies, covariates = "covar" , select=c("strategies","responses","trembles"), crit = "icl", inner.runs = 100, inner.max = 10, outer.runs = 1,outer.max = 200,outer.tol = 0,lcr.runs = 100, verbose = F)
 
-  expect_equal( 0.33, round(model$shares[1],3) )
-  expect_equal( 0.67, round(model$shares[2],3) )
-  expect_equal( 0.231, round(model$responses[1],3) )
-  expect_equal( 0.110, round(model$trembles[1],3) )
-  expect_equal( 0.160, round(model$coefficients[1],3) )
-  expect_equal( 1.226, round(model$coefficients[2],3) )
-  expect_equal( 2 , length( model$shares ) )
-  expect_equal( 2 , length( model$responses ) )
-  expect_equal( 1 , length( model$trembles ) )
+  expect_equal( 0.350, round(as.numeric(model$shares[1]),3) )
+  expect_equal( 0.231, round(as.numeric(model$responses.par[2]),3) )
+  expect_equal( 0.110, round(as.numeric(model$trembles.par[1]),3) )
+  expect_equal( 1.386, round(as.numeric(model$coefficients.par[1]),3) )
+  expect_equal( 2 , length( as.numeric(model$shares ) ) )
+  expect_equal( 4 , length( as.numeric(model$responses.par ) ) )
+  expect_equal( 1 , length( as.numeric(model$trembles.par ) ) )
+
 })

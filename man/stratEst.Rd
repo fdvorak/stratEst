@@ -2,95 +2,145 @@
 % Please edit documentation in R/stratEst.R
 \name{stratEst}
 \alias{stratEst}
-\title{Estimation function for strategy estimation}
+\title{Strategy Estimation Function}
 \usage{
-stratEst(data, strategies, shares, coefficients, sample.id, cluster.id,
-  covariates, response = "mixed", r.responses = "no",
-  r.trembles = "global", select = "no", min.strategies = 1,
-  crit = "bic", se = "yes", outer.runs = 10, outer.tol = 0,
-  outer.max = 1000, inner.runs = 100, inner.tol = 0,
-  inner.max = 10, lcr.runs = 1000, lcr.tol = 0, lcr.max = 1000,
-  bs.samples = 1000, stepsize = 1, penalty = F,
-  print.messages = TRUE)
+stratEst(
+  data,
+  strategies,
+  shares,
+  coefficients,
+  covariates,
+  sample.id,
+  response = "mixed",
+  sample.specific = c("shares", "responses", "trembles"),
+  r.responses = "no",
+  r.trembles = "global",
+  select = NULL,
+  min.strategies = 1,
+  crit = "bic",
+  se = "analytic",
+  outer.runs = 1,
+  outer.tol = 1e-10,
+  outer.max = 1000,
+  inner.runs = 10,
+  inner.tol = 1e-10,
+  inner.max = 10,
+  lcr.runs = 100,
+  lcr.tol = 1e-10,
+  lcr.max = 1000,
+  bs.samples = 1000,
+  quantiles = c(0.01, 0.05, 0.5, 0.95, 0.99),
+  stepsize = 1,
+  penalty = F,
+  verbose = TRUE
+)
 }
 \arguments{
-\item{data}{Mandatory data frame object which contains the data for the estimation. Data has to be in the long format with variables in columns. Each row in \code{data} represents one observation. Three columns are mandatory: A column named \code{id} which identifies the observations of the same individual across the rows of the data frame. A column named \code{input} which indicates the type of information observed by the individual before giving a response. A column named \code{output} which contains the behavioral response of the individual after observing the input. If an individual plays the same game for more than one period with the same partner, \code{data} must contain a variable \code{period} which identifies the period within the game. If an individual plays the same game more than once with different partners, \code{data} must contain a variable \code{game} (or \code{supergame}) which identifies data from different games. For data from prisoner's dilemma experiments, two more data formats are possible. Instead of using the variables \code{input} and \code{output}, the data frame may also contain the variables \code{cooperation} and \code{other_cooperation}, or alternatively, the variables  \code{cooperation} and \code{group}. The variable \code{cooperation} should be a dummy which indicates if the participant cooperated in the current period. The variable \code{other_cooperation} should be a dummy which indicates if the other player cooperated in the current period. The variable \code{group} should be an identifier variable with a unique value for each unique match of two individuals.}
+\item{data}{A \code{stratEst.data} object or \code{data.frame}. The variables \code{id}, \code{game}, \code{period}, \code{input}, and \code{output} are mandatory. The variable \code{id} identifies observations of the same individual across games and periods. The factor \code{input} indicates the dicrete information observed by the individual before making a response. The factor \code{output} indicates the behavioral response observed.}
 
-\item{strategies}{Mandatory input object. Can be either a positive integer or a matrix. If an integer is used, the estimation function will generate the respective number of memory-one strategies with as many states as there are unique input values in \code{data}. A matrix can be used to supply a set of customized strategies. In the matrix, each row corresponds to one state of a strategy, starting with the start state of an automaton. The first column enumerates the states of each strategy in ascending order. A value of one in the first column indicates the begin of a new strategy with its start state. The columns after the first column contain the collection of multinomial response vectors. The number of columns for the multinomial response vectors must correspond to the number of unique non-zero outputs in data. Without a reference output - which is labeled with a zero in the output column of data - the columns specify the complete multinomial response distribution for each unique value in the output column. In this case, the response probabilities in each row must sum to one. With a reference output, the response probability for the response labeled with zero is omitted and the response probabilities in each row must sum to a value smaller or equal to one. The remaining columns of the strategies matrix define the deterministic state transitions. The number of columns must equal the number of unique non-zero inputs in the data. The numbers in the first column indicate the next state of the automaton if the input is one. The numbers in the second column indicate the next state if the input is two and so on.}
+\item{strategies}{A list of strategies. Each strategy is a data.frame of class \code{stratEst.strategy}. Each row of the data.frame represents one state of the strategy. The first row defines the initial state which is entered if the variable input is NA. Column names which start with the string 'output.' indicate the columns which contain the multinomial response probabilities of the strategy. For example, a column labeled 'output.x' contains the probability to observe the output 'x'. The column 'tremble' contains a tremble probability for pure responses. Column names which start with the string 'input.' indicate the columns which contain the deterministic state transition of the strategy. For example, a column with name 'input.x' indicates the state transition after observing input 'x'.}
 
-\item{shares}{A matrix of strategy shares. The number of columns must correspond to the number of samples in the data. The number of rows must correspond to the number of strategies defined in the strategies matrix. Elements which are NA are estimated from the data. If the object is not supplied, one share is estimated for every strategy defined in the strategies matrix for every sample.}
+\item{shares}{A vector of strategy shares. The elements to the order of strategies in the list \code{strategies}. Shares which are \code{NA} are estimated from the data. With more than one sample and sample specific shares, a list of column vectors is required.}
 
 \item{coefficients}{Column vector which contains the latent class regression coefficients. The elements correspond to the vector of estimates.}
 
-\item{sample.id}{A character indicating the variable in data which contains an id for samples. Individual observations must be nested in samples. The same must be true for clusters if specified. If more than one sample exists, shares are estimated for each sample. All other parameters are estimated for the data of all samples. If the object is not supplied, it is assumed that the data contains only one sample.}
+\item{covariates}{A character vector indicating the names of the variables in data that are the covariates of the latent class regression model. Rows with the same id must have the values of covariates. Missing value are not allowed.}
 
-\item{cluster.id}{A character indicating the variable in data which contains an id for clusters. Individual observations must be nested in clusters. for block-bootstrapped standard errors. Note that estimates will nevertheless be biased due to the non-linearity of the model.}
+\item{sample.id}{A character indicating the name of the variable which identifies the samples. Individual observations must be nested in samples. The same must be true for clusters if specified. If more than one sample exists, shares are estimated for each sample. All other parameters are estimated for the data of all samples. If the object is not supplied, it is assumed that the data contains only one sample.}
 
-\item{covariates}{A character vector indicating the covariates in data for latent class regression. Rows with the same id must have the values of covariates. Missing value are not allowed. Whenever a character vector is supplied for the input object 'covariates', a latent class regression model is estimated.}
+\item{response}{A string which can be set to \code{"pure"} or \code{"mixed"}. If set to \code{"pure"} all estimated response probabilities are pure, i.e. either zero or one. If set to \code{"mixed"} all estimated response probabilities are mixed. The default is \code{"mixed"}.}
 
-\item{response}{String which can be set to \code{"pure"} or \code{"mixed"}. If set to \code{"pure"} all response probabilities estimated from the data are pure responses. If set to \code{"mixed"} all response probabilities estimated from the data are mixed responses. The default is \code{"mixed"}.}
+\item{sample.specific}{A character vector defining which model parameters are sample specific. If the vector contains the character \code{"shares"} (\code{"responses"}, \code{"trembles"}), the estimation function estimates a set of shares (responses, trembles) for each sample in the data. If the vector does not contains the character \code{"shares"} (\code{"responses"}, \code{"trembles"}) one set of shares (responses, trembles) is estimated for the pooled data of all samples. Default is \code{c("shares","responses","trembles")}.}
 
 \item{r.responses}{A string which can be set to \code{"no"}, \code{"strategies"}, \code{"states"} or \code{"global"}. If set to \code{"strategies"}, the estimation function estimates strategies with one strategy specific vector of responses in every state of the strategy. If set to \code{"states"}, one state specific vector of responses is estimated for each state. If set to \code{"global"}, a single vector of responses is estimated which applies in every state of each strategy. Default is \code{"no"}.}
 
-\item{r.trembles}{String which can be set to \code{"no"}, \code{"strategies"}, \code{"states"} or \code{"global"}. If set to \code{"strategies"}, the estimation unction estimates strategies with one strategy specific tremble probability. If set to  \code{"states"}, one state specific tremble probability is estimated for each state. If set to \code{"global"}, a single tremble is estimated which applies in every state of each strategy. Default is \code{"global"}.}
+\item{r.trembles}{A string which can be set to \code{"no"}, \code{"strategies"}, \code{"states"} or \code{"global"}. If set to \code{"strategies"}, the estimation unction estimates strategies with one strategy specific tremble probability. If set to  \code{"states"}, one state specific tremble probability is estimated for each state. If set to \code{"global"}, a single tremble probability is estimated which globally. Default is \code{"global"}.}
 
-\item{select}{String which can be set to \code{"no"}, \code{"strategies"}, \code{"responses"}, \code{"trembles"}, \code{"both"}, and \code{"all"}. If set to \code{"strategies"}, \code{"responses"}, \code{"trembles"}, the number of strategies, responses, trembles respectively are selected based on the selection criterion specified in option \code{"crit"}. If set to \code{"both"}, the number of responses and trembles are selected. If set to \code{"all"}, the number of strategies, responses, and trembles are selected. Note that the selection of responses and trembles occurs within the scope of the restriction set to these parameters (E.g. if \code{r.responses} is set to \code{"strategies"}, \code{select = "responses"} will select responses within each strategy). Default is \code{"no"}.}
+\item{select}{A character vector indicating which model parameters are selected. If the vector contains the character \code{"strategies"} (\code{"responses"}, \code{"trembles"}), the number of strategies (responses, trembles) is selected based on the selection criterion specified in \code{"crit"}. The selection of responses and trembles occurs obeying the restriction specified in \code{r.responses} and \code{r.trembles}. (E.g. if \code{r.responses} is set to \code{"strategies"}, \code{select = "responses"} will select responses within each strategy). Default is \code{NULL}.}
 
-\item{min.strategies}{Integer which specifies the minimum number of strategies for strategy selection. The selection procedure stops if the minimum is reached.}
+\item{min.strategies}{An integer which specifies the minimum number of strategies in case of strategy selection. The strategy selection procedure stops if the minimum is reached.}
 
-\item{crit}{String which can be set to \code{"bic"}, \code{"aic"} or \code{"icl"}. If set to \code{"bic"}, model selection based on the Bayesian Information criterion is performed. If set to \code{"aic"}, the Akaike Information criterion is used. If set to \code{"icl"} the Integrated Classification Likelihood criterion is used. Default is \code{"bic"}.}
+\item{crit}{A string which can be set to \code{"bic"}, \code{"aic"} or \code{"icl"}. If set to \code{"bic"}, model selection based on the Bayesian Information criterion is performed. If set to \code{"aic"}, the Akaike Information criterion is used. If set to \code{"icl"} the Integrated Classification Likelihood criterion is used. Default is \code{"bic"}.}
 
-\item{se}{String which can be set to \code{"no"}, \code{"yes"} or \code{"bs"}. If set to \code{"no"}, standard errors are not reported. If set to \code{"yes"}, analytic standard errors are reported. If set to \code{"bs"}, bootstrapped standard errors are reported for responses and trembles. Default is \code{"yes"}.}
+\item{se}{A string which can be set to \code{"analytic"} or \code{"bootstrap"}. If set to \code{"bootstrap"}, bootstrapped standard errors are reported. Default is \code{"analytic"}.}
 
-\item{outer.runs}{Positive integer which stets the number of outer runs of the solver. Default is 10.}
+\item{outer.runs}{A positive integer which stets the number of outer runs of the solver. Default is 1.}
 
-\item{outer.tol}{Positive number which stets the tolerance of the continuation condition of the outer runs. The iterative algorithm stops if the relative decrease of the log-likelihood is smaller than \code{outer.tol}. Default is 0.}
+\item{outer.tol}{A positive number which stets the tolerance of the continuation condition of the outer runs. The iterative algorithm stops if the relative decrease of the log-likelihood is smaller than \code{outer.tol}. Default is 0.}
 
-\item{outer.max}{Positive integer which stets the maximum number of iterations of the outer runs of the solver. The iterative algorithm stops if it did not converge after \code{"outer.max"} iterations. Default is 1000.}
+\item{outer.max}{A positive integer which stets the maximum number of iterations of the outer runs of the solver. The iterative algorithm stops if it did not converge after \code{"outer.max"} iterations. Default is 1000.}
 
-\item{inner.runs}{Positive integer which stets the number of inner runs of the solver. Default is 100.}
+\item{inner.runs}{A positive integer which stets the number of inner runs of the solver. Default is 10.}
 
-\item{inner.tol}{Positive number which stets the tolerance of the continuation condition of the inner EM runs. The iterative algorithm stops if the relative decrease of the log-likelihood is smaller than \code{inner.tol}. Default is 0.}
+\item{inner.tol}{A positive number which stets the tolerance of the continuation condition of the inner EM runs. The iterative algorithm stops if the relative decrease of the log-likelihood is smaller than \code{inner.tol}. Default is 0.}
 
-\item{inner.max}{Positive integer which stets the maximum number of iterations of the inner EM runs. The iterative algorithm stops if it did not converge after \code{inner.max} iterations. Default is 100.}
+\item{inner.max}{A positive integer which stets the maximum number of iterations of the inner EM runs. The iterative algorithm stops if it did not converge after \code{inner.max} iterations. Default is 10.}
 
-\item{lcr.runs}{Positive integer which stets the number of estimation runs for latent class regression. Default is 100.}
+\item{lcr.runs}{A positive integer which stets the number of estimation runs for latent class regression. Default is 100.}
 
-\item{lcr.tol}{Positive number which stets the tolerance of the continuation condition of the Latent Class Regression runs. The iterative algorithm stops if the relative decrease of the log-likelihood is smaller than \code{lcr.tol}. Default is 0.}
+\item{lcr.tol}{A positive number which stets the tolerance of the continuation condition of the Latent Class Regression runs. The iterative algorithm stops if the relative decrease of the log-likelihood is smaller than \code{lcr.tol}. Default is 0.}
 
-\item{lcr.max}{Positive integer which stets the maximum number of iterations of the Latent Class Regression EM runs. The iterative algorithm stops if it did not converge after \code{lcr.max} iterations. Default is 1000.}
+\item{lcr.max}{A positive integer which stets the maximum number of iterations of the Latent Class Regression EM runs. The iterative algorithm stops if it did not converge after \code{lcr.max} iterations. Default is 1000.}
 
-\item{bs.samples}{Positive integer which sets the number of bootstrap samples drawn with replacement.}
+\item{bs.samples}{A positive integer which sets the number of bootstrap samples drawn with replacement.}
 
-\item{stepsize}{Positive number which sets the stepsize of the Fisher scoring algorithm used to update the coefficients of the latent class regression model. Default is one. Values smaller than one slow down the convergence of the algorithm.}
+\item{quantiles}{A numeric vector indicating the quantiles of the sampling distribution of the estimated parameters. The quantiles are identified based on the standard error or based on bootstrapping the sampling distribution of the parameter.}
 
-\item{penalty}{A logical value indicating if the Firth penalty is used to estimate the coefficients of the latent class regression model. Default is FALSE. Independent of the logical value specified, the penalty is always used in the bootstrap of the standard errors of latent class regression coefficients.}
+\item{stepsize}{A positive number which sets the stepsize of the Fisher scoring algorithm used to estimate the coefficients of the latent class regression model. Default is one. Values smaller than one slow down the convergence of the algorithm.}
 
-\item{print.messages}{Logical, if \code{TRUE} messages are printed which illustrate the status of the estimation process.}
+\item{penalty}{A logical indicating if the Firth penalty is used to estimate the coefficients of the latent class regression model. Default is \code{FALSE}. Irrespective of the value specified here, the penalty is used in the case of a bootstrap of the standard errors of latent class regression coefficients.}
+
+\item{verbose}{A logical, if \code{TRUE} messages of the estimation process and a summary of the estimated model is printed to the console. Default is \code{TRUE}.}
 }
 \value{
-The function returns a list with the following elements.
-\item{shares}{Matrix which contains the estimates of population shares for the strategies. The order of rows corresponds to the order of strategies defined in the input object 'strategies'. Columns correspond to the samples defined in 'samples'. Can be used as input object of the estimation function.}
-\item{strategies}{Matrix which contains the strategies of the model. Can be used as input object of the of the estimation function.}
-\item{responses}{Column vector which contains the response probabilities of the strategies. The value -1 indicates that the corresponding response could not be estimated since data does not contain observations the model assigns to the corresponding state.}
-\item{trembles}{Column vector which contains the tremble probabilities of the strategies. The value -1 indicates that the corresponding response could not be estimated since data does not contain observations the model assigns to the corresponding state.}
-\item{coefficients}{Column vector which contains the Latent Class Regression coefficients for strategies.}
-\item{response.mat}{Matrix which contains the estimates of the response probabilities for the columns of the strategy matrix which represent the response probabilities.}
-\item{tremble.mat}{Matrix which contains the estimates of the tremble probabilities for the columns of the strategy matrix which represent the response probabilities.}
-\item{coefficient.mat}{Matrix which contains the latent class regression coefficients of strategies in columns. Note that the coefficients of the first strategy are one by definition.}
-\item{loglike}{The log-Likelihood value corresponding to the reported estimates. Bigger values indicate a better fit of the model to the data.}
-\item{crit.val}{The value of the selection criterion defined under \code{crit}. Bigger values indicate a better fit of the model.}
-\item{eval}{Number of iterations of the solver. The reported number is the sum of iterations performed in the inner and the outer run which led to the reported estimates.}
-\item{tol.val}{The tolerance value in the last iteration.}
-\item{entropy}{Entropy of the assignments.}
+An object of class \code{stratEst}. A list with the following elements.
+\item{strategies}{A list of fitted strategies.}
+\item{shares}{Matrix of strategy shares. The order of rows corresponds to the order of strategies defined in the input object \code{strategies}.}
+\item{responses}{Matrix of response probabilities. The value \code{NA} indicates that the corresponding response could not be estimated since data does not contain observations the model assigns to the corresponding state.}
+\item{trembles}{Matrix of tremble probabilities of the strategies. The value \code{NA} indicates that the corresponding response could not be estimated since data does not contain observations the model assigns to the corresponding state.}
+\item{coefficients}{Matrix of latent class regression coefficients for strategies.}
+\item{shares.par}{Estimated strategy shares.}
+\item{responses.par}{Estimated response probabilities.}
+\item{trembles.par}{Estimated tremble probabilities.}
+\item{coefficients.par}{Estimated latent class regression coefficients.}
+\item{shares.indices}{Indices of strategy shares.}
+\item{responses.indices}{Indices of response probabilities.}
+\item{trembles.indices}{Indices of tremble probabilities.}
+\item{coefficients.indices}{Indices of latent class regression coefficients.}
+\item{loglike}{The log-likelihood of the model. Larger values indicate a better fit of the model to the data.}
+\item{crit.val}{The value of the selection criterion defined under \code{crit}. Larger values indicate a better fit of the model.}
+\item{eval}{Number of iterations of the solver. The reported number is the sum of iterations performed in the inner and the outer run which produced the reported estimates.}
+\item{tol.val}{The percentual decrease of the log-likelihood in the last iteration of the algorithm. }
+\item{convergence}{Maximum absolute score of the model parameters. Small values indicate convergence of the algorithm to a (local) maximum of the negative log likelihood.}
+\item{entropy}{Entropy of the posterior probability assignments of indviduals to strategies.}
 \item{state.obs}{A column vector with the number of weighted observations for each strategy state corresponding to the rows of \code{strategies}.}
-\item{assignments}{Matrix which contains the posterior probability assignments of individuals to strategies. The rows of the matrix correspond to the ID sorted in ascending order beginning with the individual with the lowest ID. The columns correspond to the strategies, starting with the first strategy defined in the strategy matrix in column one.}
-\item{priors}{Matrix which contains the individual prior probabilities of individuals as predicted by the covariate vectors of the individuals. The rows correspond to the ID sorted in ascending order beginning with the individual with the lowest ID. The columns correspond to the strategies, starting with the first strategy defined in the strategy matrix.}
-\item{shares.se}{Matrix which contains the standard errors of the estimated shares. The elements correspond to the matrix of estimates.}
-\item{responses.se}{Column vector which contains the standard errors of the reported responses. The elements correspond to the vector of estimates.}
-\item{trembles.se}{Column vector which contains the standard errors of the reported trembles. The elements correspond to the vector of estimates.}
-\item{coefficients.se}{Column vector which contains the standard errors of the reported coefficients. The elements correspond to the vector of estimates.}
-\item{convergence}{Row vector which reports the maximum value of the score vector of shares, responses, trembles, and latent class regression coefficients. Small values indicate convergence of the algorithm to a (local) maximum of the negative log likelihood. Because of the sum to one constraint the score of the shares will not be close to zero if some of the shares are fixed.}
+\item{posterior.assignments}{Posterior probability of each individual to use a strategy.}
+\item{prior.assignments}{Prior probability of each individual to use a strategy as predicted by the individual covariates.}
+\item{shares.se}{Standard errors of the estimated shares.}
+\item{responses.se}{Standard errors of the estimated responses.}
+\item{trembles.se}{Standard errors of the estimated trembles.}
+\item{coefficients.se}{Standard errors of the estimated coefficients.}
+\item{shares.score}{Score of the estimated shares.}
+\item{responses.score}{Score of the reported responses.}
+\item{trembles.score}{Score of the reported trembles.}
+\item{coefficients.score}{Score of the reported coefficients.}
+\item{shares.fisher}{Fisher information of the estimated shares.}
+\item{responses.fisher}{Fisher information of the reported responses.}
+\item{trembles.fisher}{Fisher information of the reported trembles.}
+\item{coefficients.fisher}{Fisher information of the reported coefficients.}
+\item{num.obs}{Number of observations.}
+\item{num.ids}{Number of individuals.}
+\item{num.par}{Total number of model parameters.}
+\item{free.par}{Total numbe rof free model parameters.}
+\item{res.degrees}{Residual degrees of freedom (num.ids - free.par).}
+\item{shares.quantiles}{Quantiles of the estimated shares.}
+\item{responses.quantiles}{Quantiles of the estimated response probabilities.}
+\item{trembles.quantiles}{Quantiles of the estimated tremble probabilities.}
+\item{coefficients.quantiles}{Quantiles of the estimated latent class regression coefficients.}
+\item{gammas}{Gamma parameter of the model.}
+\item{gammas.par}{Estimated gamma parameters.}
+\item{gammas.se}{Standard errors of the gamma parameters.}#
+\item{crit}{Values of the information criteria.}
 }
 \description{
 Performs variants of the strategy estimation method.
@@ -102,29 +152,20 @@ The estimation function \code{stratEst()} returns maximum-likelihood estimates f
 The strategy estimation method was introduced by (Dal Bo & Frechette 2011) to estimate the relative frequency of a fixed set of pure strategies in the indefinitely repeated prisoner's dilemma. Breitmoser (2015) extended the method to the estimation of behavior strategies. The \pkg{stratEst} package uses the EM algorithm (Dempster, Laird & Rubin 1977) and the Newton-Raphson method to obtain maximum-likelihood estimates for the population shares and response parameters of a set of candidate strategies. The package builds on other software contributions of the R community. To increase speed the estimation procedures, the package uses integration of C++ and R achieved by the Rcpp package (Eddelbuettel & Francois 2011) and the open source linear algebra library for the C++ language RppArmadillo (Sanderson & Curtin 2016).
 }
 \examples{
-## Fictitious data from a helping game
-## Participant 62 plays reciprocal strategy.
-## Participant 87 plays alternating strategy.
-id <- c(62,62,62,62,87,87,87,87)
-game <- c(4,4,4,4,4,4,4,4)
-period <- c(1,2,3,4,1,2,3,4)
-input <- c(0,1,2,3,0,1,3,2)
-output <- c(2,2,1,2,2,1,2,1)
-data <- as.data.frame(cbind(id,game,period,input,output))
-model <- stratEst(data,strategies = 2)
+## Estimate strategies in the rock-paper-scissors game (roshambo.me).
+## Compare the fit of a mixed strategy to a mixture of two conditional strategies.
+model.mixed <- stratEst( data.RPS , strategies.RPS[c("mixed")])
+model.conditional <- stratEst( data.RPS , strategies.RPS[c("anti","cyclic")])
+print(model.mixed$loglike)
+print(model.conditional$loglike)
 
-## Replication of Dal Bo and Frechette (2011), Table 7 on page 424
-## Results for the first treatment with delta = 1/2 and R = 32 (column 1 of Table 7)
-data <- DF2011[DF2011$treatment == 1,]
-strategies <- rbind(ALLD,ALLC,GRIM,TFT,WSLS,T2)
-stratEst(data,strategies)
+## Replication of Dal Bo and Frechette (2011), Table 7, page 424
+model.DF2011 <- stratEst(data.DF2011,strategies.DF2011,sample.id="treatment" )
 
-## Latent class regression with data from Dal Bo and Frechette (2011)
-## For the two treatments with R = 32, introduce a dummy which is one if delta = 3/4
-dummy <- as.numeric( DF2011$treatment > 3 )
-data <- as.data.frame(cbind(DF2011,dummy))
-strats <- rbind(ALLD,TFT)
-stratEst(data,strats,covariates = c("dummy"),lcr.runs = 100)
+## Replication of Fudenberg, Rand, Dreber (2012), Table 3, page 733
+# Note: The estimates for treatment bc = 4 reported in the paper represent a local optimum.
+model.FRD2012 <- stratEst(data.FRD2012,strategies.FRD2012,sample.id="bc")
+
 }
 \references{
 Breitmoser, Y. (2015): Cooperation, but no reciprocity: Individual strategies in the repeated prisoner's dilemma, \emph{American Economic Review}, 105, 2882-2910.

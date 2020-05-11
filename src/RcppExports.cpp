@@ -50,8 +50,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // stratEst_cpp
-List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec sid, arma::mat shares, arma::vec trembles, arma::mat coefficients, arma::mat covariates, bool LCR, arma::vec cluster, std::string response, std::string r_responses, std::string r_trembles, std::string select, int min_strategies, std::string crit, std::string SE, int outer_runs, double outer_tol_eval, int outer_max_eval, int inner_runs, double inner_tol_eval, int inner_max_eval, int LCR_runs, double LCR_tol_eval, int LCR_max_eval, int BS_samples, bool print_messages, bool integer_strategies, double newton_stepsize, bool penalty);
-RcppExport SEXP _stratEst_stratEst_cpp(SEXP dataSEXP, SEXP strategiesSEXP, SEXP sidSEXP, SEXP sharesSEXP, SEXP tremblesSEXP, SEXP coefficientsSEXP, SEXP covariatesSEXP, SEXP LCRSEXP, SEXP clusterSEXP, SEXP responseSEXP, SEXP r_responsesSEXP, SEXP r_tremblesSEXP, SEXP selectSEXP, SEXP min_strategiesSEXP, SEXP critSEXP, SEXP SESEXP, SEXP outer_runsSEXP, SEXP outer_tol_evalSEXP, SEXP outer_max_evalSEXP, SEXP inner_runsSEXP, SEXP inner_tol_evalSEXP, SEXP inner_max_evalSEXP, SEXP LCR_runsSEXP, SEXP LCR_tol_evalSEXP, SEXP LCR_max_evalSEXP, SEXP BS_samplesSEXP, SEXP print_messagesSEXP, SEXP integer_strategiesSEXP, SEXP newton_stepsizeSEXP, SEXP penaltySEXP) {
+List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec sid, arma::mat shares, arma::vec trembles, arma::mat coefficient_mat, arma::mat covariates, bool LCR, arma::vec cluster, arma::vec quantile_vec, std::string response, bool specific_shares, bool specific_responses, bool specific_trembles, bool specific_coefficients, std::string r_responses, std::string r_trembles, bool select_strategies, bool select_responses, bool select_trembles, int min_strategies, std::string crit, std::string SE, int outer_runs, double outer_tol_eval, int outer_max_eval, int inner_runs, double inner_tol_eval, int inner_max_eval, int LCR_runs, double LCR_tol_eval, int LCR_max_eval, int BS_samples, bool print_messages, bool integer_strategies, double newton_stepsize, bool penalty);
+RcppExport SEXP _stratEst_stratEst_cpp(SEXP dataSEXP, SEXP strategiesSEXP, SEXP sidSEXP, SEXP sharesSEXP, SEXP tremblesSEXP, SEXP coefficient_matSEXP, SEXP covariatesSEXP, SEXP LCRSEXP, SEXP clusterSEXP, SEXP quantile_vecSEXP, SEXP responseSEXP, SEXP specific_sharesSEXP, SEXP specific_responsesSEXP, SEXP specific_tremblesSEXP, SEXP specific_coefficientsSEXP, SEXP r_responsesSEXP, SEXP r_tremblesSEXP, SEXP select_strategiesSEXP, SEXP select_responsesSEXP, SEXP select_tremblesSEXP, SEXP min_strategiesSEXP, SEXP critSEXP, SEXP SESEXP, SEXP outer_runsSEXP, SEXP outer_tol_evalSEXP, SEXP outer_max_evalSEXP, SEXP inner_runsSEXP, SEXP inner_tol_evalSEXP, SEXP inner_max_evalSEXP, SEXP LCR_runsSEXP, SEXP LCR_tol_evalSEXP, SEXP LCR_max_evalSEXP, SEXP BS_samplesSEXP, SEXP print_messagesSEXP, SEXP integer_strategiesSEXP, SEXP newton_stepsizeSEXP, SEXP penaltySEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -60,14 +60,21 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< arma::vec >::type sid(sidSEXP);
     Rcpp::traits::input_parameter< arma::mat >::type shares(sharesSEXP);
     Rcpp::traits::input_parameter< arma::vec >::type trembles(tremblesSEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type coefficients(coefficientsSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type coefficient_mat(coefficient_matSEXP);
     Rcpp::traits::input_parameter< arma::mat >::type covariates(covariatesSEXP);
     Rcpp::traits::input_parameter< bool >::type LCR(LCRSEXP);
     Rcpp::traits::input_parameter< arma::vec >::type cluster(clusterSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type quantile_vec(quantile_vecSEXP);
     Rcpp::traits::input_parameter< std::string >::type response(responseSEXP);
+    Rcpp::traits::input_parameter< bool >::type specific_shares(specific_sharesSEXP);
+    Rcpp::traits::input_parameter< bool >::type specific_responses(specific_responsesSEXP);
+    Rcpp::traits::input_parameter< bool >::type specific_trembles(specific_tremblesSEXP);
+    Rcpp::traits::input_parameter< bool >::type specific_coefficients(specific_coefficientsSEXP);
     Rcpp::traits::input_parameter< std::string >::type r_responses(r_responsesSEXP);
     Rcpp::traits::input_parameter< std::string >::type r_trembles(r_tremblesSEXP);
-    Rcpp::traits::input_parameter< std::string >::type select(selectSEXP);
+    Rcpp::traits::input_parameter< bool >::type select_strategies(select_strategiesSEXP);
+    Rcpp::traits::input_parameter< bool >::type select_responses(select_responsesSEXP);
+    Rcpp::traits::input_parameter< bool >::type select_trembles(select_tremblesSEXP);
     Rcpp::traits::input_parameter< int >::type min_strategies(min_strategiesSEXP);
     Rcpp::traits::input_parameter< std::string >::type crit(critSEXP);
     Rcpp::traits::input_parameter< std::string >::type SE(SESEXP);
@@ -85,41 +92,24 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< bool >::type integer_strategies(integer_strategiesSEXP);
     Rcpp::traits::input_parameter< double >::type newton_stepsize(newton_stepsizeSEXP);
     Rcpp::traits::input_parameter< bool >::type penalty(penaltySEXP);
-    rcpp_result_gen = Rcpp::wrap(stratEst_cpp(data, strategies, sid, shares, trembles, coefficients, covariates, LCR, cluster, response, r_responses, r_trembles, select, min_strategies, crit, SE, outer_runs, outer_tol_eval, outer_max_eval, inner_runs, inner_tol_eval, inner_max_eval, LCR_runs, LCR_tol_eval, LCR_max_eval, BS_samples, print_messages, integer_strategies, newton_stepsize, penalty));
+    rcpp_result_gen = Rcpp::wrap(stratEst_cpp(data, strategies, sid, shares, trembles, coefficient_mat, covariates, LCR, cluster, quantile_vec, response, specific_shares, specific_responses, specific_trembles, specific_coefficients, r_responses, r_trembles, select_strategies, select_responses, select_trembles, min_strategies, crit, SE, outer_runs, outer_tol_eval, outer_max_eval, inner_runs, inner_tol_eval, inner_max_eval, LCR_runs, LCR_tol_eval, LCR_max_eval, BS_samples, print_messages, integer_strategies, newton_stepsize, penalty));
     return rcpp_result_gen;
 END_RCPP
 }
-// transform_cpp
-arma::vec transform_cpp(arma::vec id, arma::vec supergame, arma::vec period, arma::vec group, arma::vec output, arma::vec input, arma::vec unique_ids);
-RcppExport SEXP _stratEst_transform_cpp(SEXP idSEXP, SEXP supergameSEXP, SEXP periodSEXP, SEXP groupSEXP, SEXP outputSEXP, SEXP inputSEXP, SEXP unique_idsSEXP) {
+// stratEst_data_cpp
+arma::vec stratEst_data_cpp(arma::vec id, arma::vec game, arma::vec period, arma::vec input, arma::vec lagged_input, int lag, int num_ids);
+RcppExport SEXP _stratEst_stratEst_data_cpp(SEXP idSEXP, SEXP gameSEXP, SEXP periodSEXP, SEXP inputSEXP, SEXP lagged_inputSEXP, SEXP lagSEXP, SEXP num_idsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< arma::vec >::type id(idSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type supergame(supergameSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type game(gameSEXP);
     Rcpp::traits::input_parameter< arma::vec >::type period(periodSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type group(groupSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type output(outputSEXP);
     Rcpp::traits::input_parameter< arma::vec >::type input(inputSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type unique_ids(unique_idsSEXP);
-    rcpp_result_gen = Rcpp::wrap(transform_cpp(id, supergame, period, group, output, input, unique_ids));
-    return rcpp_result_gen;
-END_RCPP
-}
-// transform_pd_cpp
-arma::vec transform_pd_cpp(arma::vec id, arma::vec supergame, arma::vec period, arma::vec output, arma::vec p_output, arma::vec input, arma::vec unique_ids);
-RcppExport SEXP _stratEst_transform_pd_cpp(SEXP idSEXP, SEXP supergameSEXP, SEXP periodSEXP, SEXP outputSEXP, SEXP p_outputSEXP, SEXP inputSEXP, SEXP unique_idsSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::vec >::type id(idSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type supergame(supergameSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type period(periodSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type output(outputSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type p_output(p_outputSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type input(inputSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type unique_ids(unique_idsSEXP);
-    rcpp_result_gen = Rcpp::wrap(transform_pd_cpp(id, supergame, period, output, p_output, input, unique_ids));
+    Rcpp::traits::input_parameter< arma::vec >::type lagged_input(lagged_inputSEXP);
+    Rcpp::traits::input_parameter< int >::type lag(lagSEXP);
+    Rcpp::traits::input_parameter< int >::type num_ids(num_idsSEXP);
+    rcpp_result_gen = Rcpp::wrap(stratEst_data_cpp(id, game, period, input, lagged_input, lag, num_ids));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -129,9 +119,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_stratEst_rcpparma_outerproduct", (DL_FUNC) &_stratEst_rcpparma_outerproduct, 1},
     {"_stratEst_rcpparma_innerproduct", (DL_FUNC) &_stratEst_rcpparma_innerproduct, 1},
     {"_stratEst_rcpparma_bothproducts", (DL_FUNC) &_stratEst_rcpparma_bothproducts, 1},
-    {"_stratEst_stratEst_cpp", (DL_FUNC) &_stratEst_stratEst_cpp, 30},
-    {"_stratEst_transform_cpp", (DL_FUNC) &_stratEst_transform_cpp, 7},
-    {"_stratEst_transform_pd_cpp", (DL_FUNC) &_stratEst_transform_pd_cpp, 7},
+    {"_stratEst_stratEst_cpp", (DL_FUNC) &_stratEst_stratEst_cpp, 37},
+    {"_stratEst_stratEst_data_cpp", (DL_FUNC) &_stratEst_stratEst_data_cpp, 7},
     {NULL, NULL, 0}
 };
 

@@ -4,7 +4,8 @@
 \name{DF2011LCR}
 \alias{DF2011LCR}
 \title{Data of Dal Bo and Frechette (2011)}
-\format{A data frame with 37042 rows and 8 variables:
+\format{
+A data frame with 37042 rows and 8 variables:
 \describe{
   \item{supergame}{The supergame number.}
   \item{period}{Period of the supergame.}
@@ -14,7 +15,8 @@
   \item{delta}{Discount factor of the treatment.}
   \item{group}{Group id of two matched participants.}
   \item{id}{Variable which identifies a unique participant-supergame combination.}
-}}
+}
+}
 \source{
 \url{https://www.aeaweb.org/articles?id=10.1257/aer.101.1.411}
 }
