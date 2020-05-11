@@ -267,7 +267,6 @@ stratEst.simulate <- function( strategies , shares , coefficients , covariates ,
     colnames(data)[8:(8+num.covariates-1)] <- colnames(covariate_mat)
   }
 
-
   # make object of class stratEst.data
   attr(data, "class") <- c("stratEst.data","data.frame")
 
