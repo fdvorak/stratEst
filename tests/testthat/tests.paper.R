@@ -1,6 +1,7 @@
 library(stratEst)
 
 test_that("Introductory example paper" , {
+  skip_on_cran()
   set.seed(1)
   rps = c("r", "p", "s")
   mixed = stratEst.strategy(choices = rps)
@@ -54,6 +55,7 @@ test_that("Introductory example paper" , {
 })
 
 test_that("Simulated data" , {
+  skip_on_cran()
   set.seed(1)
   lr <- c("left","right")
   mixed <- stratEst.strategy( choices = lr, inputs = lr, num.states = 1 )
@@ -90,6 +92,7 @@ test_that("Simulated data" , {
 })
 
 test_that("Replication example DalBo and Frechette, 2011" , {
+  skip_on_cran()
   expect_equal(1,as.numeric(1,all( colnames(strategies.DF2011[["TFT"]]) == c("prob.d","prob.c","tremble","tr(cc)","tr(cd)","tr(dc)","tr(dd)") )))
   expect_equal(1,as.numeric(all(strategies.DF2011[["TFT"]]$prob.d == c(0,1))))
   expect_equal(1,as.numeric(all(strategies.DF2011[["TFT"]]$prob.c == c(1,0))))

@@ -1,6 +1,7 @@
 library(stratEst)
 
 test_that("Example: rock-paper-scissors" , {
+  skip_on_cran()
   set.seed(1)
   strategies.mixture = list( "nash" = strategies.RPS$nash, "imitate" = strategies.RPS$imitate )
   model.mixture <- stratEst.model(data.WXZ2014,strategies.mixture)
@@ -8,6 +9,7 @@ test_that("Example: rock-paper-scissors" , {
 })
 
 test_that("Example: Dal Bo & Frechette 2011",  {
+  skip_on_cran()
   set.seed(1)
   data <- stratEst.data(DF2011,input =c("choice","other.choice"), input.lag = 1 )
   model.DF2011 <- stratEst.model(data,strategies.DF2011,sample.id="treatment",verbose=F)
@@ -20,6 +22,7 @@ test_that("Example: Dal Bo & Frechette 2011",  {
 
 
 test_that("Example: Fudenberg, Rand, Dreber (2012)" , {
+  skip_on_cran()
   set.seed(1)
   data <- stratEst.data(FRD2012,input =c("last.choice","last.other") )
   model.FRD2012 <- stratEst.model(data,strategies.FRD2012,sample.id="bc",verbose=F)
@@ -31,7 +34,16 @@ test_that("Example: Fudenberg, Rand, Dreber (2012)" , {
 })
 
 
-
+test_that("Example: Dvorak, Fischbacher, and Schmelz (2020)" , {
+  skip_on_cran()
+  data.DFS2020 <- stratEst.data(data = DFS2020,
+                                input = c("others.choices"))
+  model.DFS2020 <- stratEst.model(data = data.DFS2020 ,
+                                  strategies = strategies.DFS2020,
+                                  covariates = c("intercept","conformity.score"))
+  test.coefficients <- stratEst.test(model.DFS2020, par = "coefficients")
+  #check.DFS2020 <- stratEst.check(model.DFS2020, chi.tests = TRUE, bs.samples = 10)
+})
 
 
 
