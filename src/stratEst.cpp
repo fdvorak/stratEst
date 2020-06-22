@@ -1,4 +1,4 @@
-#define ARMA_NO_DEBUG
+//#define ARMA_NO_DEBUG
 #include <RcppArmadillo.h>
 using namespace Rcpp;
 
@@ -63,6 +63,9 @@ arma::field<arma::mat> stratEst_EM(arma::cube& output_cube, arma::cube& sum_outp
   arma::mat i_shares_mat( num_ids , k , arma::fill::zeros );
   arma::cube i_shares_cube( num_rows_response_mat , num_cols_response_mat , num_ids , arma::fill::zeros );
   arma::cube weigthed_sums_cube( num_rows_response_mat , num_cols_response_mat , num_ids , arma::fill::zeros );
+  //
+  arma::cube weigthed_output_cube = output_cube;
+  //
   arma::vec sample_of_ids_max = sample_of_ids_responses;
   if( max(sample_of_ids_max) < max(sample_of_ids_trembles ) ){
     sample_of_ids_max = sample_of_ids_trembles;
@@ -71,7 +74,8 @@ arma::field<arma::mat> stratEst_EM(arma::cube& output_cube, arma::cube& sum_outp
     sample_of_ids_max.fill(1);
   }
   int num_sample_of_ids_max = max( sample_of_ids_max );
-  arma::mat state_obs( num_rows_response_mat*num_sample_of_ids_max , 1 , arma::fill::zeros );
+  arma::mat state_obs( num_rows_response_mat*num_sample_of_ids_max , num_cols_response_mat , arma::fill::zeros );
+  //arma::mat state_obs( num_rows_response_mat*num_sample_of_ids_max , 1 , arma::fill::zeros );
   arma::vec new_shares = shares;
   arma::mat new_share_mat = share_mat;
   arma::mat new_responses = responses;
@@ -257,7 +261,7 @@ arma::field<arma::mat> stratEst_EM(arma::cube& output_cube, arma::cube& sum_outp
     }
 
     // update responses
-    arma::cube weigthed_output_cube = i_shares_cube % output_cube;
+    weigthed_output_cube = i_shares_cube % output_cube;
     weigthed_sums_cube = i_shares_cube % sum_outputs_cube;
     for ( int j = 0; j < num_responses_to_est; j++){
       new_responses(j) = accu( weigthed_output_cube( find( indices_responses_id_cube == j+1 ) ) ) / accu( weigthed_sums_cube( find( indices_responses_id_cube == j+1 ) ) );
@@ -356,15 +360,19 @@ arma::field<arma::mat> stratEst_EM(arma::cube& output_cube, arma::cube& sum_outp
 
   // calculate state observations
   for (int i = 0; i < num_ids; i++) {
-    arma::mat weigthed_sums_cube_slice = weigthed_sums_cube.slice(i);
+    arma::mat weigthed_output_cube_slice = weigthed_output_cube.slice(i);
     int sample_of_id = sample_of_ids_max(i);
-    state_obs( arma::span( (sample_of_id-1)*num_rows_response_mat , sample_of_id*num_rows_response_mat - 1 ) , arma::span::all ) += weigthed_sums_cube_slice( arma::span( 0 , num_rows_response_mat - 1 ) , 0 );
+    state_obs( arma::span( (sample_of_id-1)*num_rows_response_mat , sample_of_id*num_rows_response_mat - 1 ) , arma::span::all ) += weigthed_output_cube_slice( arma::span( 0 , num_rows_response_mat - 1 ) , arma::span::all );
+
+    // arma::mat weigthed_sums_cube_slice = weigthed_sums_cube.slice(i);
+    // int sample_of_id = sample_of_ids_max(i);
+    // state_obs( arma::span( (sample_of_id-1)*num_rows_response_mat , sample_of_id*num_rows_response_mat - 1 ) , arma::span::all ) += weigthed_sums_cube_slice( arma::span( 0 , num_rows_response_mat - 1 ) , 0 );
   }
 
   // calculate selection criteria
-  crit_vals(0) = new_ll_val(0) + free_params;                                                 // update AIC value
-  crit_vals(1) = new_ll_val(0) + ( free_params * log( (double) num_ids ) )/2;                           // update BIC value
-  crit_vals(2) = crit_vals(1) + new_entropy_k(0);                                                  // update ICL value
+  crit_vals(0) = 2*new_ll_val(0) + 2*free_params;                                                 // update AIC value
+  crit_vals(1) = 2*new_ll_val(0) + log( (double) num_ids )*free_params;                           // update BIC value
+  crit_vals(2) = crit_vals(1) + 2*new_entropy_k(0);                                                // update ICL value
 
   // prepare output
   double LL = new_ll_val(0);
@@ -444,7 +452,8 @@ arma::field<arma::mat> stratEst_LCR_EM(arma::cube& output_cube, arma::cube& sum_
     sample_of_ids_max.fill(1);
   }
   int num_sample_of_ids_max = max( sample_of_ids_max );
-  arma::mat state_obs( num_rows_response_mat*num_sample_of_ids_max , 1 , arma::fill::zeros );
+  arma::mat state_obs( num_rows_response_mat*num_sample_of_ids_max , num_cols_response_mat , arma::fill::zeros );
+  //arma::mat state_obs( num_rows_response_mat*num_sample_of_ids_max , 1 , arma::fill::zeros );
   arma::vec new_shares = shares;
   arma::mat new_share_mat = share_mat;
   arma::mat new_responses = responses;
@@ -467,6 +476,9 @@ arma::field<arma::mat> stratEst_LCR_EM(arma::cube& output_cube, arma::cube& sum_
   arma::vec stepsize_vec( num_coefficients_short_vec , arma::fill::ones );
   arma::vec penalty_vec( num_coefficients_short_vec , arma::fill::zeros );
   arma::cube weigthed_sums_cube( num_rows_response_mat , num_cols_response_mat , num_ids , arma::fill::zeros );
+  //
+  arma::cube weigthed_output_cube = output_cube;
+  //
   stepsize_vec.fill(newton_stepsize);
   int eval = eval_pre;
   bool coefficients_changed = true;
@@ -723,7 +735,7 @@ arma::field<arma::mat> stratEst_LCR_EM(arma::cube& output_cube, arma::cube& sum_
       }
 
       // update responses
-      arma::cube weigthed_output_cube = i_shares_cube % output_cube;
+      weigthed_output_cube = i_shares_cube % output_cube;
       weigthed_sums_cube = i_shares_cube % sum_outputs_cube;
       for ( int j = 0; j < num_responses_to_est; j++){
         new_responses(j) = accu( weigthed_output_cube( find( indices_responses_id_cube == j+1 ) ) ) / accu( weigthed_sums_cube( find( indices_responses_id_cube == j+1 ) ) );
@@ -890,7 +902,7 @@ arma::field<arma::mat> stratEst_LCR_EM(arma::cube& output_cube, arma::cube& sum_
     }
     else{
       if (eval > eval_pre+1 ) { eps_now = (1 - (new_ll_val(0) / ll_val(0))); }          // current epsilon
-      if ( eps_now < tol_eval ){ eps_now = tol_eval; }
+      // if ( eps_now < tol_eval ){ eps_now = tol_eval; }
       if ( new_ll_val(0) == 0 ){ eps_now = 0; }
       if ( new_ll_val.is_finite() ){  eps = eps_now; }                                  // only continue if no overshoot
       else { eps = arma::datum::nan; }
@@ -903,15 +915,19 @@ arma::field<arma::mat> stratEst_LCR_EM(arma::cube& output_cube, arma::cube& sum_
 
   // calculate state observations
   for (int i = 0; i < num_ids; i++) {
-    arma::mat weigthed_sums_cube_slice = weigthed_sums_cube.slice(i);
+    arma::mat weigthed_output_cube_slice = weigthed_output_cube.slice(i);
     int sample_of_id = sample_of_ids_max(i);
-    state_obs( arma::span( (sample_of_id-1)*num_rows_response_mat , sample_of_id*num_rows_response_mat - 1 ) , arma::span::all ) += weigthed_sums_cube_slice( arma::span( 0 , num_rows_response_mat - 1 ) , 0 );
+    state_obs( arma::span( (sample_of_id-1)*num_rows_response_mat , sample_of_id*num_rows_response_mat - 1 ) , arma::span::all ) += weigthed_output_cube_slice( arma::span( 0 , num_rows_response_mat - 1 ) , arma::span::all );
+
+    // arma::mat weigthed_sums_cube_slice = weigthed_sums_cube.slice(i);
+    // int sample_of_id = sample_of_ids_max(i);
+    // state_obs( arma::span( (sample_of_id-1)*num_rows_response_mat , sample_of_id*num_rows_response_mat - 1 ) , arma::span::all ) += weigthed_sums_cube_slice( arma::span( 0 , num_rows_response_mat - 1 ) , 0 );
   }
 
   // calculate selection criteria
-  crit_vals(0) = new_ll_val(0) + free_params;                                                 // update AIC value
-  crit_vals(1) = new_ll_val(0) + ( free_params * log( (double) num_ids ) )/2;                           // update BIC value
-  crit_vals(2) = crit_vals(1) + new_entropy_k(0);                                                  // update ICL value
+  crit_vals(0) = 2*new_ll_val(0) + 2*free_params;                                                 // update AIC value
+  crit_vals(1) = 2*new_ll_val(0) + log( (double) num_ids )*free_params;                           // update BIC value
+  crit_vals(2) = crit_vals(1) + 2*new_entropy_k(0);                                                // update ICL value
 
   // prepare output
   double LL = new_ll_val(0);
@@ -1344,15 +1360,15 @@ arma::field<arma::mat> stratEst_SE(arma::cube& output_cube, arma::cube& sum_outp
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // [[Rcpp::export]]
-List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec sid , arma::mat shares , arma::vec trembles , arma::mat coefficient_mat, arma::mat covariates, bool LCR , arma::vec cluster, arma::vec quantile_vec , std::string response = "mixed", bool specific_shares = true, bool specific_responses = true, bool specific_trembles = true , bool specific_coefficients = true , std::string r_responses = "no", std::string r_trembles = "global", bool select_strategies = false, bool select_responses = false , bool select_trembles = false , int min_strategies = 1 , std::string crit = "bic", std::string SE = "analytic", int outer_runs = 10, double outer_tol_eval = 0, int outer_max_eval = 1000, int inner_runs = 100, double inner_tol_eval = 0, int inner_max_eval = 100, int LCR_runs = 100, double LCR_tol_eval = 0, int LCR_max_eval = 1000, int BS_samples = 1000 , bool print_messages = true, bool integer_strategies = true, double newton_stepsize = 1 , bool penalty = false ) {
+List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec sid , arma::mat shares , arma::vec trembles , arma::mat coefficient_mat, arma::mat covariates, bool LCR , arma::vec cluster, arma::vec quantile_vec , std::string response = "mixed", bool specific_shares = true, bool specific_responses = true, bool specific_trembles = true , bool specific_coefficients = true , std::string r_responses = "no", std::string r_trembles = "global", bool select_strategies = false, bool select_responses = false , bool select_trembles = false , int min_strategies = 1 , std::string crit = "bic", std::string SE = "analytic", int outer_runs = 10, double outer_tol_eval = 1e-10, int outer_max_eval = 1000, int inner_runs = 100, double inner_tol_eval = 1e-5, int inner_max_eval = 100, int LCR_runs = 100, double LCR_tol_eval = 1e-10, int LCR_max_eval = 1000, int BS_samples = 1000 , bool print_messages = true, bool integer_strategies = true, double newton_stepsize = 1 , bool penalty = false ) {
 
   if( print_messages == true ){
-    Rcout<< "prepare estimation\n";
+    Rcout<< "start estimation\n";
   }
 
   arma::field<arma::mat> R(26,1);
   int rows_data = data.n_rows;
-  int cols_data = data.n_cols;
+  //int cols_data = data.n_cols;
   int rows_strategies = strategies.n_rows;
   int cols_strategies = strategies.n_cols;
   arma::vec state = strategies.col(0);
@@ -2671,9 +2687,9 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec sid , arma::ma
       if( print_messages == true ){
         Rcout<< "\n";
       }
-      if( arma::max( vectorise(shares_no_lcr) - vectorise(R(3,0)) ) > 0.05 ){
-        Rcout<<"warning: shares of latent class model deviate substantially from the model without covariates.\n";
-      }
+      // if( arma::max( vectorise(shares_no_lcr) - vectorise(R(3,0)) ) > 0.05 ){
+      //   Rcout<<"warning: shares of latent class model deviate substantially from the model without covariates.\n";
+      // }
     }
   }
 
@@ -2703,6 +2719,7 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec sid , arma::ma
   arma::mat BS_coefficients_SE_mat( num_coefficients_to_est , BS_samples , arma::fill::zeros  );
   arma::mat BS_responses_SE_mat( num_responses_to_est , BS_samples , arma::fill::zeros );
   arma::mat BS_trembles_SE_mat( num_trembles_to_est , BS_samples , arma::fill::zeros  );
+  arma::mat BS_check_mat( 1 , BS_samples , arma::fill::zeros );
 
   int num_quantiles = quantile_vec.n_elem;
 
@@ -2734,6 +2751,7 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec sid , arma::ma
       }
       arma::field<arma::mat> R_LCR_BS(26,1);
       arma::field<arma::mat> R_NO_LCR_BS(26,1);
+      arma::field<arma::mat> R_CHECK_BS(26,1);
 
       int num_ids_to_sample = num_ids;
 
@@ -2795,160 +2813,163 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec sid , arma::ma
           covariate_mat_BS_sample.row(j) = covariate_mat.row( sampled_ids(j) - 1 );
         }
       }
-      arma::mat pre_eval_mat( 1 , 1 , arma::fill::zeros );
-      arma::mat indices_shares_zero( indices_shares.n_rows , indices_shares.n_cols , arma::fill::zeros );
-      arma::mat indices_responses_zero( indices_responses.n_rows , indices_responses.n_cols , arma::fill::zeros );
-      arma::mat indices_trembles_zero( indices_trembles.n_rows , indices_trembles.n_cols , arma::fill::zeros );
-      arma::mat indices_coefficients_zero( indices_coefficients.n_rows , indices_coefficients.n_cols , arma::fill::zeros );
 
-      arma::vec empty_shares( 0 , arma::fill::none );
-      arma::vec empty_responses( 0 , arma::fill::none );
-      arma::vec empty_trembles( 0 , arma::fill::none );
+        arma::mat pre_eval_mat( 1 , 1 , arma::fill::zeros );
+        arma::mat indices_shares_zero( indices_shares.n_rows , indices_shares.n_cols , arma::fill::zeros );
+        arma::mat indices_responses_zero( indices_responses.n_rows , indices_responses.n_cols , arma::fill::zeros );
+        arma::mat indices_trembles_zero( indices_trembles.n_rows , indices_trembles.n_cols , arma::fill::zeros );
+        arma::mat indices_coefficients_zero( indices_coefficients.n_rows , indices_coefficients.n_cols , arma::fill::zeros );
 
-      // bootstrap shares or coefficients
-      if( num_shares_to_est > 0 ){
-        arma::mat estimated_shares_BS( k , num_samples , arma::fill::zeros );
-        if( LCR == false ){
-          R_NO_LCR_BS = stratEst_EM( output_cube_BS_sample, sum_outputs_cube_BS_sample, strat_id, R(0,0), empty_responses, empty_trembles, R(3,0), R(4,0), R(5,0), indices_shares, indices_responses_zero, indices_trembles_zero, responses_to_sum, response, 0, outer_tol_eval, outer_max_eval, sample_of_ids_shares_BS, num_ids_sample_shares_BS, sample_of_ids_responses_BS, num_ids_sample_responses_BS, sample_of_ids_trembles_BS, num_ids_sample_trembles_BS );
-          estimated_shares_BS = R_NO_LCR_BS(0,0);
-          if( estimated_shares_BS.is_finite() && estimated_shares_BS.n_elem > 0 ){
-            BS_shares_SE_mat( arma::span::all , i ) = estimated_shares_BS;
-            BS_shares_SE += ( ( estimated_shares_BS - estimated_shares) % (estimated_shares_BS - estimated_shares ) );
-          }
-          else{
-            BS_samples_shares = BS_samples_shares - 1;
-          }
-        }
-        else{
-          arma::mat estimated_coefficients_BS( covariate_mat.n_cols * (k-1) , 1 , arma::fill::zeros );
-          arma::uvec coefficients_to_est_bs = find_finite( R(14,0) );
-          R_LCR_BS = stratEst_LCR_EM( output_cube_BS_sample, sum_outputs_cube_BS_sample, strat_id, covariate_mat_BS_sample, R(0,0), empty_responses, empty_trembles, R(14,0), R(3,0), R(4,0), R(5,0), R(15,0), shares_to_est, indices_responses_zero, indices_trembles_zero, indices_coefficients, true, coefficients_to_est_bs, responses_to_sum, response, 0 , outer_tol_eval, outer_max_eval, newton_stepsize, true, sample_of_ids_shares_BS, num_ids_sample_shares_BS, sample_of_ids_responses_BS, num_ids_sample_responses_BS, sample_of_ids_trembles_BS, num_ids_sample_trembles_BS );
-          estimated_coefficients_BS = R_LCR_BS(14,0);
-          estimated_shares_BS = R_LCR_BS(3,0);
-          if( estimated_shares_BS.is_finite() && estimated_coefficients_BS.is_finite() ){
-            BS_shares_SE_mat( arma::span::all , i ) = estimated_shares_BS( shares_to_est );
-            BS_coefficients_SE_mat( arma::span::all , i ) = estimated_coefficients_BS( coefficients_to_est_bs );
-            BS_shares_SE += ( ( estimated_shares_BS( shares_to_est ) - estimated_shares( shares_to_est )) % (estimated_shares_BS( shares_to_est ) - estimated_shares( shares_to_est ) ) );
-            BS_coefficients_SE += ( ( estimated_coefficients_BS( coefficients_to_est_bs ) - estimated_coefficients( coefficients_to_est_bs )) % (estimated_coefficients_BS( coefficients_to_est_bs ) - estimated_coefficients( coefficients_to_est_bs ) ) );
-          }
-          else{
-            BS_samples_coefficients = BS_samples_coefficients - 1;
-          }
-        }
+        arma::vec empty_shares( 0 , arma::fill::none );
+        arma::vec empty_responses( 0 , arma::fill::none );
+        arma::vec empty_trembles( 0 , arma::fill::none );
 
-      }
-
-      // bootstrap responses & trembles
-      if( response != "pure" && num_responses_to_est > 0 ){
-        arma::vec estimated_responses = R(1,0);
-        arma::vec estimated_responses_BS( estimated_responses.n_elem , arma::fill::zeros );
-        arma::mat indices_responses_BS = indices_responses;
-        indices_responses_BS.fill(0);
-        int num_estimated_responses = estimated_responses.n_elem;
-        int num_col_indices = indices_responses.n_cols;
-        int max_indices_responses = indices_responses.max();
-        int num_it_responses = max_indices_responses/num_col_indices;
-        arma::vec responses_indices_vec = arma::linspace(1,num_estimated_responses,num_estimated_responses);
-        arma::vec responses_BS( num_col_indices*num_samples_responses , arma::fill::zeros );
-        for (int r1 = 0; r1 < num_it_responses; r1++) {
-          arma::vec indices_ones( num_estimated_responses , arma::fill::zeros );
-          for(int r3 = 1; r3 <= num_col_indices; r3++) {
-            for(int sam = 0; sam < num_samples_responses; sam++) {
-              indices_ones( find( responses_indices_vec  == sam*max_indices_responses + r1*num_col_indices + r3 ) ).fill(1);
+        // bootstrap shares or coefficients
+        if( num_shares_to_est > 0 ){
+          arma::mat estimated_shares_BS( k , num_samples , arma::fill::zeros );
+          if( LCR == false ){
+            R_NO_LCR_BS = stratEst_EM( output_cube_BS_sample, sum_outputs_cube_BS_sample, strat_id, R(0,0), empty_responses, empty_trembles, R(3,0), R(4,0), R(5,0), indices_shares, indices_responses_zero, indices_trembles_zero, responses_to_sum, response, 0, outer_tol_eval, outer_max_eval, sample_of_ids_shares_BS, num_ids_sample_shares_BS, sample_of_ids_responses_BS, num_ids_sample_responses_BS, sample_of_ids_trembles_BS, num_ids_sample_trembles_BS );
+            estimated_shares_BS = R_NO_LCR_BS(0,0);
+            if( estimated_shares_BS.is_finite() && estimated_shares_BS.n_elem > 0 ){
+              BS_shares_SE_mat( arma::span::all , i ) = estimated_shares_BS;
+              BS_shares_SE += ( ( estimated_shares_BS - estimated_shares) % (estimated_shares_BS - estimated_shares ) );
             }
-            indices_responses_BS( find( indices_responses == r1*num_col_indices + r3 ) ).fill(r3);
-
+            else{
+              BS_samples_shares = BS_samples_shares - 1;
+            }
           }
-          responses_BS = estimated_responses( find( indices_ones == 1 ) );
-          if( LCR ){
+          else{
+            arma::mat estimated_coefficients_BS( covariate_mat.n_cols * (k-1) , 1 , arma::fill::zeros );
             arma::uvec coefficients_to_est_bs = find_finite( R(14,0) );
-            R_LCR_BS = stratEst_LCR_EM( output_cube_BS_sample, sum_outputs_cube_BS_sample, strat_id, covariate_mat_BS_sample, empty_shares, responses_BS, empty_trembles, R(14,0), R(3,0), R(4,0), R(5,0), R(15,0), shares_to_est, indices_responses_BS, indices_trembles_zero, indices_coefficients_zero, false, coefficients_to_est_bs, responses_to_sum, response, 0 , outer_tol_eval, outer_max_eval, newton_stepsize, penalty, sample_of_ids_shares_BS, num_ids_sample_shares_BS, sample_of_ids_responses_BS, num_ids_sample_responses_BS, sample_of_ids_trembles_BS, num_ids_sample_trembles_BS );
-            arma::mat response_estimate_BS = R_LCR_BS(1,0);
-            estimated_responses_BS( find( indices_ones == 1 ) ) = response_estimate_BS;
-          }else{
-            R_NO_LCR_BS = stratEst_EM( output_cube_BS_sample, sum_outputs_cube_BS_sample, strat_id, empty_shares, responses_BS, empty_trembles, R(3,0), R(4,0), R(5,0), indices_shares_zero, indices_responses_BS, indices_trembles_zero, responses_to_sum, response, 0, outer_tol_eval, outer_max_eval, sample_of_ids_shares_BS, num_ids_sample_shares_BS, sample_of_ids_responses_BS, num_ids_sample_responses_BS, sample_of_ids_trembles_BS, num_ids_sample_trembles_BS );
-            arma::mat response_estimate_BS = R_NO_LCR_BS(1,0);
-            estimated_responses_BS( find( indices_ones == 1 ) ) = response_estimate_BS;
+            R_LCR_BS = stratEst_LCR_EM( output_cube_BS_sample, sum_outputs_cube_BS_sample, strat_id, covariate_mat_BS_sample, R(0,0), empty_responses, empty_trembles, R(14,0), R(3,0), R(4,0), R(5,0), R(15,0), shares_to_est, indices_responses_zero, indices_trembles_zero, indices_coefficients, true, coefficients_to_est_bs, responses_to_sum, response, 0 , outer_tol_eval, outer_max_eval, newton_stepsize, true, sample_of_ids_shares_BS, num_ids_sample_shares_BS, sample_of_ids_responses_BS, num_ids_sample_responses_BS, sample_of_ids_trembles_BS, num_ids_sample_trembles_BS );
+            estimated_coefficients_BS = R_LCR_BS(14,0);
+            estimated_shares_BS = R_LCR_BS(3,0);
+            if( estimated_shares_BS.is_finite() && estimated_coefficients_BS.is_finite() ){
+              BS_shares_SE_mat( arma::span::all , i ) = estimated_shares_BS( shares_to_est );
+              BS_coefficients_SE_mat( arma::span::all , i ) = estimated_coefficients_BS( coefficients_to_est_bs );
+              BS_shares_SE += ( ( estimated_shares_BS( shares_to_est ) - estimated_shares( shares_to_est )) % (estimated_shares_BS( shares_to_est ) - estimated_shares( shares_to_est ) ) );
+              BS_coefficients_SE += ( ( estimated_coefficients_BS( coefficients_to_est_bs ) - estimated_coefficients( coefficients_to_est_bs )) % (estimated_coefficients_BS( coefficients_to_est_bs ) - estimated_coefficients( coefficients_to_est_bs ) ) );
+            }
+            else{
+              BS_samples_coefficients = BS_samples_coefficients - 1;
+            }
           }
-        }
-        if( estimated_responses_BS.is_finite() ){
-          BS_responses_SE_mat( arma::span::all , i ) = estimated_responses_BS;
-          BS_responses_SE += ( (estimated_responses_BS - estimated_responses) % (estimated_responses_BS - estimated_responses ) );
-        }
-        else{
-          BS_samples_responses = BS_samples_responses - 1;
-        }
-      }
 
-      int num_trembles_per_sample = indices_trembles.max();
-      arma::mat estimated_trembles_BS( estimated_trembles.n_elem , 1 , arma::fill::zeros );
-      arma::mat trembles_BS( num_samples_trembles , 1 );
-      for (int j = 0; j < num_trembles_per_sample; j++) {
-        for( int k = 0; k < num_samples_trembles; k++){
-          trembles_BS(k,0) = ( estimated_trembles(j+k*num_trembles_per_sample,0) );
         }
-        arma::mat indices_trembles_BS = indices_trembles_zero;
-        indices_trembles_BS( find( indices_trembles == j+1 ) ).fill(1);
-        if( LCR ){
-          arma::uvec coefficients_to_est = find_finite( R(14,0) );
-          R_LCR_BS = stratEst_LCR_EM( output_cube_BS_sample, sum_outputs_cube_BS_sample, strat_id, covariate_mat_BS_sample, empty_shares, empty_responses, trembles_BS, R(14,0), R(3,0), R(4,0), R(5,0), R(15,0), shares_to_est, indices_responses_zero, indices_trembles_BS, indices_coefficients_zero, false, coefficients_to_est, responses_to_sum, response, 0, outer_tol_eval, outer_max_eval, newton_stepsize, penalty, sample_of_ids_shares_BS, num_ids_sample_shares_BS, sample_of_ids_responses_BS, num_ids_sample_responses_BS, sample_of_ids_trembles_BS, num_ids_sample_trembles_BS );
-          arma::mat trembles_estimate_BS = R_LCR_BS(2,0);
-          for( int k = 0; k < num_samples_trembles; k++){
-            estimated_trembles_BS(j+k*num_trembles_per_sample,0) = trembles_estimate_BS(k,0);
+
+        // bootstrap responses & trembles
+        if( response != "pure" && num_responses_to_est > 0 ){
+          arma::vec estimated_responses = R(1,0);
+          arma::vec estimated_responses_BS( estimated_responses.n_elem , arma::fill::zeros );
+          arma::mat indices_responses_BS = indices_responses;
+          indices_responses_BS.fill(0);
+          int num_estimated_responses = estimated_responses.n_elem;
+          int num_col_indices = indices_responses.n_cols;
+          int max_indices_responses = indices_responses.max();
+          int num_it_responses = max_indices_responses/num_col_indices;
+          arma::vec responses_indices_vec = arma::linspace(1,num_estimated_responses,num_estimated_responses);
+          arma::vec responses_BS( num_col_indices*num_samples_responses , arma::fill::zeros );
+          for (int r1 = 0; r1 < num_it_responses; r1++) {
+            arma::vec indices_ones( num_estimated_responses , arma::fill::zeros );
+            for(int r3 = 1; r3 <= num_col_indices; r3++) {
+              for(int sam = 0; sam < num_samples_responses; sam++) {
+                indices_ones( find( responses_indices_vec  == sam*max_indices_responses + r1*num_col_indices + r3 ) ).fill(1);
+              }
+              indices_responses_BS( find( indices_responses == r1*num_col_indices + r3 ) ).fill(r3);
+
+            }
+            responses_BS = estimated_responses( find( indices_ones == 1 ) );
+            if( LCR ){
+              arma::uvec coefficients_to_est_bs = find_finite( R(14,0) );
+              R_LCR_BS = stratEst_LCR_EM( output_cube_BS_sample, sum_outputs_cube_BS_sample, strat_id, covariate_mat_BS_sample, empty_shares, responses_BS, empty_trembles, R(14,0), R(3,0), R(4,0), R(5,0), R(15,0), shares_to_est, indices_responses_BS, indices_trembles_zero, indices_coefficients_zero, false, coefficients_to_est_bs, responses_to_sum, response, 0 , outer_tol_eval, outer_max_eval, newton_stepsize, penalty, sample_of_ids_shares_BS, num_ids_sample_shares_BS, sample_of_ids_responses_BS, num_ids_sample_responses_BS, sample_of_ids_trembles_BS, num_ids_sample_trembles_BS );
+              arma::mat response_estimate_BS = R_LCR_BS(1,0);
+              estimated_responses_BS( find( indices_ones == 1 ) ) = response_estimate_BS;
+            }else{
+              R_NO_LCR_BS = stratEst_EM( output_cube_BS_sample, sum_outputs_cube_BS_sample, strat_id, empty_shares, responses_BS, empty_trembles, R(3,0), R(4,0), R(5,0), indices_shares_zero, indices_responses_BS, indices_trembles_zero, responses_to_sum, response, 0, outer_tol_eval, outer_max_eval, sample_of_ids_shares_BS, num_ids_sample_shares_BS, sample_of_ids_responses_BS, num_ids_sample_responses_BS, sample_of_ids_trembles_BS, num_ids_sample_trembles_BS );
+              arma::mat response_estimate_BS = R_NO_LCR_BS(1,0);
+              estimated_responses_BS( find( indices_ones == 1 ) ) = response_estimate_BS;
+            }
           }
+          if( estimated_responses_BS.is_finite() ){
+            BS_responses_SE_mat( arma::span::all , i ) = estimated_responses_BS;
+            BS_responses_SE += ( (estimated_responses_BS - estimated_responses) % (estimated_responses_BS - estimated_responses ) );
+          }
+          else{
+            BS_samples_responses = BS_samples_responses - 1;
+          }
+        }
+
+        int num_trembles_per_sample = indices_trembles.max();
+        arma::mat estimated_trembles_BS( estimated_trembles.n_elem , 1 , arma::fill::zeros );
+        arma::mat trembles_BS( num_samples_trembles , 1 );
+        for (int j = 0; j < num_trembles_per_sample; j++) {
+          for( int k = 0; k < num_samples_trembles; k++){
+            trembles_BS(k,0) = ( estimated_trembles(j+k*num_trembles_per_sample,0) );
+          }
+          arma::mat indices_trembles_BS = indices_trembles_zero;
+          indices_trembles_BS( find( indices_trembles == j+1 ) ).fill(1);
+          if( LCR ){
+            arma::uvec coefficients_to_est = find_finite( R(14,0) );
+            R_LCR_BS = stratEst_LCR_EM( output_cube_BS_sample, sum_outputs_cube_BS_sample, strat_id, covariate_mat_BS_sample, empty_shares, empty_responses, trembles_BS, R(14,0), R(3,0), R(4,0), R(5,0), R(15,0), shares_to_est, indices_responses_zero, indices_trembles_BS, indices_coefficients_zero, false, coefficients_to_est, responses_to_sum, response, 0, outer_tol_eval, outer_max_eval, newton_stepsize, penalty, sample_of_ids_shares_BS, num_ids_sample_shares_BS, sample_of_ids_responses_BS, num_ids_sample_responses_BS, sample_of_ids_trembles_BS, num_ids_sample_trembles_BS );
+            arma::mat trembles_estimate_BS = R_LCR_BS(2,0);
+            for( int k = 0; k < num_samples_trembles; k++){
+              estimated_trembles_BS(j+k*num_trembles_per_sample,0) = trembles_estimate_BS(k,0);
+            }
+          }
+          else{
+            R_NO_LCR_BS = stratEst_EM( output_cube_BS_sample, sum_outputs_cube_BS_sample, strat_id, empty_shares, empty_responses, trembles_BS, R(3,0), R(4,0), R(5,0), indices_shares_zero, indices_responses_zero, indices_trembles_BS, responses_to_sum, response, 0 , inner_tol_eval, inner_max_eval, sample_of_ids_shares_BS, num_ids_sample_shares_BS, sample_of_ids_responses_BS, num_ids_sample_responses_BS, sample_of_ids_trembles_BS, num_ids_sample_trembles_BS );
+            arma::mat trembles_estimate_BS = R_NO_LCR_BS(2,0);
+            for( int k = 0; k < num_samples_trembles; k++){
+              estimated_trembles_BS(j+k*num_trembles_per_sample,0) = trembles_estimate_BS(k,0);
+            }
+          }
+        }
+        if( estimated_trembles_BS.is_finite() ){
+          BS_trembles_SE_mat( arma::span::all , i ) = estimated_trembles_BS;
+          BS_trembles_SE += ( (estimated_trembles_BS - estimated_trembles) % (estimated_trembles_BS - estimated_trembles ) );
         }
         else{
-          R_NO_LCR_BS = stratEst_EM( output_cube_BS_sample, sum_outputs_cube_BS_sample, strat_id, empty_shares, empty_responses, trembles_BS, R(3,0), R(4,0), R(5,0), indices_shares_zero, indices_responses_zero, indices_trembles_BS, responses_to_sum, response, 0 , inner_tol_eval, inner_max_eval, sample_of_ids_shares_BS, num_ids_sample_shares_BS, sample_of_ids_responses_BS, num_ids_sample_responses_BS, sample_of_ids_trembles_BS, num_ids_sample_trembles_BS );
-          arma::mat trembles_estimate_BS = R_NO_LCR_BS(2,0);
-          for( int k = 0; k < num_samples_trembles; k++){
-            estimated_trembles_BS(j+k*num_trembles_per_sample,0) = trembles_estimate_BS(k,0);
-          }
+          BS_samples_trembles = BS_samples_trembles - 1;
         }
-      }
-      if( estimated_trembles_BS.is_finite() ){
-        BS_trembles_SE_mat( arma::span::all , i ) = estimated_trembles_BS;
-        BS_trembles_SE += ( (estimated_trembles_BS - estimated_trembles) % (estimated_trembles_BS - estimated_trembles ) );
+
+    }
+    // store bootstrap results
+      if( LCR ){
+        BS_shares_SE = sqrt( BS_shares_SE/BS_samples_coefficients );
+        BS_coefficients_SE = sqrt( BS_coefficients_SE/BS_samples_coefficients );
+        BS_shares_quantiles = quantile( BS_shares_SE_mat , quantile_vec , 1  );
+        BS_coefficients_quantiles = quantile( BS_coefficients_SE_mat , quantile_vec , 1  );
+        if( BS_samples_coefficients/BS_samples < 0.9 ){
+          BS_shares_SE.fill(-1);
+          BS_coefficients_SE.fill(-1);
+          BS_shares_quantiles.fill(-1);
+          BS_coefficients_quantiles.fill(-1);
+          Rcout<<"stratEst warning: Bootstrap for coefficients failed. More than 10 percent of the bootstrap samples did not produce estimates.\n";
+        }
       }
       else{
-        BS_samples_trembles = BS_samples_trembles - 1;
+        BS_shares_SE = sqrt( BS_shares_SE/BS_samples_shares );
+        BS_shares_quantiles = quantile( BS_shares_SE_mat , quantile_vec , 1  );
+        if( BS_samples_shares/BS_samples < 0.9 ){
+          BS_shares_SE.fill(-1);
+          BS_shares_quantiles.fill(-1);
+          Rcout<<"stratEst warning: Bootstrap for shares failed. More than 10 percent of the bootstrap samples did not produce estimates.\n";
+        }
       }
-    }
-    if( LCR ){
-      BS_shares_SE = sqrt( BS_shares_SE/BS_samples_coefficients );
-      BS_coefficients_SE = sqrt( BS_coefficients_SE/BS_samples_coefficients );
-      BS_shares_quantiles = quantile( BS_shares_SE_mat , quantile_vec , 1  );
-      BS_coefficients_quantiles = quantile( BS_coefficients_SE_mat , quantile_vec , 1  );
-      if( BS_samples_coefficients/BS_samples < 0.9 ){
-        BS_shares_SE.fill(-1);
-        BS_coefficients_SE.fill(-1);
-        BS_shares_quantiles.fill(-1);
-        BS_coefficients_quantiles.fill(-1);
-        Rcout<<"stratEst warning: Bootstrap for coefficients failed. More than 10 percent of the bootstrap samples did not produce estimates.\n";
+      BS_responses_SE = sqrt( BS_responses_SE/BS_samples_responses );
+      BS_responses_quantiles = quantile( BS_responses_SE_mat , quantile_vec , 1  );
+      BS_trembles_SE = sqrt( BS_trembles_SE/BS_samples_trembles );
+      BS_trembles_quantiles = quantile( BS_trembles_SE_mat , quantile_vec , 1  );
+      if( BS_samples_responses/BS_samples < 0.9 ){
+        BS_responses_SE.fill(-1);
+        BS_responses_quantiles.fill(-1);
+        Rcout<<"stratEst warning: Bootstrap for responses failed. More than 10 percent of the bootstrap samples did not produce estimates.\n";
       }
-    }
-    else{
-      BS_shares_SE = sqrt( BS_shares_SE/BS_samples_shares );
-      BS_shares_quantiles = quantile( BS_shares_SE_mat , quantile_vec , 1  );
-      if( BS_samples_shares/BS_samples < 0.9 ){
-        BS_shares_SE.fill(-1);
-        BS_shares_quantiles.fill(-1);
-        Rcout<<"stratEst warning: Bootstrap for shares failed. More than 10 percent of the bootstrap samples did not produce estimates.\n";
+      if( BS_samples_trembles/BS_samples < 0.9 ){
+        BS_trembles_SE.fill(-1);
+        BS_trembles_quantiles.fill(-1);
+        Rcout<<"stratEst warning: Bootstrap for trembles failed. More than 10 percent of the bootstrap samples did not produce estimates.\n";
       }
-    }
-    BS_responses_SE = sqrt( BS_responses_SE/BS_samples_responses );
-    BS_responses_quantiles = quantile( BS_responses_SE_mat , quantile_vec , 1  );
-    BS_trembles_SE = sqrt( BS_trembles_SE/BS_samples_trembles );
-    BS_trembles_quantiles = quantile( BS_trembles_SE_mat , quantile_vec , 1  );
-    if( BS_samples_responses/BS_samples < 0.9 ){
-      BS_responses_SE.fill(-1);
-      BS_responses_quantiles.fill(-1);
-      Rcout<<"stratEst warning: Bootstrap for responses failed. More than 10 percent of the bootstrap samples did not produce estimates.\n";
-    }
-    if( BS_samples_trembles/BS_samples < 0.9 ){
-      BS_trembles_SE.fill(-1);
-      BS_trembles_quantiles.fill(-1);
-      Rcout<<"stratEst warning: Bootstrap for trembles failed. More than 10 percent of the bootstrap samples did not produce estimates.\n";
-    }
     if( print_messages == true ){
       Rcout<< "\n";
     }
@@ -3053,6 +3074,37 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec sid , arma::ma
 
   }
 
+  // global chi square
+  arma::mat chi_mat( 1 , 2 , arma::fill::zeros );
+  arma::mat observed = R(21,0);
+  arma::mat probabilities_mat = response_long_mat % (1 - tremble_long_mat) + ( 1 - response_long_mat ) % ( tremble_long_mat / (num_outputs - 1) );
+  arma::mat sum_observed_mat = sum( observed , 1 );
+  arma::mat expected = probabilities_mat;
+  expected.each_col() %= sum_observed_mat;
+  arma::umat non_zero = find( expected != 0 );
+  double chi = accu(((observed(non_zero) - expected(non_zero)) % (observed(non_zero) - expected(non_zero)))/expected(non_zero) );
+  chi_mat(0,0) = chi;
+
+  //local chi square
+  arma::mat chi_local( 1 , k , arma::fill::zeros );
+  arma::mat strat_id_mat = repmat( strat_id , 1 , k );
+  arma::mat assignments = R(13.0);
+  for (int i = 0; i < num_ids; i++) {
+    arma::rowvec target_row = assignments.row(i);
+    arma::uword index_id = index_max( target_row );
+    arma::vec v = arma::linspace(1,k,k);
+    int k_id = v(index_id);
+    arma::mat observed_k = output_cube.slice(i);
+    arma::mat sum_observed_k = sum_outputs_cube.slice(i);
+    arma::mat observed_id = observed_k.rows( find( strat_id == k_id ) );
+    arma::mat sum_observed_id = sum_observed_k.rows( find( strat_id == k_id ) );
+    arma::mat expected_id = probabilities_mat.rows( find( strat_id == k_id ) );
+    expected_id %= sum_observed_id;
+    arma::umat non_zero_id = find( expected_id != 0 );
+    double chi_id = accu(((observed_id(non_zero_id) - expected_id(non_zero_id)) % (observed_id(non_zero_id) - expected_id(non_zero_id)))/expected_id(non_zero_id) );
+    chi_local(k_id-1) += chi_id;
+  }
+
   arma::mat SE_shares = R_SE(0,0);
   arma::mat covar_shares = R_SE(5,0);
   arma::mat score_shares = R_SE(6,0);
@@ -3147,11 +3199,13 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec sid , arma::ma
   }
 
   //final fit variables
-  arma::mat final_fit( 1 , 6 , arma::fill::zeros );
+  arma::mat final_fit( 1 , 7+k , arma::fill::zeros );
   final_fit(0,0) = -final_LL(0,0);
   final_fit(0,1) = final_crit( crit_index );
   final_fit(0,2) = final_entropy(0,0);
   final_fit(0,arma::span(3,5) ) = final_crit.t();
+  final_fit(0,6) = chi_mat(0,0);
+  final_fit(0,arma::span(7,7+k-1)) = chi_local;
   arma::mat final_solver( 1 , 3 , arma::fill::zeros );
   final_solver(0,0) = final_eval(0,0);
   final_solver(0,1) = final_eps(0,0);
@@ -3176,7 +3230,7 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec sid , arma::ma
   List shares_list = List::create( Named("shares.par") = final_shares, Named("shares.indices") = final_indices_shares, Named("shares.se") = final_SE_shares, Named("shares.score") =  final_score_shares, Named("shares.covar") = final_covar_shares, Named("shares.fisher") = final_fisher_shares , Named("shares.quantiles") = final_quantiles_shares );
   List responses_list = List::create( Named("responses.par") = final_responses, Named("responses.indices") = final_indices_responses, Named("responses.se") = final_SE_responses, Named("responses.covar") = final_covar_responses, Named("responses.score") = final_score_responses, Named("responses.fisher") = final_fisher_responses, Named("responses.quantiles") = final_quantiles_responses  );
   List trembles_list = List::create( Named("trembles.par") = final_trembles, Named("trembles.indices") = final_indices_trembles, Named("trembles.se") = final_SE_trembles, Named("trembles.covar") = final_covar_trembles, Named("trembles.score") = final_score_trembles, Named("trembles.fisher") = final_fisher_trembles, Named("trembles.quantiles") = final_quantiles_trembles );
-  List coefficients_list = List::create( Named("coefficients.par") = final_coefficients,  Named("coefficients.se") = final_SE_coefficients, Named("coefficients.covar") = final_covar_coefficients, Named("coefficients.score") = final_score_coefficients, Named("coefficients.fisher") = final_fisher_coefficients, Named("coefficients.quantiles") = final_quantiles_coefficients  );
+  List coefficients_list = List::create( Named("coefficients.par") = final_coefficients,  Named("coefficients.se") = final_SE_coefficients, Named("coefficients.covar") = final_covar_coefficients, Named("coefficients.score") = final_score_coefficients, Named("coefficients.fisher") = final_fisher_coefficients, Named("coefficients.quantiles") = final_quantiles_coefficients, Named("covariate.mat") = covariate_mat  );
 
   List S = List::create( Named("shares") = final_shares_vec, Named("strategies") = final_strategies,  Named("responses") = final_response_mat, Named("trembles") = final_tremble_vec,  Named("coefficients") = final_coefficient_mat, Named("fit") = final_fit, Named("solver") = final_solver, Named("state.obs") = final_state_obs, Named("assignments") = final_i_class, Named("priors") = final_individual_priors, Named("convergence") = final_convergence, Named("sid") = sid, Named("selected.strats") = survivors, Named("lcr") = LCR , Named("n.par") = final_free_params , Named("shares.list") = shares_list, Named("responses.list") = responses_list, Named("trembles.list") = trembles_list, Named("coefficients.list") = coefficients_list );
 
