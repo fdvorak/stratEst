@@ -10,7 +10,7 @@ stratEst.check.sample.id <- function( data , sample.id ){
   }else{
     if( sample.id %in% colnames(data) ){
       sample <- data[,sample.id]
-      if( class(sample) != "factor" ){
+      if( "factor" %in% class(sample) == F ){
         warning(paste("stratEst error: The variable '",sample.id,"' ","has to be of class integer or factor.",sep=""))
         sample <- as.factor(sample)
       }

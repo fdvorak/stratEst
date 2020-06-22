@@ -42,10 +42,10 @@ summary(model.DF2011)
 
   - Breitmoser, Y. (2015): Cooperation, but no reciprocity: Individual
     strategies in the repeated prisoner’s dilemma, American Economic
-    Review, 105, 2882-2910. <doi:10.1257/aer.20130675>
+    Review, 105, 2882-2910. \doi 10.1257/aer.20130675
   - Dal Bo, P. and G. R. Frechette (2011): The evolution of cooperation
     in infinitely repeated games: Experimental evidence, American
-    Economic Review, 101, 411-429. <doi:10.1257/aer.101.1.411>
+    Economic Review, 101, 411-429. \doi 10.1257/aer.101.1.411
   - Dempster, A., N. Laird, and D. B. Rubin (1977): Maximum likelihood
     from incomplete data via the EM algorithm," Journal of the Royal
     Statistical Society Series B, 39, 1-38.

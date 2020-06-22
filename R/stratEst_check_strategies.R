@@ -50,7 +50,7 @@ stratEst.check.strategies <- function( strategies , input_factor , output_factor
       # check and generate responses
       response_mat_strategy <- matrix(NA,nrow(strategy),num_unique_outputs)
       for( out in 1:num_unique_outputs ){
-        r_string <- paste("output.",as.character(unique_outputs[out]),sep="")
+        r_string <- paste("prob.",as.character(unique_outputs[out]),sep="")
         if( r_string %in% colnames(strategy) ){
           response_mat_strategy[,out] <- strategy[,r_string]
           response_mat_col_index[le,out] <- grep(paste("^",r_string,"$",sep=""), colnames(strategy))
@@ -64,19 +64,26 @@ stratEst.check.strategies <- function( strategies , input_factor , output_factor
       # check and generate transitions
       transition_mat_strategy <- matrix(NA,nrow(strategy),num_unique_inputs)
       for( ins in 1:num_unique_inputs ){
-        t_string <- paste("input.",as.character(unique_inputs[ins]),sep="")
+        t_string <- paste("tr(",as.character(unique_inputs[ins]), ")" , sep="")
         if( t_string %in% colnames(strategy) ){
           transition_mat_strategy[,ins] <- strategy[,t_string]
-          transition_mat_col_index[le,ins] <- grep(paste("^",t_string,"$",sep=""), colnames(strategy))
+          transition_mat_col_index[le,ins] <- c(1:ncol(strategy))[t_string == colnames(strategy)]
         }
         else{
-          message <- paste("stratEst error: There is an input with value ", as.character(unique_inputs[ins]) , " in the data but there is no column named '", t_string , "' in strategy",le,".",sep="")
-          stop(message)
+          transition_mat_strategy[,ins] <- rep(1,nrow(strategy))
+          #transition_mat_col_index[le,ins] <- grep(paste("^",t_string,"$",sep=""), colnames(strategy))
+          # message <- paste("stratEst error: There is an input with value ", as.character(unique_inputs[ins]) , " in the data but there is no column named '", t_string , "' in strategy",le,".",sep="")
+          # stop(message)
         }
         if( sum( transition_mat_strategy[,ins]%%1==0 ) < nrow(strategy) ){
           message <- paste("stratEst error: The transition columns in 'strategies' must be integers. Check the column named '", t_string , "'.",sep="")
           stop(message)
         }
+      }
+      if( paste("tr(",as.character(unique_inputs[1]), ")" , sep="") %in% colnames(strategy) == F ){
+        strategy_with_transitions <- cbind(strategies[[le]],transition_mat_strategy)
+        colnames( strategy_with_transitions) <- c(colnames(strategy),paste("tr(",as.character(unique_inputs),")",sep=""))
+        strategies[[le]] <- strategy_with_transitions
       }
       transition_mat <- rbind(transition_mat,transition_mat_strategy)
       if( any( transition_mat <= 0 ) ){
@@ -107,7 +114,7 @@ stratEst.check.strategies <- function( strategies , input_factor , output_factor
     stop("stratEst error: Strategies cannot be selected if there is only one strategy.");
   }
 
-  stratEst.check.strategies.return <- list( "strategies.matrix" = strategies_matrix , "trembles" = trembles , "num_strats" = num_strats , "unique.inputs" = unique_inputs , "unique.outputs" = unique_outputs , "num.unique.inputs" = num_unique_inputs , "num.unique.outputs" = num_unique_outputs , "sid" = sid , "integer.strategies" = integer_strategies , "response.mat.col.index" = response_mat_col_index , "names.strategies" = names_strategies )
+  stratEst.check.strategies.return <- list( "strategies" = strategies , "strategies.matrix" = strategies_matrix , "trembles" = trembles , "num_strats" = num_strats , "unique.inputs" = unique_inputs , "unique.outputs" = unique_outputs , "num.unique.inputs" = num_unique_inputs , "num.unique.outputs" = num_unique_outputs , "sid" = sid , "integer.strategies" = integer_strategies , "response.mat.col.index" = response_mat_col_index , "names.strategies" = names_strategies )
 
   return( stratEst.check.strategies.return )
 

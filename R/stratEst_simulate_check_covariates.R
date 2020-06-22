@@ -2,7 +2,7 @@
 
 stratEst.simulate.check.covariates <- function( covariates ){
 
-  if( class(covariates) != "matrix" ){
+  if( "matrix" %in% class(covariates) == F ){
     stop(paste("stratEst error: The input object covariates must be a numeric matrix.",sep=""))
   }
   names_covariates <- colnames( covariates )

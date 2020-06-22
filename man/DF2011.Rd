@@ -12,7 +12,7 @@ A data frame with 7358 rows and 6 variables:
   \item{game}{A vector of integers which identifies the supergame.}
   \item{period}{A vector of integers which identifies the period of the supergame.}
   \item{choice}{A factor with two levels which is indicates if the participant cooperates (c) or defects (d) in the current period.}
-  \item{other_choice}{A factor with two levels which indicates if the other participant cooperates (c) or defects (d) in the current period.}
+  \item{other.choice}{A factor with two levels which indicates if the other participant cooperates (c) or defects (d) in the current period.}
 }
 }
 \source{

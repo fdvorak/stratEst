@@ -1,11 +1,15 @@
 #' Dethod dispatch for Generic Function Summary
-#' @param object An object returned by the estimation function\code{stratEst()}. An object of class \code{stratEst}.
+#' @param object An object returned by the estimation function\code{stratEst.model()}. An object of class \code{stratEst.model}.
 #' @param ... additional arguments affecting the summary produced.
 #' @export
 
-summary.stratEst <- function( object , ...){
+summary.stratEst.model <- function( object , ...){
 
-  stratEst.return <- object
+  if( "stratEst.model" %in% class(object) == F ){
+    stop(paste("stratEst.summary error: The object ",as.character(object)," must be of class 'stratEst.model" ),sep="")
+  }else{
+    stratEst.return <- object
+  }
 
   convergence_string <- ifelse( is.null(stratEst.return$convergence) , "no parameters estimated" , ifelse( max( stratEst.return$convergence[ is.na(stratEst.return$convergence) == F ] ) < 0.001 , "yes" , ifelse( any( stratEst.return$convergence[ is.na(stratEst.return$convergence) == F ] < 0.001 ) , "partial" , "no") ) )
 
@@ -16,23 +20,23 @@ summary.stratEst <- function( object , ...){
   writeLines(paste("number of individuals: ",stratEst.return$num.ids,sep=""))
   writeLines(paste("number of observations: ",stratEst.return$num.obs,sep=""))
   writeLines(paste("number of model parameters: ",stratEst.return$num.par,sep=""))
-  writeLines(paste("number of free parameters: ",stratEst.return$free.par,sep=""))
+  writeLines(paste("number of free model parameters: ",stratEst.return$free.par,sep=""))
   writeLines(paste("residual degrees of freedom: ", stratEst.return$res.degrees,sep=""))
   writeLines(paste("convergence: ",convergence_string,sep=""))
   writeLines("")
   writeLines("model fit:")
   writeLines(paste(rep("-",nchar("model fit:")),collapse = ""))
   writeLines(paste("log likelihood: ",round(stratEst.return$loglike,2),sep=""))
-  writeLines(paste("entropy: ",round(stratEst.return$entropy,2),sep=""))
-  writeLines(paste("aic: ",round(stratEst.return$crit[1],2),sep=""))
-  writeLines(paste("bic: ",round(stratEst.return$crit[2],2),sep=""))
-  writeLines(paste("icl: ",round(stratEst.return$crit[3],2),sep=""))
+  writeLines(paste("model entropy: ",round(stratEst.return$entropy.model,2),sep=""))
+  writeLines(paste("aic: ",round(stratEst.return$aic,2),sep=""))
+  writeLines(paste("bic: ",round(stratEst.return$bic,2),sep=""))
+  writeLines(paste("icl: ",round(stratEst.return$icl,2),sep=""))
   writeLines("")
   writeLines("shares:")
   writeLines(paste(rep("-",nchar("shares:")),collapse = ""))
   if( "list" %in% class(stratEst.return$shares) ){
     #writeLines(paste(rep("=",(sum(nchar(colnames(stratEst.return$shares[[1]])))+max(nchar(rownames(stratEst.return$shares[[1]])))+length(stratEst.return$shares[[1]]))), collapse = ""))
-    print(format(round(do.call(rbind,stratEst.return$shares),2)),2)
+    print(round(do.call(rbind,stratEst.return$shares),2))
   }else{
     print(round(stratEst.return$shares,2))
   }
@@ -50,14 +54,19 @@ summary.stratEst <- function( object , ...){
     strategies_print <- stratEst.return$strategies
     names_samples <- names(stratEst.return$strategies)
     for( i in 1:length(stratEst.return$strategies) ){
-      strategies_sample <- round(do.call(rbind,strategies_print[[i]]),3)
-      row_names_strategies_sample <- row.names(strategies_sample)
-      row.names(strategies_sample) =  paste( names_samples[i], "." , row_names_strategies_sample, sep="")
+      strategies_sample <- do.call(rbind,strategies_print[[i]])
+      row_names_strategies_sample <- rownames(strategies_sample)
+      rownames(strategies_sample) =  paste( names_samples[i], "." , row_names_strategies_sample, sep="")
       strategies_sample_list <- rbind( strategies_sample_list , strategies_sample )
     }
     print(strategies_sample_list)
   }else{
-    print(round(do.call(rbind,stratEst.return$strategies),3))
+#
+#     for( i in 1:length(stratEst.return$strategies) ){
+#       print(round(stratEst.return$strategies[[i]],3))
+#     }
+    print(do.call(rbind,stratEst.return$strategies))
+    #print(round(do.call(rbind,stratEst.return$strategies),3))
   }
   writeLines("")
   writeLines("parameter estimates:")
@@ -65,7 +74,7 @@ summary.stratEst <- function( object , ...){
 
   par_matrix <- NULL
 
-  if( length(stratEst.return$shares.par > 0) & is.null(stratEst.return$coefficients)  ){
+  if( length(stratEst.return$shares.par) > 1 & is.null(stratEst.return$coefficients)  ){
     par <- stratEst.return$shares.par
     se <- stratEst.return$shares.se
     se[ se == 0 ] = NA
@@ -83,21 +92,20 @@ summary.stratEst <- function( object , ...){
     z <- abs(par/se)
     p <- stats::pt( z , stratEst.return$res.degrees , lower = F )
     coefficients_matrix = cbind( par ,  stratEst.return$coefficients.quantiles , se , z , p )
-    print(stratEst.return$coefficients.par)
     colnames(coefficients_matrix) <- c("estimate",colnames(stratEst.return$coefficients.quantiles),"std. error","t-value","Pr(>|t|)")
     rownames(coefficients_matrix) <- paste("coefficients.par.",as.character(seq(1,nrow(coefficients_matrix),by = 1)),sep="")
     par_matrix = rbind(par_matrix,coefficients_matrix)
 
   }
-  if( length(stratEst.return$responses.par > 0) & length(stratEst.return$responses.se > 0) ){
-    par <- stratEst.return$responses.par
-    se <- stratEst.return$responses.se
+  if( length(stratEst.return$probs.par > 0) & length(stratEst.return$probs.se > 0) ){
+    par <- stratEst.return$probs.par
+    se <- stratEst.return$probs.se
     se[ se == 0 ] = NA
     z <- abs(par/se)
     p <- stats::pt( z , stratEst.return$res.degrees , lower = F )
-    response_matrix = cbind( par , stratEst.return$responses.quantiles , se , z , p )
-    colnames(response_matrix) <- c("estimate",colnames(stratEst.return$responses.quantiles),"std.error","t-value","Pr(>|t|)")
-    rownames(response_matrix) <- paste("responses.par.",as.character(seq(1,nrow(response_matrix),by = 1)),sep="")
+    response_matrix = cbind( par , stratEst.return$probs.quantiles , se , z , p )
+    colnames(response_matrix) <- c("estimate",colnames(stratEst.return$probs.quantiles),"std.error","t-value","Pr(>|t|)")
+    rownames(response_matrix) <- paste("probs.par.",as.character(seq(1,nrow(response_matrix),by = 1)),sep="")
     par_matrix = rbind(par_matrix,response_matrix)
   }
   if( length(stratEst.return$trembles.par > 0) ){

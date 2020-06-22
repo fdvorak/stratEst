@@ -12,8 +12,8 @@ stratEst(
   covariates,
   sample.id,
   response = "mixed",
-  sample.specific = c("shares", "responses", "trembles"),
-  r.responses = "no",
+  sample.specific = c("shares", "probs", "trembles"),
+  r.probs = "no",
   r.trembles = "global",
   select = NULL,
   min.strategies = 1,
@@ -23,7 +23,7 @@ stratEst(
   outer.tol = 1e-10,
   outer.max = 1000,
   inner.runs = 10,
-  inner.tol = 1e-10,
+  inner.tol = 1e-05,
   inner.max = 10,
   lcr.runs = 100,
   lcr.tol = 1e-10,
@@ -36,9 +36,9 @@ stratEst(
 )
 }
 \arguments{
-\item{data}{A \code{stratEst.data} object or \code{data.frame}. The variables \code{id}, \code{game}, \code{period}, \code{input}, and \code{output} are mandatory. The variable \code{id} identifies observations of the same individual across games and periods. The factor \code{input} indicates the dicrete information observed by the individual before making a response. The factor \code{output} indicates the behavioral response observed.}
+\item{data}{A \code{stratEst.data} object or \code{data.frame}. Must contain the variables \code{choice},  \code{input}, \code{id}, \code{game}, \code{period}. The variable \code{id} identifies observations of the same individual across games and periods. The factor \code{input} indicates the dicrete information observed by the individual before making a choice. The factor \code{choice} indicates the choice of the individual.}
 
-\item{strategies}{A list of strategies. Each strategy is a data.frame of class \code{stratEst.strategy}. Each row of the data.frame represents one state of the strategy. The first row defines the initial state which is entered if the variable input is NA. Column names which start with the string 'output.' indicate the columns which contain the multinomial response probabilities of the strategy. For example, a column labeled 'output.x' contains the probability to observe the output 'x'. The column 'tremble' contains a tremble probability for pure responses. Column names which start with the string 'input.' indicate the columns which contain the deterministic state transition of the strategy. For example, a column with name 'input.x' indicates the state transition after observing input 'x'.}
+\item{strategies}{A list of strategies. Each strategy is a data.frame of class \code{stratEst.strategy}. Each row of the data.frame represents one state of the strategy. The first row defines the initial state which is entered if the variable input is NA. Column names which start with the string 'output.' indicate the columns which contain the multinomial choice probabilities of the strategy. For example, a column labeled 'output.x' contains the probability to observe the output 'x'. The column 'tremble' contains a tremble probability for pure strategies. Column names which start with the string 'input.' indicate the columns which contain the deterministic state transition of the strategy. For example, a column with name 'input.x' indicates the state transition after observing input 'x'.}
 
 \item{shares}{A vector of strategy shares. The elements to the order of strategies in the list \code{strategies}. Shares which are \code{NA} are estimated from the data. With more than one sample and sample specific shares, a list of column vectors is required.}
 
@@ -48,15 +48,15 @@ stratEst(
 
 \item{sample.id}{A character indicating the name of the variable which identifies the samples. Individual observations must be nested in samples. The same must be true for clusters if specified. If more than one sample exists, shares are estimated for each sample. All other parameters are estimated for the data of all samples. If the object is not supplied, it is assumed that the data contains only one sample.}
 
-\item{response}{A string which can be set to \code{"pure"} or \code{"mixed"}. If set to \code{"pure"} all estimated response probabilities are pure, i.e. either zero or one. If set to \code{"mixed"} all estimated response probabilities are mixed. The default is \code{"mixed"}.}
+\item{response}{A string which can be set to \code{"pure"} or \code{"mixed"}. If set to \code{"pure"} all estimated choice probabilities are pure, i.e. either zero or one. If set to \code{"mixed"} all estimated choice probabilities are mixed. The default is \code{"mixed"}.}
 
-\item{sample.specific}{A character vector defining which model parameters are sample specific. If the vector contains the character \code{"shares"} (\code{"responses"}, \code{"trembles"}), the estimation function estimates a set of shares (responses, trembles) for each sample in the data. If the vector does not contains the character \code{"shares"} (\code{"responses"}, \code{"trembles"}) one set of shares (responses, trembles) is estimated for the pooled data of all samples. Default is \code{c("shares","responses","trembles")}.}
+\item{sample.specific}{A character vector defining which model parameters are sample specific. If the vector contains the character \code{"shares"} (\code{"probs"}, \code{"trembles"}), the estimation function estimates a set of shares (choice probabilities, trembles) for each sample in the data. If the vector does not contains the character \code{"shares"} (\code{"probs"}, \code{"trembles"}) one set of shares (choice probabilities, trembles) is estimated for the pooled data of all samples. Default is \code{c("shares","probs","trembles")}.}
 
-\item{r.responses}{A string which can be set to \code{"no"}, \code{"strategies"}, \code{"states"} or \code{"global"}. If set to \code{"strategies"}, the estimation function estimates strategies with one strategy specific vector of responses in every state of the strategy. If set to \code{"states"}, one state specific vector of responses is estimated for each state. If set to \code{"global"}, a single vector of responses is estimated which applies in every state of each strategy. Default is \code{"no"}.}
+\item{r.probs}{A string which can be set to \code{"no"}, \code{"strategies"}, \code{"states"} or \code{"global"}. If set to \code{"strategies"}, the estimation function estimates strategies with one strategy specific vector of choice probabilities in every state of the strategy. If set to \code{"states"}, one state specific vector of choice probabilities is estimated for each state. If set to \code{"global"}, a single vector of probabilities is estimated which applies in every state of each strategy. Default is \code{"no"}.}
 
 \item{r.trembles}{A string which can be set to \code{"no"}, \code{"strategies"}, \code{"states"} or \code{"global"}. If set to \code{"strategies"}, the estimation unction estimates strategies with one strategy specific tremble probability. If set to  \code{"states"}, one state specific tremble probability is estimated for each state. If set to \code{"global"}, a single tremble probability is estimated which globally. Default is \code{"global"}.}
 
-\item{select}{A character vector indicating which model parameters are selected. If the vector contains the character \code{"strategies"} (\code{"responses"}, \code{"trembles"}), the number of strategies (responses, trembles) is selected based on the selection criterion specified in \code{"crit"}. The selection of responses and trembles occurs obeying the restriction specified in \code{r.responses} and \code{r.trembles}. (E.g. if \code{r.responses} is set to \code{"strategies"}, \code{select = "responses"} will select responses within each strategy). Default is \code{NULL}.}
+\item{select}{A character vector indicating which model parameters are selected. If the vector contains the character \code{"strategies"} (\code{"probs"}, \code{"trembles"}), the number of strategies (choice probabilities, trembles) is selected based on the selection criterion specified in \code{"crit"}. The selection of choice probabilities and trembles occurs obeying the restriction specified in \code{r.probs} and \code{r.trembles}. (E.g. if \code{r.probs} is set to \code{"strategies"}, \code{select = "probs"} will select the sets of choice probabilities within each strategy). Default is \code{NULL}.}
 
 \item{min.strategies}{An integer which specifies the minimum number of strategies in case of strategy selection. The strategy selection procedure stops if the minimum is reached.}
 
@@ -96,15 +96,15 @@ stratEst(
 An object of class \code{stratEst}. A list with the following elements.
 \item{strategies}{A list of fitted strategies.}
 \item{shares}{Matrix of strategy shares. The order of rows corresponds to the order of strategies defined in the input object \code{strategies}.}
-\item{responses}{Matrix of response probabilities. The value \code{NA} indicates that the corresponding response could not be estimated since data does not contain observations the model assigns to the corresponding state.}
-\item{trembles}{Matrix of tremble probabilities of the strategies. The value \code{NA} indicates that the corresponding response could not be estimated since data does not contain observations the model assigns to the corresponding state.}
+\item{probs}{Matrix of choice probabilities. The value \code{NA} indicates that the probability could not be estimated since data does not contain observations the model assigns to the corresponding state.}
+\item{trembles}{Matrix of tremble probabilities of the strategies. The value \code{NA} indicates that the corresponding probability could not be estimated since data does not contain observations the model assigns to the corresponding state.}
 \item{coefficients}{Matrix of latent class regression coefficients for strategies.}
 \item{shares.par}{Estimated strategy shares.}
-\item{responses.par}{Estimated response probabilities.}
+\item{probs.par}{Estimated choice probabilities.}
 \item{trembles.par}{Estimated tremble probabilities.}
 \item{coefficients.par}{Estimated latent class regression coefficients.}
 \item{shares.indices}{Indices of strategy shares.}
-\item{responses.indices}{Indices of response probabilities.}
+\item{probs.indices}{Indices of choice probabilities.}
 \item{trembles.indices}{Indices of tremble probabilities.}
 \item{coefficients.indices}{Indices of latent class regression coefficients.}
 \item{loglike}{The log-likelihood of the model. Larger values indicate a better fit of the model to the data.}
@@ -117,15 +117,15 @@ An object of class \code{stratEst}. A list with the following elements.
 \item{posterior.assignments}{Posterior probability of each individual to use a strategy.}
 \item{prior.assignments}{Prior probability of each individual to use a strategy as predicted by the individual covariates.}
 \item{shares.se}{Standard errors of the estimated shares.}
-\item{responses.se}{Standard errors of the estimated responses.}
+\item{probs.se}{Standard errors of the estimated chocie probabilities.}
 \item{trembles.se}{Standard errors of the estimated trembles.}
 \item{coefficients.se}{Standard errors of the estimated coefficients.}
 \item{shares.score}{Score of the estimated shares.}
-\item{responses.score}{Score of the reported responses.}
+\item{probs.score}{Score of the reported choice probabilities.}
 \item{trembles.score}{Score of the reported trembles.}
 \item{coefficients.score}{Score of the reported coefficients.}
 \item{shares.fisher}{Fisher information of the estimated shares.}
-\item{responses.fisher}{Fisher information of the reported responses.}
+\item{probs.fisher}{Fisher information of the reported choice probabilities.}
 \item{trembles.fisher}{Fisher information of the reported trembles.}
 \item{coefficients.fisher}{Fisher information of the reported coefficients.}
 \item{num.obs}{Number of observations.}
@@ -134,38 +134,24 @@ An object of class \code{stratEst}. A list with the following elements.
 \item{free.par}{Total numbe rof free model parameters.}
 \item{res.degrees}{Residual degrees of freedom (num.ids - free.par).}
 \item{shares.quantiles}{Quantiles of the estimated shares.}
-\item{responses.quantiles}{Quantiles of the estimated response probabilities.}
+\item{probs.quantiles}{Quantiles of the estimated choice probabilities.}
 \item{trembles.quantiles}{Quantiles of the estimated tremble probabilities.}
 \item{coefficients.quantiles}{Quantiles of the estimated latent class regression coefficients.}
 \item{gammas}{Gamma parameter of the model.}
 \item{gammas.par}{Estimated gamma parameters.}
 \item{gammas.se}{Standard errors of the gamma parameters.}#
-\item{crit}{Values of the information criteria.}
+\item{aic}{Akaike information criterion.}
+\item{bic}{Bayesian information criterion.}
+\item{icl}{Integrated classifcation likelihood information criteria.}
 }
 \description{
 Performs variants of the strategy estimation method.
 }
 \details{
-The estimation function \code{stratEst()} returns maximum-likelihood estimates for the population shares and response parameters of a set of candidate strategies given some data from an economic experiment. Candidate strategies can be supplied by the user in the form of deterministic finite-state automata. The number and the complexity of strategies can be restricted by the user or selected based on information criteria. stratEst also features latent class regression to assess the influence of covariates on strategy choice.
+The estimation function \code{stratEst()} returns maximum-likelihood estimates for the population shares and choice probabilities of a set of candidate strategies given some data from an economic experiment. Candidate strategies can be supplied by the user in the form of deterministic finite-state automata. The number and the complexity of strategies can be restricted by the user or selected based on information criteria. stratEst also features latent class regression to assess the influence of covariates on strategy choice.
 }
 \note{
-The strategy estimation method was introduced by (Dal Bo & Frechette 2011) to estimate the relative frequency of a fixed set of pure strategies in the indefinitely repeated prisoner's dilemma. Breitmoser (2015) extended the method to the estimation of behavior strategies. The \pkg{stratEst} package uses the EM algorithm (Dempster, Laird & Rubin 1977) and the Newton-Raphson method to obtain maximum-likelihood estimates for the population shares and response parameters of a set of candidate strategies. The package builds on other software contributions of the R community. To increase speed the estimation procedures, the package uses integration of C++ and R achieved by the Rcpp package (Eddelbuettel & Francois 2011) and the open source linear algebra library for the C++ language RppArmadillo (Sanderson & Curtin 2016).
-}
-\examples{
-## Estimate strategies in the rock-paper-scissors game (roshambo.me).
-## Compare the fit of a mixed strategy to a mixture of two conditional strategies.
-model.mixed <- stratEst( data.RPS , strategies.RPS[c("mixed")])
-model.conditional <- stratEst( data.RPS , strategies.RPS[c("anti","cyclic")])
-print(model.mixed$loglike)
-print(model.conditional$loglike)
-
-## Replication of Dal Bo and Frechette (2011), Table 7, page 424
-model.DF2011 <- stratEst(data.DF2011,strategies.DF2011,sample.id="treatment" )
-
-## Replication of Fudenberg, Rand, Dreber (2012), Table 3, page 733
-# Note: The estimates for treatment bc = 4 reported in the paper represent a local optimum.
-model.FRD2012 <- stratEst(data.FRD2012,strategies.FRD2012,sample.id="bc")
-
+The strategy estimation method was introduced by (Dal Bo & Frechette 2011) to estimate the relative frequency of a fixed set of pure strategies in the indefinitely repeated prisoner's dilemma. Breitmoser (2015) extended the method to the estimation of behavior strategies. The \pkg{stratEst} package uses the EM algorithm (Dempster, Laird & Rubin 1977) and the Newton-Raphson method to obtain maximum-likelihood estimates for the population shares and choice probabilities of a set of candidate strategies. The package builds on other software contributions of the R community. To increase speed the estimation procedures, the package uses integration of C++ and R achieved by the Rcpp package (Eddelbuettel & Francois 2011) and the open source linear algebra library for the C++ language RppArmadillo (Sanderson & Curtin 2016).
 }
 \references{
 Breitmoser, Y. (2015): Cooperation, but no reciprocity: Individual strategies in the repeated prisoner's dilemma, \emph{American Economic Review}, 105, 2882-2910.

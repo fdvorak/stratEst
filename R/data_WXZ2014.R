@@ -1,18 +1,19 @@
-#' Data of the rock-paper-scissors game from roshambo.me
+#' Data of the rock-paper-scissors game from Wang, Xu, and Zhou (2014)
 #'
-#' The dataset of 10000 observations of rock-paper-scissors as a stratEst.data frame.
+#' A stratEst.data object that contains the data of Wang, Xu, and Zhou (2014).
 #'
-#' @format A data frame with 10000 rows and 8 variables:
+#' @format A stratEst.data object with 21.600 rows and 7 variables:
 #' \describe{
-#'   \item{id}{Variable which identifies the player of a unique game.}
-#'   \item{game}{The identifier of a unique game.}
+#'   \item{id}{Variable which identifies the participant.}
+#'   \item{game}{The identifier of the game.}
 #'   \item{period}{The period within the game.}
 #'   \item{choice}{A factor with three levels which indicates if the player chooses rock, paper or scissors.}
 #'   \item{other_choice}{A factor with three levels which indicates if the other player chooses rock, paper or scissors.}
 #'   \item{result}{A factor with three levels which indicates if the result for the player.}
 #'   \item{input}{A factor with three levels which is indicates the action in the previous round. In the first period of a game the input is NA.}
-#'   \item{output}{A factor with three levels which indicates the choice of the player.}
 #' }
-#' @usage data(data.RPS)
-#' @source \url{https://roshambo.me/}
-"data.RPS"
+#' @usage data(data.WXZ2014)
+#' @references
+#' Wang, Z., Xu, B., and Zhou, H. (2014): Social cycling and conditional responses in the Rock-Paper-Scissors game. \emph{Scientific Reports} 4, 5830.
+"data.WXZ2014"
+

@@ -5,25 +5,29 @@
 \title{Simulation function for strategy estimation.}
 \usage{
 stratEst.simulate(
+  data = NULL,
   strategies,
-  shares,
-  coefficients,
-  covariates,
+  shares = NULL,
+  coefficients = NULL,
+  covariate.mat = NULL,
   num.ids = 100,
   num.games = 5,
-  num.periods,
-  fixed.assignment = FALSE,
-  input.na = FALSE
+  num.periods = NULL,
+  fixed.assignment = TRUE,
+  input.na = FALSE,
+  sample.id = NULL
 )
 }
 \arguments{
-\item{strategies}{Mandatory input object. Can be either a positive integer or a matrix. If an integer is used, the estimation function will generate the respective number of memory-one strategies with as many states as there are unique input values in \code{data}. A matrix can be used to supply a set of customized strategies. In the matrix, each row corresponds to one state of a strategy, starting with the start state of an automaton. The first column enumerates the states of each strategy in ascending order. A value of one in the first column indicates the begin of a new strategy with its start state. The columns after the first column contain the collection of multinomial response vectors. The number of columns for the multinomial response vectors must correspond to the number of unique non-zero outputs in data. Without a reference output - which is labeled with a zero in the output column of data - the columns specify the complete multinomial response distribution for each unique value in the output column. In this case, the response probabilities in each row must sum to one. With a reference output, the response probability for the response labeled with zero is omitted and the response probabilities in each row must sum to a value smaller or equal to one. The remaining columns of the strategies matrix define the deterministic state transitions. The number of columns must equal the number of unique non-zero inputs in the data. The numbers in the first column indicate the next state of the automaton if the input is one. The numbers in the second column indicate the next state if the input is two and so on.}
+\item{data}{A \code{stratEst.data} object. Alternatively, the arguments \code{num.ids}, \code{num.games}, and \code{num.periods} can be used if no data is available.}
 
-\item{shares}{A matrix of strategy shares. The number of columns must correspond to the number of samples in the data. The number of rows must correspond to the number of strategies defined in the strategies matrix. Elements which are NA are estimated from the data. If the object is not supplied, one share is estimated for every strategy defined in the strategies matrix for every sample.}
+\item{strategies}{A list of strategies. Each strategy is a data.frame of class \code{stratEst.strategy}. Each row of the data.frame represents one state of the strategy. The first row defines the initial state which is entered if the variable input is NA. Column names which start with the string 'output.' indicate the columns which contain the multinomial choice probabilities of the strategy. For example, a column labeled 'output.x' contains the probability to observe the output 'x'. The column 'tremble' contains a tremble probability for pure strategies. Column names which start with the string 'input.' indicate the columns which contain the deterministic state transition of the strategy. For example, a column with name 'input.x' indicates the state transition after observing input 'x'.}
 
-\item{coefficients}{Column vector which contains the latent class regression coefficients. The elements correspond to the vector of estimates.}
+\item{shares}{A vector of strategy shares. The elements to the order of strategies in the list \code{strategies}. Shares which are \code{NA} are estimated from the data. With more than one sample and sample specific shares, a list of column vectors is required.}
 
-\item{covariates}{A character vector indicating the names of the variables in data that are the covariates of the latent class regression model. Rows with the same id must have the values of covariates. Missing value are not allowed. Whenever a character vector is supplied for the input object 'covariates', a latent class regression model is estimated.}
+\item{coefficients}{A matrix of regression coefficients. The column names correspond to the names of the strategies. The row names to the names of the covariates.}
+
+\item{covariate.mat}{A matrix with the covariates in columns. The covariate matrix must have as many rows as there are individuals.}
 
 \item{num.ids}{Integer which specifies the number of individuals which are assigned to the stategies. Default is 100.}
 
@@ -34,12 +38,17 @@ stratEst.simulate(
 \item{fixed.assignment}{A logical indicating whether the assignment of individuals to strategies is fixed. If \code{FALSE} individuals are repeatedly assigned to strategies for each each game. If \code{TRUE}, individuals are only assigned once, and use the assigned strategy in each game. Default is \code{FALSE}.}
 
 \item{input.na}{A logical indicating whether the input in the first period of a game is \code{NA}. If \code{FALSE}, and input is randomly selected for the first period. Default is \code{FALSE}.}
+
+\item{sample.id}{A character indicating the name of the variable which identifies the samples in data. Individual observations must be nested in samples. The same must be true for clusters if specified. If more than one sample exists, shares are estimated for each sample. All other parameters are estimated for the data of all samples. If the object is not supplied, it is assumed that the data contains only one sample.}
+}
+\value{
+A \code{stratEst.data} object. A data frame in the long format with the following variables:
+\item{id}{the individual.}
+\item{game}{the game.}
+\item{period}{the period.}
+\item{choice}{the choice.}
+\item{input}{the input.}
 }
 \description{
 Simulates data which can be used to test the strategy estimation function \code{stratEst()}.
-}
-\examples{
-## Fictitious data from a helping game
-## Participant 62 plays reciprocal strategy.
-## Participant 87 plays alternating strategy.
 }

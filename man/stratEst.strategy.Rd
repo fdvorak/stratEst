@@ -5,32 +5,32 @@
 \title{Creates a stratEst.strategy object.}
 \usage{
 stratEst.strategy(
-  inputs,
-  outputs,
-  num.states,
-  responses,
-  trembles,
-  transitions
+  choices,
+  inputs = NULL,
+  prob.choices = NULL,
+  tr.inputs = NULL,
+  trembles = NULL,
+  num.states = NULL
 )
 }
 \arguments{
-\item{inputs}{The names of the inputs, i.e. the levels of factor input in data.}
+\item{choices}{A character vector indicating the levels of the variable 'output' in data.}
 
-\item{outputs}{The names of the outputs, i.e. the levels of factor output in data. .}
+\item{inputs}{A character vector indicating the levels of the variable 'input' in data.}
 
-\item{num.states}{An integer indicating the number states of the strategy.}
+\item{prob.choices}{A numeric vector which contains the response probabilities of the strategy.}
 
-\item{responses}{A numeric vector which contains the response probabilities of the strategy.}
+\item{tr.inputs}{A vector of integers which contains the deterministic state transitions.}
 
 \item{trembles}{A numeric vector which contains the tremble probabilities of the strategy.}
 
-\item{transitions}{A vector of integers which contains the deterministic state transitions.}
+\item{num.states}{An integer indicating the number states of the strategy.}
 }
 \value{
 A stratEst.strategy object. A data.frame with the following variables:
-\item{output.x}{The probability for output 'x'.}
-\item{trembles}{The probability to observe a tremble.}
-\item{input.x}{The deterministic state transition of the strategy after observing of input 'x'.}
+\item{prob.x}{The probability of choice 'x'.}
+\item{tremble}{The probability to observe a tremble.}
+\item{tr(x)}{The deterministic state transition of the strategy after input 'x'.}
 }
 \description{
 Creates a stratEst.strategy object.
@@ -39,8 +39,10 @@ Creates a stratEst.strategy object.
 The strategy generation function \code{stratEst.strategy()} creates a strategy as a data.frame.
 }
 \examples{
-## Create the mixed nash strategy for the rock-paper-scissors game.
+## Nash equilibrium strategy of rock-paper-scissors
 ins = c(NA,"rock","paper","scissors")
-outs = c("rock","paper","scissors")
-nash =  stratEst.strategy( inputs = ins , outputs = outs , num.states = 1 , responses = 1/3 )
+rps = c("rock","paper","scissors")
+mixed = stratEst.strategy(choices = rps)
+nash = stratEst.strategy(choices = rps, prob.choices = rep(1/3,3))
+rock = stratEst.strategy(choices = rps, prob.choices = c(1,0,0))
 }

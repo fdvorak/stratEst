@@ -7,13 +7,13 @@
 \format{
 Each strategy is encoded as a data.frame object. The rows of the data frame represent the states of the automaton. The first row is the start state of the automaton. Each data.frame object contains the following variables:
 \describe{
-  \item{\code{output.d}}{Probability to defect.}
-  \item{\code{output.c}}{Probability to cooperate.}
+  \item{\code{prob.d}}{Probability to defect.}
+  \item{\code{prob.c}}{Probability to cooperate.}
   \item{\code{tremble}}{Probability of a tremble.}
-  \item{\code{input.cc}}{State transition for the input cc.}
-  \item{\code{input.cd}}{State transition for the input cd.}
-  \item{\code{input.dc}}{State transition for the input dc.}
-  \item{\code{input.dd}}{State transition for the input dd.}
+  \item{\code{tr(cc)}}{State transition for the input cc.}
+  \item{\code{tr(cd)}}{State transition for the input cd.}
+  \item{\code{tr(dc)}}{State transition for the input dc.}
+  \item{\code{tr(dd)}}{State transition for the input dd.}
 }
 }
 \usage{

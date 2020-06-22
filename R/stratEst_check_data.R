@@ -19,19 +19,22 @@ stratEst.check.data <- function( data ){
   if( is.null(data$input) ) {
     stop("stratEst error: Data does not contain the variable 'input'.")
   }
-  if( is.null(data$output) ) {
-    stop("stratEst error: Data does not contain the variable 'output'.")
+  if( is.null(data$choice) ) {
+    stop("stratEst error: Data does not contain the variable 'choice'.")
+  }
+  else{
+
   }
 
   id <- data$id
   game <- data$game
   period <- data$period
   input <- data$input
-  output <- data$output
+  output <- data$choice
 
   # id
   id_is_factor = FALSE
-  if( class(id) == "factor" ){
+  if( "factor" %in% class(id) ){
     id_factor <- id
     id_is_factor = TRUE
   }
@@ -41,7 +44,7 @@ stratEst.check.data <- function( data ){
   }
 
   # input
-  if( class(input) == "factor" ){
+  if( "factor" %in% class(input) ){
     input_factor <- input
   }
   else{
@@ -49,10 +52,11 @@ stratEst.check.data <- function( data ){
   }
   input <- match(input_factor,sort(unique(input_factor)))
   input[is.na(input)] <- 0
+  input <- as.numeric(input)
   levels_input <- levels(input_factor)
 
   # output
-  if( class(output) == "factor" ){
+  if( "factor" %in% class(output) ){
     output_factor <- output
   }
   else{
@@ -61,7 +65,7 @@ stratEst.check.data <- function( data ){
   output <- match(output_factor,sort(unique(output_factor)))
   levels_output <- levels( output_factor )
   if( any( is.na( output ) ) ){
-    stop("stratEst error: The variable 'output' in data cannot contain NA values.");
+    stop("stratEst error: The variable 'choice' in data cannot contain NA values.");
   }
 
   stratEst.check.data.return <- list( "data" = data , "id" = id , "game" = game , "period" = period , "input" = input , "output" = output, "input.factor" = input_factor , "output.factor" = output_factor , "levels.input" = levels_input , "levels.output" = levels_output )

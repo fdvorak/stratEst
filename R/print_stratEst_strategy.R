@@ -4,7 +4,7 @@
 #' @export
 
 print.stratEst.strategy <- function( x , ... ){
-
-  c("stratEst.strategy", NextMethod())
+  x <- round.stratEst.strategy(x,digits=3)
+  print.data.frame(x , ... )  #unlist("stratEst.strategy", NextMethod())
 
 }

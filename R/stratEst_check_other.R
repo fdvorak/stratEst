@@ -1,6 +1,6 @@
 # checks other input objects
 
-stratEst.check.other <- function( response , sample.specific , r.responses , r.trembles , select , min.strategies , crit , se , outer.runs , outer.tol , outer.max , inner.runs , inner.tol , inner.max , lcr.runs , lcr.tol , lcr.max , bs.samples , stepsize , penalty , verbose , quantiles ){
+stratEst.check.other <- function( response , sample.specific , r.probs , r.trembles , select , min.strategies , crit , se , outer.runs , outer.tol , outer.max , inner.runs , inner.tol , inner.max , lcr.runs , lcr.tol , lcr.max , bs.samples , step.size , penalty , verbose , quantiles ){
 
   # check response
   if ( response %in% c("mixed","pure") == F ){
@@ -10,27 +10,27 @@ stratEst.check.other <- function( response , sample.specific , r.responses , r.t
 
   # check sample.specific
   specific_shares = F
-  specific_responses = F
+  specific_probs = F
   specific_trembles = F
   specific_coefficients = F
   if( is.null(sample.specific) == F ){
-    if( class( sample.specific ) != "character" ){
+    if( "character" %in% class( sample.specific ) == F ){
       stop("stratEst error: The input object 'sample.specific' has to be a character vector.");
     }
     for( i in 1:length( sample.specific ) ){
-      if ( sample.specific[i] %in% c("shares","responses","trembles","coefficients") == F  ){
-        stop("stratEst error: The input object 'sample.specific' should only contain the following characters: \"shares\", \"responses\", \"trembles\" or \"coefficients\".");
+      if ( sample.specific[i] %in% c("shares","probs","trembles","coefficients") == F  ){
+        stop("stratEst error: The input object 'sample.specific' should only contain the following characters: \"shares\", \"probs\", \"trembles\" or \"coefficients\".");
       }
     }
     specific_shares = ifelse( "shares" %in% sample.specific , T , F  )
-    specific_responses = ifelse( "responses" %in% sample.specific , T , F  )
+    specific_probs = ifelse( "probs" %in% sample.specific , T , F  )
     specific_trembles = ifelse( "trembles" %in% sample.specific , T , F  )
     specific_coefficients = ifelse( "coefficients" %in% sample.specific , T , F  )
   }
 
-  # check r.responses
-  if ( r.responses %in% c("no","strategies","states","global") == F  ){
-    stop("stratEst error: The input object 'r.responses' has to be one of the following: \"no\", \"strategies\", \"states\" or \"global\". Default is \"no\".");
+  # check r.probs
+  if ( r.probs %in% c("no","strategies","states","global") == F  ){
+    stop("stratEst error: The input object 'r.probs' has to be one of the following: \"no\", \"strategies\", \"states\" or \"global\". Default is \"no\".");
   }
 
   # check r.trembles
@@ -40,24 +40,24 @@ stratEst.check.other <- function( response , sample.specific , r.responses , r.t
 
   # check select
   select_strategies = F
-  select_responses = F
+  select_probs = F
   select_trembles = F
 
   if( is.null(select) == F ){
     # check select
-    if( class( select ) != "character" ){
+    if( "character" %in% class( select ) == F ){
       stop("stratEst error: The input object 'select' has to be a character vector.");
     }
     for( i in 1:length( select ) ){
-      if ( select[i] %in% c("responses","trembles","strategies") == F  ){
-        stop("stratEst error: The input object 'select' should only contain the following characters: \"strategies\", \"responses\" or \"trembles\".");
+      if ( select[i] %in% c("probs","trembles","strategies") == F  ){
+        stop("stratEst error: The input object 'select' should only contain the following characters: \"strategies\", \"probs\" or \"trembles\".");
       }
       else{
         if( select[i] == "strategies" ){
           select_strategies = T
         }
-        if( select[i] == "responses" ){
-          select_responses = T
+        if( select[i] == "probs" ){
+          select_probs = T
         }
         if( select[i] == "trembles" ){
           select_trembles = T
@@ -132,9 +132,9 @@ stratEst.check.other <- function( response , sample.specific , r.responses , r.t
     stop("stratEst error: The number of bootstrap samples specified by the argument 'bs.samples' must be a positive integer. Default is 1000.");
   }
 
-  # check stepsize
-  if ( stepsize < 0 ){
-    stop("stratEst error: The newton stepsize specified by the argument 'newton.stepsize' must be a positive number. Default is 1.");
+  # check step size
+  if ( step.size < 0 ){
+    stop("stratEst error: The step size specified by the argument 'step.size' must be a positive number. Default is 1.");
   }
 
   # check penalty
@@ -143,8 +143,8 @@ stratEst.check.other <- function( response , sample.specific , r.responses , r.t
   }
 
   # check verbose
-  if (  class(verbose) != "logical"){
-    stop("stratEst error: The input argument 'verbose' must be a logical value.");
+  if ( "logical" %in% class(verbose) == F ){
+    stop("stratEst error: The input argument 'verbose' must be a logical.");
   }
   else{
     print.messages = verbose[1]
@@ -152,12 +152,12 @@ stratEst.check.other <- function( response , sample.specific , r.responses , r.t
   }
 
   # check print.summary
-  if (  class(print.summary) != "logical"){
+  if (  "logical" %in% class(print.summary) == F ){
     stop("stratEst error: The input argument 'print.summary' must be a logical value.");
   }
 
   # check quantiles
-  if (  class(quantiles) != "numeric"){
+  if (  "numeric" %in% class(quantiles) == F ){
     stop("stratEst error: The input argument 'print.summary' must be a logical value.");
   }
   else{
@@ -167,7 +167,7 @@ stratEst.check.other <- function( response , sample.specific , r.responses , r.t
   }
   qunantile_vec <- quantiles
 
-  stratEst.check.other.return = list( "select.strategies" = select_strategies , "select.responses" = select_responses , "select.trembles" = select_trembles, "specific.shares" = specific_shares , "specific.responses" = specific_responses , "specific.trembles" = specific_trembles, "specific.coefficients" = specific_coefficients ,  "quantile.vec" = qunantile_vec , "print.messages" = print.messages , "print.summary" = print.summary  )
+  stratEst.check.other.return = list( "select.strategies" = select_strategies , "select.responses" = select_probs , "select.trembles" = select_trembles, "specific.shares" = specific_shares , "specific.responses" = specific_probs , "specific.trembles" = specific_trembles, "specific.coefficients" = specific_coefficients ,  "quantile.vec" = qunantile_vec , "print.messages" = print.messages , "print.summary" = print.summary  )
 
   return(stratEst.check.other.return)
 

@@ -1,17 +1,17 @@
 #' Strategy Estimation Function
 #' @useDynLib stratEst,.registration = TRUE
 #' @importFrom Rcpp sourceCpp
-#' @param data A \code{stratEst.data} object or \code{data.frame}. The variables \code{id}, \code{game}, \code{period}, \code{input}, and \code{output} are mandatory. The variable \code{id} identifies observations of the same individual across games and periods. The factor \code{input} indicates the dicrete information observed by the individual before making a response. The factor \code{output} indicates the behavioral response observed.
-#' @param strategies A list of strategies. Each strategy is a data.frame of class \code{stratEst.strategy}. Each row of the data.frame represents one state of the strategy. The first row defines the initial state which is entered if the variable input is NA. Column names which start with the string 'output.' indicate the columns which contain the multinomial response probabilities of the strategy. For example, a column labeled 'output.x' contains the probability to observe the output 'x'. The column 'tremble' contains a tremble probability for pure responses. Column names which start with the string 'input.' indicate the columns which contain the deterministic state transition of the strategy. For example, a column with name 'input.x' indicates the state transition after observing input 'x'.
+#' @param data A \code{stratEst.data} object or \code{data.frame}. Must contain the variables \code{choice},  \code{input}, \code{id}, \code{game}, \code{period}. The variable \code{id} identifies observations of the same individual across games and periods. The factor \code{input} indicates the dicrete information observed by the individual before making a choice. The factor \code{choice} indicates the choice of the individual.
+#' @param strategies A list of strategies. Each strategy is a data.frame of class \code{stratEst.strategy}. Each row of the data.frame represents one state of the strategy. The first row defines the initial state which is entered if the variable input is NA. Column names which start with the string 'output.' indicate the columns which contain the multinomial choice probabilities of the strategy. For example, a column labeled 'output.x' contains the probability to observe the output 'x'. The column 'tremble' contains a tremble probability for pure strategies. Column names which start with the string 'input.' indicate the columns which contain the deterministic state transition of the strategy. For example, a column with name 'input.x' indicates the state transition after observing input 'x'.
 #' @param shares A vector of strategy shares. The elements to the order of strategies in the list \code{strategies}. Shares which are \code{NA} are estimated from the data. With more than one sample and sample specific shares, a list of column vectors is required.
 #' @param coefficients Column vector which contains the latent class regression coefficients. The elements correspond to the vector of estimates.
 #' @param covariates A character vector indicating the names of the variables in data that are the covariates of the latent class regression model. Rows with the same id must have the values of covariates. Missing value are not allowed.
 #' @param sample.id A character indicating the name of the variable which identifies the samples. Individual observations must be nested in samples. The same must be true for clusters if specified. If more than one sample exists, shares are estimated for each sample. All other parameters are estimated for the data of all samples. If the object is not supplied, it is assumed that the data contains only one sample.
-#' @param response A string which can be set to \code{"pure"} or \code{"mixed"}. If set to \code{"pure"} all estimated response probabilities are pure, i.e. either zero or one. If set to \code{"mixed"} all estimated response probabilities are mixed. The default is \code{"mixed"}.
-#' @param sample.specific A character vector defining which model parameters are sample specific. If the vector contains the character \code{"shares"} (\code{"responses"}, \code{"trembles"}), the estimation function estimates a set of shares (responses, trembles) for each sample in the data. If the vector does not contains the character \code{"shares"} (\code{"responses"}, \code{"trembles"}) one set of shares (responses, trembles) is estimated for the pooled data of all samples. Default is \code{c("shares","responses","trembles")}.
-#' @param r.responses A string which can be set to \code{"no"}, \code{"strategies"}, \code{"states"} or \code{"global"}. If set to \code{"strategies"}, the estimation function estimates strategies with one strategy specific vector of responses in every state of the strategy. If set to \code{"states"}, one state specific vector of responses is estimated for each state. If set to \code{"global"}, a single vector of responses is estimated which applies in every state of each strategy. Default is \code{"no"}.
+#' @param response A string which can be set to \code{"pure"} or \code{"mixed"}. If set to \code{"pure"} all estimated choice probabilities are pure, i.e. either zero or one. If set to \code{"mixed"} all estimated choice probabilities are mixed. The default is \code{"mixed"}.
+#' @param sample.specific A character vector defining which model parameters are sample specific. If the vector contains the character \code{"shares"} (\code{"probs"}, \code{"trembles"}), the estimation function estimates a set of shares (choice probabilities, trembles) for each sample in the data. If the vector does not contains the character \code{"shares"} (\code{"probs"}, \code{"trembles"}) one set of shares (choice probabilities, trembles) is estimated for the pooled data of all samples. Default is \code{c("shares","probs","trembles")}.
+#' @param r.probs A string which can be set to \code{"no"}, \code{"strategies"}, \code{"states"} or \code{"global"}. If set to \code{"strategies"}, the estimation function estimates strategies with one strategy specific vector of choice probabilities in every state of the strategy. If set to \code{"states"}, one state specific vector of choice probabilities is estimated for each state. If set to \code{"global"}, a single vector of probabilities is estimated which applies in every state of each strategy. Default is \code{"no"}.
 #' @param r.trembles A string which can be set to \code{"no"}, \code{"strategies"}, \code{"states"} or \code{"global"}. If set to \code{"strategies"}, the estimation unction estimates strategies with one strategy specific tremble probability. If set to  \code{"states"}, one state specific tremble probability is estimated for each state. If set to \code{"global"}, a single tremble probability is estimated which globally. Default is \code{"global"}.
-#' @param select A character vector indicating which model parameters are selected. If the vector contains the character \code{"strategies"} (\code{"responses"}, \code{"trembles"}), the number of strategies (responses, trembles) is selected based on the selection criterion specified in \code{"crit"}. The selection of responses and trembles occurs obeying the restriction specified in \code{r.responses} and \code{r.trembles}. (E.g. if \code{r.responses} is set to \code{"strategies"}, \code{select = "responses"} will select responses within each strategy). Default is \code{NULL}.
+#' @param select A character vector indicating which model parameters are selected. If the vector contains the character \code{"strategies"} (\code{"probs"}, \code{"trembles"}), the number of strategies (choice probabilities, trembles) is selected based on the selection criterion specified in \code{"crit"}. The selection of choice probabilities and trembles occurs obeying the restriction specified in \code{r.probs} and \code{r.trembles}. (E.g. if \code{r.probs} is set to \code{"strategies"}, \code{select = "probs"} will select the sets of choice probabilities within each strategy). Default is \code{NULL}.
 #' @param min.strategies An integer which specifies the minimum number of strategies in case of strategy selection. The strategy selection procedure stops if the minimum is reached.
 #' @param crit A string which can be set to \code{"bic"}, \code{"aic"} or \code{"icl"}. If set to \code{"bic"}, model selection based on the Bayesian Information criterion is performed. If set to \code{"aic"}, the Akaike Information criterion is used. If set to \code{"icl"} the Integrated Classification Likelihood criterion is used. Default is \code{"bic"}.
 #' @param se A string which can be set to \code{"analytic"} or \code{"bootstrap"}. If set to \code{"bootstrap"}, bootstrapped standard errors are reported. Default is \code{"analytic"}.
@@ -29,19 +29,19 @@
 #' @param stepsize A positive number which sets the stepsize of the Fisher scoring algorithm used to estimate the coefficients of the latent class regression model. Default is one. Values smaller than one slow down the convergence of the algorithm.
 #' @param penalty A logical indicating if the Firth penalty is used to estimate the coefficients of the latent class regression model. Default is \code{FALSE}. Irrespective of the value specified here, the penalty is used in the case of a bootstrap of the standard errors of latent class regression coefficients.
 #' @param verbose A logical, if \code{TRUE} messages of the estimation process and a summary of the estimated model is printed to the console. Default is \code{TRUE}.
-#' @note The strategy estimation method was introduced by (Dal Bo & Frechette 2011) to estimate the relative frequency of a fixed set of pure strategies in the indefinitely repeated prisoner's dilemma. Breitmoser (2015) extended the method to the estimation of behavior strategies. The \pkg{stratEst} package uses the EM algorithm (Dempster, Laird & Rubin 1977) and the Newton-Raphson method to obtain maximum-likelihood estimates for the population shares and response parameters of a set of candidate strategies. The package builds on other software contributions of the R community. To increase speed the estimation procedures, the package uses integration of C++ and R achieved by the Rcpp package (Eddelbuettel & Francois 2011) and the open source linear algebra library for the C++ language RppArmadillo (Sanderson & Curtin 2016).
+#' @note The strategy estimation method was introduced by (Dal Bo & Frechette 2011) to estimate the relative frequency of a fixed set of pure strategies in the indefinitely repeated prisoner's dilemma. Breitmoser (2015) extended the method to the estimation of behavior strategies. The \pkg{stratEst} package uses the EM algorithm (Dempster, Laird & Rubin 1977) and the Newton-Raphson method to obtain maximum-likelihood estimates for the population shares and choice probabilities of a set of candidate strategies. The package builds on other software contributions of the R community. To increase speed the estimation procedures, the package uses integration of C++ and R achieved by the Rcpp package (Eddelbuettel & Francois 2011) and the open source linear algebra library for the C++ language RppArmadillo (Sanderson & Curtin 2016).
 #' @return An object of class \code{stratEst}. A list with the following elements.
 #' \item{strategies}{A list of fitted strategies.}
 #' \item{shares}{Matrix of strategy shares. The order of rows corresponds to the order of strategies defined in the input object \code{strategies}.}
-#' \item{responses}{Matrix of response probabilities. The value \code{NA} indicates that the corresponding response could not be estimated since data does not contain observations the model assigns to the corresponding state.}
-#' \item{trembles}{Matrix of tremble probabilities of the strategies. The value \code{NA} indicates that the corresponding response could not be estimated since data does not contain observations the model assigns to the corresponding state.}
+#' \item{probs}{Matrix of choice probabilities. The value \code{NA} indicates that the probability could not be estimated since data does not contain observations the model assigns to the corresponding state.}
+#' \item{trembles}{Matrix of tremble probabilities of the strategies. The value \code{NA} indicates that the corresponding probability could not be estimated since data does not contain observations the model assigns to the corresponding state.}
 #' \item{coefficients}{Matrix of latent class regression coefficients for strategies.}
 #' \item{shares.par}{Estimated strategy shares.}
-#' \item{responses.par}{Estimated response probabilities.}
+#' \item{probs.par}{Estimated choice probabilities.}
 #' \item{trembles.par}{Estimated tremble probabilities.}
 #' \item{coefficients.par}{Estimated latent class regression coefficients.}
 #' \item{shares.indices}{Indices of strategy shares.}
-#' \item{responses.indices}{Indices of response probabilities.}
+#' \item{probs.indices}{Indices of choice probabilities.}
 #' \item{trembles.indices}{Indices of tremble probabilities.}
 #' \item{coefficients.indices}{Indices of latent class regression coefficients.}
 #' \item{loglike}{The log-likelihood of the model. Larger values indicate a better fit of the model to the data.}
@@ -54,15 +54,15 @@
 #' \item{posterior.assignments}{Posterior probability of each individual to use a strategy.}
 #' \item{prior.assignments}{Prior probability of each individual to use a strategy as predicted by the individual covariates.}
 #' \item{shares.se}{Standard errors of the estimated shares.}
-#' \item{responses.se}{Standard errors of the estimated responses.}
+#' \item{probs.se}{Standard errors of the estimated chocie probabilities.}
 #' \item{trembles.se}{Standard errors of the estimated trembles.}
 #' \item{coefficients.se}{Standard errors of the estimated coefficients.}
 #' \item{shares.score}{Score of the estimated shares.}
-#' \item{responses.score}{Score of the reported responses.}
+#' \item{probs.score}{Score of the reported choice probabilities.}
 #' \item{trembles.score}{Score of the reported trembles.}
 #' \item{coefficients.score}{Score of the reported coefficients.}
 #' \item{shares.fisher}{Fisher information of the estimated shares.}
-#' \item{responses.fisher}{Fisher information of the reported responses.}
+#' \item{probs.fisher}{Fisher information of the reported choice probabilities.}
 #' \item{trembles.fisher}{Fisher information of the reported trembles.}
 #' \item{coefficients.fisher}{Fisher information of the reported coefficients.}
 #' \item{num.obs}{Number of observations.}
@@ -71,15 +71,17 @@
 #' \item{free.par}{Total numbe rof free model parameters.}
 #' \item{res.degrees}{Residual degrees of freedom (num.ids - free.par).}
 #' \item{shares.quantiles}{Quantiles of the estimated shares.}
-#' \item{responses.quantiles}{Quantiles of the estimated response probabilities.}
+#' \item{probs.quantiles}{Quantiles of the estimated choice probabilities.}
 #' \item{trembles.quantiles}{Quantiles of the estimated tremble probabilities.}
 #' \item{coefficients.quantiles}{Quantiles of the estimated latent class regression coefficients.}
 #' \item{gammas}{Gamma parameter of the model.}
 #' \item{gammas.par}{Estimated gamma parameters.}
 #' \item{gammas.se}{Standard errors of the gamma parameters.}#
-#' \item{crit}{Values of the information criteria.}
+#' \item{aic}{Akaike information criterion.}
+#' \item{bic}{Bayesian information criterion.}
+#' \item{icl}{Integrated classifcation likelihood information criteria.}
 #' @description Performs variants of the strategy estimation method.
-#' @details The estimation function \code{stratEst()} returns maximum-likelihood estimates for the population shares and response parameters of a set of candidate strategies given some data from an economic experiment. Candidate strategies can be supplied by the user in the form of deterministic finite-state automata. The number and the complexity of strategies can be restricted by the user or selected based on information criteria. stratEst also features latent class regression to assess the influence of covariates on strategy choice.
+#' @details The estimation function \code{stratEst()} returns maximum-likelihood estimates for the population shares and choice probabilities of a set of candidate strategies given some data from an economic experiment. Candidate strategies can be supplied by the user in the form of deterministic finite-state automata. The number and the complexity of strategies can be restricted by the user or selected based on information criteria. stratEst also features latent class regression to assess the influence of covariates on strategy choice.
 #' @references
 #' Breitmoser, Y. (2015): Cooperation, but no reciprocity: Individual strategies in the repeated prisoner's dilemma, \emph{American Economic Review}, 105, 2882-2910.
 #'
@@ -90,23 +92,10 @@
 #' Eddelbuettel, D. and R. Francois (2011): Rcpp: Seamless R and C++ Integration, \emph{Journal of Statistical Software}, 40, 1-18.
 #'
 #' Sanderson, C. and R. Curtin (2016): Armadillo: a template-based C++ library for linear algebra. \emph{Journal of Open Source Software}, 1-26.
-#' @examples
-#' ## Estimate strategies in the rock-paper-scissors game (roshambo.me).
-#' ## Compare the fit of a mixed strategy to a mixture of two conditional strategies.
-#' model.mixed <- stratEst( data.RPS , strategies.RPS[c("mixed")])
-#' model.conditional <- stratEst( data.RPS , strategies.RPS[c("anti","cyclic")])
-#' print(model.mixed$loglike)
-#' print(model.conditional$loglike)
-#'
-#' ## Replication of Dal Bo and Frechette (2011), Table 7, page 424
-#' model.DF2011 <- stratEst(data.DF2011,strategies.DF2011,sample.id="treatment" )
-#'
-#' ## Replication of Fudenberg, Rand, Dreber (2012), Table 3, page 733
-#' # Note: The estimates for treatment bc = 4 reported in the paper represent a local optimum.
-#' model.FRD2012 <- stratEst(data.FRD2012,strategies.FRD2012,sample.id="bc")
-#'
 #' @export
-stratEst <- function( data , strategies , shares , coefficients , covariates , sample.id ,  response = "mixed" , sample.specific = c("shares","responses","trembles") , r.responses = "no" , r.trembles = "global" , select = NULL , min.strategies = 1 , crit = "bic" , se = "analytic" , outer.runs = 1 , outer.tol = 1e-10 , outer.max = 1000 , inner.runs = 10 , inner.tol = 1e-10 , inner.max = 10 , lcr.runs = 100 , lcr.tol = 1e-10 , lcr.max = 1000 , bs.samples = 1000 , quantiles = c(0.01,0.05,0.5,0.95,0.99) , stepsize = 1 , penalty = F , verbose = TRUE ){
+stratEst <- function( data , strategies , shares , coefficients , covariates , sample.id ,  response = "mixed" , sample.specific = c("shares","probs","trembles") , r.probs = "no" , r.trembles = "global" , select = NULL , min.strategies = 1 , crit = "bic" , se = "analytic" , outer.runs = 1 , outer.tol = 1e-10 , outer.max = 1000 , inner.runs = 10 , inner.tol = 1e-5 , inner.max = 10 , lcr.runs = 100 , lcr.tol = 1e-10 , lcr.max = 1000 , bs.samples = 1000 , quantiles = c(0.01,0.05,0.5,0.95,0.99) , stepsize = 1 , penalty = F , verbose = TRUE ){
+
+  .Deprecated("stratEst.model")
 
   # check data
   if( missing(data) ) {
@@ -164,7 +153,7 @@ stratEst <- function( data , strategies , shares , coefficients , covariates , s
   }
 
   # check other inputs
-  stratEst.check.other.return <- stratEst.check.other( response , sample.specific , r.responses , r.trembles , select , min.strategies , crit , se , outer.runs , outer.tol , outer.max , inner.runs , inner.tol , inner.max , lcr.runs , lcr.tol , lcr.max , bs.samples , stepsize , penalty , verbose , quantiles )
+  stratEst.check.other.return <- stratEst.check.other( response , sample.specific , r.probs , r.trembles , select , min.strategies , crit , se , outer.runs , outer.tol , outer.max , inner.runs , inner.tol , inner.max , lcr.runs , lcr.tol , lcr.max , bs.samples , stepsize , penalty , verbose , quantiles )
   select_strategies = stratEst.check.other.return$select.strategies
   select_responses = stratEst.check.other.return$select.responses
   select_trembles = stratEst.check.other.return$select.trembles
@@ -181,6 +170,7 @@ stratEst <- function( data , strategies , shares , coefficients , covariates , s
     stop("stratEst error: Mandatory input object 'strategies' is missing. Specify an integer or create a data.frame object.")
   }else{
     stratEst.check.strategies.return <- stratEst.check.strategies( strategies , input_factor , output_factor , input , output , select_strategies )
+    strategies <- stratEst.check.strategies.return$strategies
     strategies_matrix <- stratEst.check.strategies.return$strategies.matrix
     trembles <- stratEst.check.strategies.return$trembles
     num_strats <- stratEst.check.strategies.return$num_strats
@@ -247,15 +237,15 @@ stratEst <- function( data , strategies , shares , coefficients , covariates , s
   #########################################################################################################
 
   # create cpp output
-  cpp.output <- stratEst_cpp( data_matrix, strategies_matrix, sid , shares , trembles , coefficient_mat, covariate_mat, LCR, cluster, quantile_vec , response, specific_shares , specific_responses , specific_trembles , specific_coefficients , r.responses, r.trembles, select_strategies , select_responses , select_trembles , min.strategies, crit, se, outer.runs, outer.tol, outer.max, inner.runs, inner.tol, inner.max, lcr.runs, lcr.tol, lcr.max, bs.samples , print.messages, integer_strategies, stepsize , penalty )
+  cpp.output <- stratEst_cpp( data_matrix, strategies_matrix, sid , shares , trembles , coefficient_mat, covariate_mat, LCR, cluster, quantile_vec , response, specific_shares , specific_responses , specific_trembles , specific_coefficients , r.probs, r.trembles, select_strategies , select_responses , select_trembles , min.strategies, crit, se, outer.runs, outer.tol, outer.max, inner.runs, inner.tol, inner.max, lcr.runs, lcr.tol, lcr.max, bs.samples , print.messages, integer_strategies, stepsize , penalty )
 
   # stratEst.return object
-  stratEst.return <- list("strategies" = cpp.output$strategies, "shares" = cpp.output$shares, "coefficients" = cpp.output$coefficients, "responses" = cpp.output$responses, "trembles" = cpp.output$trembles, "shares.par" = cpp.output$shares.list$shares.par, "responses.par" = cpp.output$responses.list$responses.par, "trembles.par" = cpp.output$trembles.list$trembles.par, "coefficients.par" =  cpp.output$coefficients.list$coefficients.par,  "shares.indices" = cpp.output$shares.list$shares.indices, "responses.indices" = cpp.output$responses.list$responses.indices, "trembles.indices" = cpp.output$trembles.list$trembles.indices, "coefficients.indices" = cpp.output$coefficients.list$coefficients.indices, "loglike" = cpp.output$fit[1,1], "crit.val" = cpp.output$fit[1,2], "eval" = cpp.output$solver[1,1], "tol.val" = cpp.output$solver[1,2], "convergence" = cpp.output$convergence, "entropy" = cpp.output$fit[1,3], "state.obs" = cpp.output$state.obs, "posterior.assignment" = cpp.output$assignments, "prior.assignment" = cpp.output$priors, "shares.se" = cpp.output$shares.list$shares.se, "responses.se" = cpp.output$responses.list$responses.se, "trembles.se" = cpp.output$trembles.list$trembles.se, "coefficients.se" = cpp.output$coefficients.list$coefficients.se, "shares.covar" = cpp.output$shares.list$shares.covar, "shares.score" =  cpp.output$shares.list$shares.score, "shares.fisher" = cpp.output$shares.list$shares.fisher, "responses.covar" = cpp.output$responses.list$responses.covar, "responses.score" = cpp.output$responses.list$responses.score, "responses.fisher" = cpp.output$responses.list$responses.fisher, "trembles.covar" = cpp.output$trembles.list$trembles.covar, "trembles.score" = cpp.output$trembles.list$trembles.score, "trembles.fisher" = cpp.output$trembles.list$trembles.fisher, "coefficients.covar" = cpp.output$coefficients.list$coefficients.covar, "coefficients.score" = cpp.output$coefficients.list$coefficients.score, "coefficients.fisher" = cpp.output$coefficients.list$coefficients.fisher );
+  stratEst.return <- list("strategies" = cpp.output$strategies, "shares" = cpp.output$shares, "coefficients" = cpp.output$coefficients, "probs" = cpp.output$responses, "trembles" = cpp.output$trembles, "shares.par" = cpp.output$shares.list$shares.par, "probs.par" = cpp.output$responses.list$responses.par, "trembles.par" = cpp.output$trembles.list$trembles.par, "coefficients.par" =  cpp.output$coefficients.list$coefficients.par,  "shares.indices" = cpp.output$shares.list$shares.indices, "probs.indices" = cpp.output$responses.list$responses.indices, "trembles.indices" = cpp.output$trembles.list$trembles.indices, "coefficients.indices" = cpp.output$coefficients.list$coefficients.indices, "loglike" = cpp.output$fit[1,1], "crit.val" = cpp.output$fit[1,2], "eval" = cpp.output$solver[1,1], "tol.val" = cpp.output$solver[1,2], "convergence" = cpp.output$convergence, "entropy" = cpp.output$fit[1,3], "state.obs" = cpp.output$state.obs, "posterior.assignment" = cpp.output$assignments, "prior.assignment" = cpp.output$priors, "shares.se" = cpp.output$shares.list$shares.se, "probs.se" = cpp.output$responses.list$responses.se, "trembles.se" = cpp.output$trembles.list$trembles.se, "coefficients.se" = cpp.output$coefficients.list$coefficients.se, "shares.covar" = cpp.output$shares.list$shares.covar, "shares.score" =  cpp.output$shares.list$shares.score, "shares.fisher" = cpp.output$shares.list$shares.fisher, "probs.covar" = cpp.output$responses.list$responses.covar, "probs.score" = cpp.output$responses.list$responses.score, "probs.fisher" = cpp.output$responses.list$responses.fisher, "trembles.covar" = cpp.output$trembles.list$trembles.covar, "trembles.score" = cpp.output$trembles.list$trembles.score, "trembles.fisher" = cpp.output$trembles.list$trembles.fisher, "coefficients.covar" = cpp.output$coefficients.list$coefficients.covar, "coefficients.score" = cpp.output$coefficients.list$coefficients.score, "coefficients.fisher" = cpp.output$coefficients.list$coefficients.fisher );
 
   # post-processing
   stratEst.return <- stratEst.post( cpp.output , stratEst.return , strategies , covariates , response , unique_ids , num_unique_ids , input , output , unique_inputs , unique_outputs , num_unique_inputs , num_unique_outputs , sample , sample.id , sample_factor , num_samples , specific_shares , specific_responses , specific_trembles , sample_is_factor , integer_strategies , cpp.output$lcr , response_mat_col_index , crit , num_obs , se , quantile_vec )
 
-  class(stratEst.return) <- c("stratEst","list")
+  class(stratEst.return) <- c("stratEst.model","list")
 
   # print summary
   if( print.summary ){

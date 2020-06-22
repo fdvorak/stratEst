@@ -62,15 +62,15 @@
 #'
 #' @format Each strategy is encoded as a data.frame object. The rows of the data frame represent the states of the automaton. The first row is the start state of the automaton. Each data.frame object contains the following variables:
 #' \describe{
-#'   \item{\code{output.a}}{Probability for action a.}
-#'   \item{\code{output.b}}{Probability for action b.}
-#'   \item{\code{output.c}}{Probability for action c.}
-#'   \item{\code{output.d}}{Probability for action d.}
+#'   \item{\code{prob.a}}{Probability for action a.}
+#'   \item{\code{prob.b}}{Probability for action b.}
+#'   \item{\code{prob.c}}{Probability for action c.}
+#'   \item{\code{prob.d}}{Probability for action d.}
 #'   \item{\code{tremble}}{Probability of a tremble.}
-#'   \item{\code{input.a}}{State transition for the input a.}
-#'   \item{\code{input.b}}{State transition for the input b.}
-#'   \item{\code{input.c}}{State transition for the input c.}
-#'   \item{\code{input.d}}{State transition for the input d.}
+#'   \item{\code{tr(a)}}{State transition for the input a.}
+#'   \item{\code{tr(b)}}{State transition for the input b.}
+#'   \item{\code{tr(c)}}{State transition for the input c.}
+#'   \item{\code{tr(d)}}{State transition for the input d.}
 #' }
 #' @usage data(strategies.DEMP)
 #' @examples
