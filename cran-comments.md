@@ -37,11 +37,14 @@ Thanks for your time. This is package version 1.0.0. This version introduces:
 * mac OS X	10.13.6, r-release, 4.0.0 (with travis-ci)
 * ubuntu 14.04.5 LTS , r-oldrel, 3.6.3 (with travis-ci)
 * ubuntu 14.04.5 LTS , r-devel, 4.0.1 (with travis-ci)
-* ubuntu 14.04.5 LTS , r-release, 4.0.0 (with travis-ci)   
+* ubuntu 14.04.5 LTS , r-release, 4.0.0 (with travis-ci)
+
 0 errors | 0 warnings | 0 notes
 
 * windows 10 pro install, R 4.0.0 (local)
+
 0 errors √ | 0 warnings √ | 1 note x
+
 > checking for non-standard things in the check directory ... NOTE
   Found the following files/directories:
     'examples_i386' 'examples_x64' 'stratEst-Ex_i386.Rout'

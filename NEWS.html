@@ -11,7 +11,7 @@
 
 <meta name="author" content="Fabian Dvorak" />
 
-<meta name="date" content="2019-01-25" />
+<meta name="date" content="2020-06-23" />
 
 <title>NEWS</title>
 
@@ -365,43 +365,47 @@ summary {
 
 <h1 class="title toc-ignore">NEWS</h1>
 <h4 class="author">Fabian Dvorak</h4>
-<h4 class="date">25 January 2019</h4>
+<h4 class="date">23 June 2020</h4>
 
 </div>
 
 
 <div id="stratest-1.0.0" class="section level1">
 <h1>stratEst 1.0.0</h1>
-<div id="major-changes" class="section level2">
-<h2>Major changes</h2>
+<div id="classes" class="section level2">
+<h2>Classes</h2>
 <ul>
-<li>introduces the S3 classes stratEst, stratEst.data, and stratEst.strategy</li>
-<li>new function stratEst.data() to reshape data.frames</li>
-<li>new function stratEst.simulate() to simulate data</li>
-<li>introduces the possibility to estimate models with samples specific parameters</li>
-<li>introduces a Firth penalty option for latent class regression models</li>
-<li>introduces the possibilty to fix trembles and coefficients</li>
+<li>introduces the S3 class stratEst.model</li>
+<li>introduces the S3 class stratEst.data</li>
+<li>introduces the S3 class stratEst.strategy</li>
+<li>introduces the S3 class stratEst.check</li>
 </ul>
 </div>
-<div id="changes-in-function-input-and-return-objects" class="section level2">
-<h2>Changes in function input and return objects</h2>
+<div id="functions" class="section level2">
+<h2>Functions</h2>
 <ul>
-<li>adds stratEst() input object sample.id</li>
-<li>adds stratEst() input object quantiles</li>
-<li>adds stratEst() input object sample.specific</li>
-<li>adds stratEst() input object penalty</li>
-<li>adds stratEst() return objects with endings .par for estimated parameters</li>
-<li>adds stratEst() return object res.degrees</li>
-<li>adds stratEst() return object num.obs</li>
-<li>removes stratEst() input object cluster.id</li>
-<li>changes stratEst() input object select to character vector</li>
+<li>new function stratEst.data() to reshape data</li>
+<li>new function stratEst.simulate() to simulate data</li>
+<li>new function stratEst.model() to fit models</li>
+<li>new function stratEst.strategy() to generate strategies</li>
+<li>new function stratEst.check() to check fitted models</li>
+<li>new function stratEst.test() to test estimated model parameters</li>
+<li>function stratEst() is deprecated</li>
+</ul>
+</div>
+<div id="new-features" class="section level2">
+<h2>New features</h2>
+<ul>
+<li>introduces the option to estimate models with samples specific parameters</li>
+<li>introduces a Firth penalty option for models with covariates</li>
+<li>introduces the option to fix trembles and coefficients</li>
 </ul>
 </div>
 <div id="bug-fixes" class="section level2">
 <h2>Bug fixes</h2>
 <ul>
-<li>bugfix for latent class regression with more than two strategies</li>
-<li>bugfix for unsorted data</li>
+<li>fixes bug in the estimation of models with covariates and more than two strategies</li>
+<li>fixes bug for unsorted data</li>
 </ul>
 </div>
 </div>
