@@ -13,8 +13,11 @@ LazyData: true
 LinkingTo: Rcpp, RcppArmadillo
 Imports: Rcpp (>= 0.12.18), stats
 RoxygenNote: 7.1.0
-Suggests: testthat
+Suggests: 
+    testthat,
+    spelling
 Depends: R (>= 3.5)
 URL: http://github.com/fdvorak/stratEst
 BugReports: http://github.com/fdvorak/stratEst/issues
 NeedsCompilation: yes
+Language: en-US
