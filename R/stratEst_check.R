@@ -1,18 +1,20 @@
 #' Check model assumptions
 #' @useDynLib stratEst,.registration = TRUE
 #' @importFrom Rcpp sourceCpp
-#' @param model A model fitted on the data with the estimation function\code{stratEst.model()}.
-#' @param chi.tests A logical. If \code{TRUE} chi square tests of global and local model fit are performed. Default is \code{FALSE}.
-#' @param bs.samples An interger. Specifies the number of parametric bootstrap samples for the chi square tests. Default is 100.
-#' @param verbose A logical, if \code{TRUE} messages of the checking process are printed to the console. Default is \code{FALSE}.
+#' @param model a fitted model of class \code{stratEst.model}.
+#' @param chi.tests a logical. If \code{TRUE} chi square tests of global and local model fit are performed. Default is \code{FALSE}.
+#' @param bs.samples an interger. The number of parametric bootstrap samples for the chi square tests. Default is 100.
+#' @param verbose a logical, if \code{TRUE} messages of the checking process are printed to the console. Default is \code{FALSE}.
 #' @export
-#' @return A list with the following elements:
-#' \item{fit}{A matrix. Contains the log likelihood, the number of free model parameters, and the value of three information criteria.}
-#' \item{chi.global}{A matrix. The results of the chi square test for global model fit.}
-#' \item{chi.local}{A matrix. The results of the chi square test for local model fit.}
-#' @details The check function can be used to assess the model fit based on the log likelihood, the number of free parameters of the model, and three information criteria. The three information criteria are the Akaike information criterion (\code{aic}), the Bayesian information criterion (\code{bic}), and Integrated classification likelihood (\code{icl}). Additionaly, the function can be used to bosstrap the Pearson chi square goodness of fit test statistics for global and local fit \code{chi.tests = TRUE}.
+#' @return A list of check results with the following elements:
+#' \item{fit}{ a matrix. Contains the log likelihood, the number of free model parameters, and the value of the three information criteria.}
+#' \item{chi.global}{a matrix. The results of the chi square test for global model fit.}
+#' \item{chi.local}{ a matrix. The results of the chi square test for local model fit.}
+#' @details The function for model checking of the package.
+#' @references
+#' Wang, Z., Xu, B., and Zhou, H. (2014): Social cycling and conditional responses in the Rock-Paper-Scissors game. \emph{Scientific Reports} 4, 5830.
 #' @examples
-#' ## Fit of a mixture model for the rock-paper-scissors data of Wang, Xu, and Zhou (2014).
+#' ## Fit and check a mixture model for the rock-paper-scissors data of Wang, Xu, and Zhou (2014).
 #' strategies.mixture = strategies.RPS[c("nash","imitate")]
 #' model.mixture <- stratEst.model(data.WXZ2014,strategies.mixture)
 #' model.mixture.check <- stratEst.check( model.mixture )
@@ -30,8 +32,8 @@ stratEst.check <- function( model, chi.tests = F, bs.samples = 100, verbose = FA
   }
 
   # check bs.samples
-  if ( bs.samples < 0  | bs.samples%%1 != 0){
-    stop("stratEst.check error: The number of bootstrap samples specified by the argument 'bs.samples' must be a positive integer. Default is 1000.");
+  if ( bs.samples <= 0  | bs.samples%%1 != 0){
+    stop("stratEst.check error: The number of bootstrap samples specified by the argument 'bs.samples' must be a positive integer. Default is 100.");
   }
 
   # check verbose

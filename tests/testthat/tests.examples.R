@@ -42,7 +42,12 @@ test_that("Example: Dvorak, Fischbacher, and Schmelz (2020)" , {
                                   strategies = strategies.DFS2020,
                                   covariates = c("intercept","conformity.score"))
   test.coefficients <- stratEst.test(model.DFS2020, par = "coefficients")
-  #check.DFS2020 <- stratEst.check(model.DFS2020, chi.tests = TRUE, bs.samples = 10)
+  expect_equal(0.008,round(as.numeric(test.coefficients$p.value[1]),3))
+  expect_equal(0.007,round(as.numeric(test.coefficients$p.value[2]),3))
+  check.DFS2020 <- stratEst.check(model.DFS2020, chi.tests = TRUE, bs.samples = 1)
+  expect_equal(0.0855,round(as.numeric(check.DFS2020$chi.global[1,1]),4))
+  expect_equal(52.2931,round(as.numeric(check.DFS2020$chi.local[1,1]),4))
+  expect_equal(117.7065,round(as.numeric(check.DFS2020$chi.local[2,1]),4))
 })
 
 

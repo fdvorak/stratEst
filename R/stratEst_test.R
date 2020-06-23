@@ -1,22 +1,28 @@
 #' Runs t-tests if model parameters differ from user defined values
 #' @useDynLib stratEst,.registration = TRUE
 #' @importFrom Rcpp sourceCpp
-#' @param model A fitted model returned by the estimation function\code{stratEst()}. An object of class \code{stratEst}.
-#' @param par A character vector indicating the type parameters to be tested. The default is a vector with all possible elements: "shares", "probs", "trembles", and "coefficients".
-#' @param values A vector of numeric values the parameter are compared to. Default is zero.
-#' @param alternative A character string specifying the alternative hypothesis, must be one of "two.sided" (default), "greater" or "smaller". You can specify just the initial letter.
-#' @param digits An integer which specifies the number of digits of the results.
+#' @param model a fitted model of class \code{stratEst.model}.
+#' @param par a character vector. The class of model parameters to be tested. Default is \code{c("shares","probs","trembles", "coefficients")}.
+#' @param values a numeric vector. The values the parameter estimates are compared to. Default is zero.
+#' @param alternative  a character string. The alternative hypothesis. Options are \code{"two.sided"}, \code{"greater"} or \code{"less"}. Default is \code{"two.sided"}.
+#' @param digits an integer. The number of digits of the result.
 #' @export
-#' @return A data.frame with one row for each estimated parameter and 5 columns:
-#' \item{estimate}{The parameter estimate.}
-#' \item{diff}{The difference between the estimated parameter and the numeric value (if values unequal to zero are supplied).}
-#' \item{std.error}{The standard error of the parameter estimate.}
-#' \item{t-value}{The t-statistic.}
-#' \item{res.degrees}{The residual degrees of freedom.}
-#' \item{Pr(>|t|)}{The p-value of the test.}
-#' @details The test function retrieves the parameter estimates and standard errors from the model and performs a two-sided t-test.
+#' @return A \code{data.frame} with one row for each tested parameter and 6 variables:
+#' \item{estimate}{the parameter estimate.}
+#' \item{diff}{the difference between the estimated parameter and the numeric value (if supplied).}
+#' \item{std.error}{the standard error of the estimated parameter.}
+#' \item{t.value}{the t statistic.}
+#' \item{res.degrees}{the residual degrees of freedom of the model.}
+#' \item{p.value}{the p value of the t statistic.}
+#' @details The test function of the package.
+#' @references
+#' Wang, Z., Xu, B., and Zhou, H. (2014): Social cycling and conditional responses in the Rock-Paper-Scissors game. \emph{Scientific Reports} 4, 5830.
 #' @examples
-#' ## Nash equilibrium strategy of rock-paper-scissors
+#' ## Test if the choice probabilities of a mixed strategy for rock-paper-scissors.
+#' ## The rock-paper-scissors data is from Wang, Xu, and Zhou (2014).
+#' model.mixed <- stratEst.model(data = data.WXZ2014, strategies = strategies.RPS["mixed"])
+#' t.probs <- stratEst.test(model = model.mixed, par = "probs", values = 1/3)
+#' print(t.probs)
 #'
 #' @export
 stratEst.test <- function( model, par = c("shares","probs","trembles","coefficients"), values = 0, alternative = "two.sided", digits = 4 ){
@@ -88,19 +94,19 @@ stratEst.test <- function( model, par = c("shares","probs","trembles","coefficie
     }
     if( any( values != 0 ) ){
       test_matrix = cbind( est , diff , se , z , rep(model$res.degrees, length(est)) , p )
-      colnames(test_matrix) <- c("estimate","diff","std.error","t-value","df","Pr(>|t|)")
+      colnames(test_matrix) <- c("estimate","diff","std.error","t.value","df","p.value")
     }else{
       test_matrix = cbind( est , se , z , rep(model$res.degrees, length(est)) , p )
-      colnames(test_matrix) <- c("estimate","std.error","t-value","df","Pr(>|t|)")
+      colnames(test_matrix) <- c("estimate","std.error","t.value","df","p.value")
     }
     rownames(test_matrix) <- row_names
     par_data <- data.frame(round(test_matrix,digits))
 
   # colnames
   if( any( values != 0 ) ){
-    colnames(par_data) <- c("estimate","diff","std.error","t-value","df","Pr(>|t|)")
+    colnames(par_data) <- c("estimate","diff","std.error","t.value","df","p.value")
   }else{
-    colnames(par_data) <- c("estimate","std.error","t-value","df","Pr(>|t|)")
+    colnames(par_data) <- c("estimate","std.error","t.value","df","p.value")
   }
 
   return(par_data)

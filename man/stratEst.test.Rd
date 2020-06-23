@@ -13,32 +13,39 @@ stratEst.test(
 )
 }
 \arguments{
-\item{model}{A fitted model returned by the estimation function\code{stratEst()}. An object of class \code{stratEst}.}
+\item{model}{a fitted model of class \code{stratEst.model}.}
 
-\item{par}{A character vector indicating the type parameters to be tested. The default is a vector with all possible elements: "shares", "probs", "trembles", and "coefficients".}
+\item{par}{a character vector. The class of model parameters to be tested. Default is \code{c("shares","probs","trembles", "coefficients")}.}
 
-\item{values}{A vector of numeric values the parameter are compared to. Default is zero.}
+\item{values}{a numeric vector. The values the parameter estimates are compared to. Default is zero.}
 
-\item{alternative}{A character string specifying the alternative hypothesis, must be one of "two.sided" (default), "greater" or "smaller". You can specify just the initial letter.}
+\item{alternative}{a character string. The alternative hypothesis. Options are \code{"two.sided"}, \code{"greater"} or \code{"less"}. Default is \code{"two.sided"}.}
 
-\item{digits}{An integer which specifies the number of digits of the results.}
+\item{digits}{an integer. The number of digits of the result.}
 }
 \value{
-A data.frame with one row for each estimated parameter and 5 columns:
-\item{estimate}{The parameter estimate.}
-\item{diff}{The difference between the estimated parameter and the numeric value (if values unequal to zero are supplied).}
-\item{std.error}{The standard error of the parameter estimate.}
-\item{t-value}{The t-statistic.}
-\item{res.degrees}{The residual degrees of freedom.}
-\item{Pr(>|t|)}{The p-value of the test.}
+A \code{data.frame} with one row for each tested parameter and 6 variables:
+\item{estimate}{the parameter estimate.}
+\item{diff}{the difference between the estimated parameter and the numeric value (if supplied).}
+\item{std.error}{the standard error of the estimated parameter.}
+\item{t.value}{the t statistic.}
+\item{res.degrees}{the residual degrees of freedom of the model.}
+\item{p.value}{the p value of the t statistic.}
 }
 \description{
 Runs t-tests if model parameters differ from user defined values
 }
 \details{
-The test function retrieves the parameter estimates and standard errors from the model and performs a two-sided t-test.
+The test function of the package.
 }
 \examples{
-## Nash equilibrium strategy of rock-paper-scissors
+## Test if the choice probabilities of a mixed strategy for rock-paper-scissors.
+## The rock-paper-scissors data is from Wang, Xu, and Zhou (2014).
+model.mixed <- stratEst.model(data = data.WXZ2014, strategies = strategies.RPS["mixed"])
+t.probs <- stratEst.test(model = model.mixed, par = "probs", values = 1/3)
+print(t.probs)
 
+}
+\references{
+Wang, Z., Xu, B., and Zhou, H. (2014): Social cycling and conditional responses in the Rock-Paper-Scissors game. \emph{Scientific Reports} 4, 5830.
 }

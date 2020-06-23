@@ -1,19 +1,23 @@
 #' Creates a stratEst.data object.
 #' @useDynLib stratEst,.registration = TRUE
 #' @importFrom Rcpp sourceCpp
-#' @param data A data.frame object in the long format. The object \code{data} is mandatory.
-#' @param choice A character indicating the variable in \code{data} which contains the discete choices. The default is "choice".
-#' @param input A character vector indicating the names of the input generating variables in \code{data}. At least one input generating variable has to be specified.
-#' @param input.lag A numeric vector indicating how many periods later each variable will affect the generation of the input. The vector must have as many elements as variables specified in the object \code{input}. The object \code{input.lag} is optional. The default is a vector of zeros.
-#' @param input.sep An optional character used to seperate the values of the input generating variables. Default is no seperation character.
-#' @param id A character indicating the variable in \code{data} which identifies observations of the same individual across the rows of the data frame. The default is "id".
-#' @param game A character indicating the variable in \code{data} which identifies observations of the same individual in one game across the rows of the data frame. The default is "game".
-#' @param period A character indicating the variable in \code{data} which identifies the period within a game. The object \code{period} is optional. The default is "period".
-#' @param add An optional character vector indicating the names of variables in the global environment that should be added to the data frame.
-#' @param drop An optional character vector indicating the names of variables in \code{data} that should be droped from the data frame.
-#' @return A stratEst.data object, which is a data.frame in the long format with the following variables:
-#' \item{data}{A data.frame object in the format required by the estimation function.}
-#' @details The data generation function \code{stratEst.data()} transforms data into the format required by the estimation function \code{stratEst()}.
+#' @param data a \code{data.frame} in the long format.
+#' @param choice a character string. The variable in \code{data} which contains the discrete choices. Default is \code{"choice"}.
+#' @param input a character string. The names of the input generating variables in \code{data}. At least one input generating variable has to be specified. Default is \code{c("input")}.
+#' @param input.lag a numeric vector. The time lag in periods of the input generating variables. The vector must have as many elements as variables specified in the object \code{input}. Default is zero.
+#' @param input.sep a character string. Separates the input generating variables. Default is \code{""}.
+#' @param id a character string. The name of the variable in \code{data} that identifies observations of the same individual. Default is \code{"id"}.
+#' @param game a character string. The name of the variable in \code{data} that identifies observations of the same game. Default is \code{"game"}.
+#' @param period a character string. The name of the variable in \code{data} that identifies the periods of a game. Default is \code{"period"}.
+#' @param add a character vector. The names of variables in the global environment that should be added to the \code{stratEst.data} object. Default is \code{NULL}.
+#' @param drop a character vector. The names of variables in \code{data} that should be dropped. Default is \code{NULL}.
+#' @return A \code{stratEst.data} object. A data frame in the long format with the following variables:
+#' \item{id}{the variable that identifies observations of the same individual.}
+#' \item{game}{the variable that identifies observations of the same game.}
+#' \item{period}{the period of the game.}
+#' \item{choice}{the discrete choices.}
+#' \item{input}{the inputs.}
+#' @details The data generation function of the package.
 #' @references
 #' Dal Bo, P. and G. R. Frechette (2011): The evolution of cooperation in infinitely repeated games: Experimental evidence, \emph{American Economic Review}, 101, 411-429.
 #'
@@ -31,7 +35,7 @@
 #' #' ## Transform the prisoner's dilemma data of Fudenberg, Rand, and Dreber (2012).
 #' data.FRD2012 <- stratEst.data(data = FRD2012, choice ="choice", input =c("last.choice","last.other"))
 #' @export
-stratEst.data <- function( data, choice = "choice", id = "id", input = "input", input.lag = 0, input.sep = "", game = "game", period = "period", add = NULL, drop = NULL ){
+stratEst.data <- function( data, choice = "choice", input = c("input"), input.lag = 0, input.sep = "", id = "id", game = "game", period = "period", add = NULL, drop = NULL ){
 
   # CHECK INPUT ARGUMENTS
   # check data

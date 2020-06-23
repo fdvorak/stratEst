@@ -14,29 +14,29 @@ stratEst.strategy(
 )
 }
 \arguments{
-\item{choices}{A character vector indicating the levels of the variable 'output' in data.}
+\item{choices}{a character vector. The levels of the factor \code{choice} in the data.}
 
-\item{inputs}{A character vector indicating the levels of the variable 'input' in data.}
+\item{inputs}{a character vector. The levels of the factor \code{input} in the data.}
 
-\item{prob.choices}{A numeric vector which contains the response probabilities of the strategy.}
+\item{prob.choices}{a numeric vector. The choice probabilities of the strategy in columnwise order.}
 
-\item{tr.inputs}{A vector of integers which contains the deterministic state transitions.}
+\item{tr.inputs}{a vector of integers. The deterministic state transitions of the strategy in columnwise order.}
 
-\item{trembles}{A numeric vector which contains the tremble probabilities of the strategy.}
+\item{trembles}{a numeric vector. The tremble probabilities of the strategy.}
 
-\item{num.states}{An integer indicating the number states of the strategy.}
+\item{num.states}{an integer. The number states of the strategy.}
 }
 \value{
-A stratEst.strategy object. A data.frame with the following variables:
-\item{prob.x}{The probability of choice 'x'.}
-\item{tremble}{The probability to observe a tremble.}
-\item{tr(x)}{The deterministic state transition of the strategy after input 'x'.}
+A \code{stratEst.strategy} object. A data.frame with the following variables:
+\item{prob.x}{the probability of choice \code{x}.}
+\item{tremble}{the probability to observe a tremble.}
+\item{tr(x)}{the deterministic state transitions of the strategy for input \code{x}.}
 }
 \description{
 Creates a stratEst.strategy object.
 }
 \details{
-The strategy generation function \code{stratEst.strategy()} creates a strategy as a data.frame.
+The strategy generation function of the package.
 }
 \examples{
 ## Nash equilibrium strategy of rock-paper-scissors

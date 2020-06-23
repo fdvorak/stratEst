@@ -36,125 +36,126 @@ stratEst.model(
 )
 }
 \arguments{
-\item{data}{A \code{stratEst.data} object or \code{data.frame}. Must contain the variables \code{choice},  \code{input}, \code{id}, \code{game}, \code{period}. The variable \code{id} identifies observations of the same individual across games and periods. The factor \code{input} indicates the dicrete information observed by the individual before making a choice. The factor \code{choice} indicates the choice of the individual.}
+\item{data}{a \code{stratEst.data} object or \code{data.frame}.}
 
-\item{strategies}{A list of strategies. Each strategy is a data.frame of class \code{stratEst.strategy}. Each row of the data.frame represents one state of the strategy. The first row defines the initial state which is entered if the variable input is NA. Column names which start with the string 'output.' indicate the columns which contain the multinomial choice probabilities of the strategy. For example, a column labeled 'output.x' contains the probability to observe the output 'x'. The column 'tremble' contains a tremble probability for pure strategies. Column names which start with the string 'input.' indicate the columns which contain the deterministic state transition of the strategy. For example, a column with name 'input.x' indicates the state transition after observing input 'x'.}
+\item{strategies}{a list of strategies. Each element if the list must be an object of class \code{stratEst.strategy}.}
 
-\item{shares}{A vector of strategy shares. The elements to the order of strategies in the list \code{strategies}. Shares which are \code{NA} are estimated from the data. With more than one sample and sample specific shares, a list of column vectors is required.}
+\item{shares}{a numeric vector of strategy shares. The order of the elements corresponds to the order in \code{strategies}. Elements which are \code{NA} are estimated from the data. Use a list of numeric vectors if data has more than one sample and shares are sample specific.}
 
-\item{coefficients}{A matrix of regression coefficients. The column names correspond to the names of the strategies. The row names to the names of the covariates.}
+\item{coefficients}{a matrix of latent class regression coefficients.}
 
-\item{covariates}{A character vector indicating the names of the variables in the data that are the covariates of the model. Rows with the same id must have the values of covariates. Missing value are not allowed. Whenever a character vector is supplied for the input object 'covariates', a latent class regression model is estimated.}
+\item{covariates}{a character vector with the names of the covariates of the latent class regression model in the data. The covariates cannot have missing values.}
 
-\item{sample.id}{A character indicating the name of the variable which identifies the samples. Individual observations must be nested in samples. The same must be true for clusters if specified. If more than one sample exists, shares are estimated for each sample. All other parameters are estimated for the data of all samples. If the object is not supplied, it is assumed that the data contains only one sample.}
+\item{sample.id}{a character string indicating the name of the variable which identifies the samples in data. Individual observations must be nested in samples.}
 
-\item{response}{A string which can be set to \code{"pure"} or \code{"mixed"}. If set to \code{"pure"} all estimated choice probabilities are pure, i.e. either zero or one. If set to \code{"mixed"} all estimated choice probabilities are mixed. The default is \code{"mixed"}.}
+\item{response}{a character string which is either \code{"pure"} or \code{"mixed"}. If \code{"pure"} the estimated choice probabilities are either zero or one. If \code{"mixed"} the estimated choice probabilities are mixed parameters. The default is \code{"mixed"}.}
 
-\item{sample.specific}{A character vector defining which model parameters are sample specific. If the vector contains the character \code{"shares"} (\code{"probs"}, \code{"trembles"}), the estimation function estimates a set of shares (choice probabilities, trembles) for each sample in the data. If the vector does not contains the character \code{"shares"} (\code{"probs"}, \code{"trembles"}) one set of shares (choice probabilities, trembles) is estimated for the pooled data of all samples. Default is \code{c("shares","probs","trembles")}.}
+\item{sample.specific}{a character vector, Defines the model parameters that are sample specific. Can contain the character strings \code{"shares"} (\code{"probs"},  \code{"trembles"}. If the vector contains \code{"shares"} (\code{"probs"}, \code{"trembles"}), the estimation function estimates a set of shares (choice probabilities, trembles) for each sample in the data.}
 
-\item{r.probs}{A string which can be set to \code{"no"}, \code{"strategies"}, \code{"states"} or \code{"global"}. If set to \code{"strategies"}, the estimation function estimates strategies with one strategy specific vector of choice probabilities in every state of the strategy. If set to \code{"states"}, one state specific vector of choice probabilities is estimated for each state. If set to \code{"global"}, a single vector of probabilities is estimated which applies in every state of each strategy. Default is \code{"no"}.}
+\item{r.probs}{a character string. Options are \code{"no"}, \code{"strategies"}, \code{"states"} or \code{"global"}. Option \code{"no"} yields one vector of choice probabilities per strategy and state. Option \code{"strategies"} yields one vector of choice probabilities per strategy. Option \code{"states"} yields one vector of choice probabilities per state. Option \code{"global"} yields a single vector of choice probabilities. Default is \code{"no"}.}
 
-\item{r.trembles}{A string which can be set to \code{"no"}, \code{"strategies"}, \code{"states"} or \code{"global"}. If set to \code{"strategies"}, the estimation unction estimates strategies with one strategy specific tremble probability. If set to  \code{"states"}, one state specific tremble probability is estimated for each state. If set to \code{"global"}, a single tremble probability is estimated which globally. Default is \code{"global"}.}
+\item{r.trembles}{a character string. Options are \code{"no"}, \code{"strategies"}, \code{"states"} or \code{"global"}. Option \code{"no"} yields one tremble probability per strategy and state. Option \code{"strategies"} yields one tremble probability per strategy. Option \code{"states"} yields one tremble probability per state. Option \code{"global"} yieldsa single tremble probability. Default is \code{"no"}.}
 
-\item{select}{A character vector indicating which model parameters are selected. If the vector contains the character \code{"strategies"} (\code{"probs"}, \code{"trembles"}), the number of strategies (choice probabilities, trembles) is selected based on the selection criterion specified in \code{"crit"}. The selection of choice probabilities and trembles occurs obeying the restriction specified in \code{r.probs} and \code{r.trembles}. (E.g. if \code{r.probs} is set to \code{"strategies"}, \code{select = "probs"} will select the sets of choice probabilities within each strategy). Default is \code{NULL}.}
+\item{select}{a character vector. Indicates the classes of model parameters that are selected. Can contain the character strings \code{"strategies"}, (\code{"probs"}, and \code{"trembles"}.  If the vector contains\code{"strategies"} (\code{"probs"}, \code{"trembles"}), the number of strategies (choice probabilities, trembles) is selected based on the selection criterion specified in \code{"crit"}. The selection can be restricted with the arguments \code{r.probs} and \code{r.trembles}. Default is \code{NULL}.}
 
-\item{min.strategies}{An integer which specifies the minimum number of strategies in case of strategy selection. The strategy selection procedure stops if the minimum is reached.}
+\item{min.strategies}{an integer. The minimum number of strategies in case of strategy selection. The strategy selection procedure stops if the minimum is reached.}
 
-\item{crit}{A string which can be set to \code{"bic"}, \code{"aic"} or \code{"icl"}. If set to \code{"bic"}, model selection based on the Bayesian Information criterion is performed. If set to \code{"aic"}, the Akaike Information criterion is used. If set to \code{"icl"} the Integrated Classification Likelihood criterion is used. Default is \code{"bic"}.}
+\item{crit}{a character string. Defines the information criterion used for model selection. Options are \code{"bic"} (Bayesian information criterion), \code{"aic"} (Akaike information criterion) or \code{"icl"} (Integrated Classification Likelihood). Default is \code{"bic"}.}
 
-\item{se}{A string which can be set to \code{"analytic"} or \code{"bootstrap"}. If set to \code{"bootstrap"}, bootstrapped standard errors are reported. Default is \code{"analytic"}.}
+\item{se}{a string. Defines how standard errors are obtained. Options are \code{"analytic"} or \code{"bootstrap"}. Default is \code{"analytic"}.}
 
-\item{outer.runs}{A positive integer which stets the number of outer runs of the solver. Default is 1.}
+\item{outer.runs}{an integer. The number of outer runs of the solver. Default is 1.}
 
-\item{outer.tol}{A positive number which stets the tolerance of the continuation condition of the outer runs. The iterative algorithm stops if the relative decrease of the log-likelihood is smaller than \code{outer.tol}. Default is 0.}
+\item{outer.tol}{a number close to zero. The tolerance of the stopping condition of the outer runs. The iterative algorithm stops if the relative decrease of the log likelihood is smaller than this number. Default is 1e-10.}
 
-\item{outer.max}{A positive integer which stets the maximum number of iterations of the outer runs of the solver. The iterative algorithm stops if it did not converge after \code{"outer.max"} iterations. Default is 1000.}
+\item{outer.max}{an integer. The maximum number of iterations of the outer runs of the solver. The iterative algorithm stops after \code{"outer.max"} iterations if it does not converge. Default is 1000.}
 
-\item{inner.runs}{A positive integer which stets the number of inner runs of the solver. Default is 10.}
+\item{inner.runs}{an integer. The number of inner runs of the solver. Default is 10.}
 
-\item{inner.tol}{A positive number which stets the tolerance of the continuation condition of the inner EM runs. The iterative algorithm stops if the relative decrease of the log-likelihood is smaller than \code{inner.tol}. Default is 0.}
+\item{inner.tol}{a number close to zero. The tolerance of the stopping condition of the inner runs. The iterative algorithm stops if the relative decrease of the log likelihood is smaller than this number. Default is 1e-5.}
 
-\item{inner.max}{A positive integer which stets the maximum number of iterations of the inner EM runs. The iterative algorithm stops if it did not converge after \code{inner.max} iterations. Default is 10.}
+\item{inner.max}{an integer. The maximum number of iterations of the outer runs of the solver. The iterative algorithm stops after \code{"inner.max"} iterations if it does not converge. Default is 10.}
 
-\item{lcr.runs}{A positive integer which stets the number of estimation runs for latent class regression. Default is 100.}
+\item{lcr.runs}{an integer. The number of latent class regression runs of the solver. Default is 100.}
 
-\item{lcr.tol}{A positive number which stets the tolerance of the continuation condition of the Latent Class Regression runs. The iterative algorithm stops if the relative decrease of the log-likelihood is smaller than \code{lcr.tol}. Default is 0.}
+\item{lcr.tol}{a number close to zero. The tolerance of the stopping condition of the latent class regression runs. The iterative algorithm stops if the relative decrease of the log likelihood is smaller than this number. Default is 1e-10.}
 
-\item{lcr.max}{A positive integer which stets the maximum number of iterations of the Latent Class Regression EM runs. The iterative algorithm stops if it did not converge after \code{lcr.max} iterations. Default is 1000.}
+\item{lcr.max}{an integer. The maximum number of iterations of the latent class regression runs of the solver. The iterative algorithm stops after \code{"lcr.max"} iterations if it does not converge. Default is 1000.}
 
-\item{bs.samples}{A positive integer which sets the number of bootstrap samples drawn with replacement.}
+\item{bs.samples}{an integer. The number of bootstrap samples.}
 
-\item{quantiles}{A numeric vector indicating the quantiles of the sampling distribution of the estimated parameters. The quantiles are identified based on the standard error or based on bootstrapping the sampling distribution of the parameter.}
+\item{quantiles}{a numeric vector. The quantiles of the sampling distribution of the estimated parameters. Depending on the option of \code{se}, the quantiles are either estimated based on a t-distribution with \code{res.degrees} of freedom and the analytic standard errors or based the bootstrap.}
 
-\item{step.size}{A positive number which sets the step size of the Fisher scoring algorithm used to estimate the coefficients of the latent class regression model. Default is one. Values smaller than one slow down the convergence of the algorithm.}
+\item{step.size}{a number between zero and one. The step size of the Fisher scoring step which updates the coefficients. Values smaller than one slow down the convergence of the algorithm and prevent overshooting. Default is one.}
 
-\item{penalty}{A logical indicating if the Firth penalty is used to estimate the coefficients of the latent class regression model. Default is \code{FALSE}. Irrespective of the value specified here, the penalty is used in the case of a bootstrap of the standard errors of latent class regression coefficients.}
+\item{penalty}{a logical. If \code{TRUE} the Firth penalty is used to estimate the coefficients of the latent class regression model. Default is \code{FALSE}.}
 
-\item{verbose}{A logical, if \code{TRUE} messages of the estimation process and a summary of the estimated model is printed to the console. Default is \code{FALSE}.}
+\item{verbose}{a logical. If \code{TRUE} information about the estimation process are printed to the console. Default is \code{FALSE}.}
 }
 \value{
-An object of class \code{stratEst}. A list with the following elements.
-\item{strategies}{A list of fitted strategies.}
-\item{shares}{Matrix of strategy shares. The order of rows corresponds to the order of strategies defined in the input object \code{strategies}.}
-\item{probs}{Matrix of choice probabilities. The value \code{NA} indicates that the probability could not be estimated since data does not contain observations the model assigns to the corresponding state.}
-\item{trembles}{Matrix of tremble probabilities of the strategies. The value \code{NA} indicates that the corresponding probability could not be estimated since data does not contain observations the model assigns to the corresponding state.}
-\item{gammas}{Gamma parameter of the model.}
-\item{coefficients}{Matrix of latent class regression coefficients for strategies.}
-\item{shares.par}{Estimated strategy shares.}
-\item{probs.par}{Estimated choice probabilities.}
-\item{trembles.par}{Estimated tremble probabilities.}
-\item{gammas.par}{Estimated gamma parameters.}
-\item{coefficients.par}{Estimated latent class regression coefficients.}
-\item{shares.indices}{Indices of strategy shares.}
-\item{probs.indices}{Indices of choice probabilities.}
-\item{trembles.indices}{Indices of tremble probabilities.}
-\item{coefficients.indices}{Indices of latent class regression coefficients.}
-\item{loglike}{The log-likelihood of the model. Larger values indicate a better fit of the model to the data.}
-\item{num.ids}{Number of individuals.}
-\item{num.obs}{Number of observations.}
-\item{num.par}{Total number of model parameters.}
-\item{free.par}{Total numbe rof free model parameters.}
-\item{res.degrees}{Residual degrees of freedom (num.ids - free.par).}
-\item{aic}{Akaike information criterion.}
-\item{bic}{Bayesian information criterion.}
-\item{icl}{Integrated classifcation likelihood information criteria.}
-\item{entropy.model}{Entropy of the model. A value between zero and one. One indicates perfect fit.}
-\item{entropy.assignments}{Entropy of probability assignments of indviduals to strategies.}
-\item{chi.square}{Chi square test results for global model fit.}
-\item{crit.val}{The value of the selection criterion defined under \code{crit}. Larger values indicate a better fit of the model.}
-\item{eval}{Number of iterations of the solver. The reported number is the sum of iterations performed in the inner and the outer run which produced the reported estimates.}
-\item{tol.val}{The percentual decrease of the log-likelihood in the last iteration of the algorithm. }
-\item{convergence}{Maximum absolute score of the model parameters. Small values indicate convergence of the algorithm to a (local) maximum of the negative log likelihood.}
-\item{state.obs}{A column vector with the number of weighted observations for each strategy state corresponding to the rows of \code{strategies}.}
-\item{post.assignments}{Posterior probability of each individual to use a strategy.}
-\item{prior.assignments}{Prior probability of each individual to use a strategy as predicted by the individual covariates.}
-\item{shares.se}{Standard errors of the estimated shares.}
-\item{probs.se}{Standard errors of the estimated chocie probabilities.}
-\item{trembles.se}{Standard errors of the estimated trembles.}
-\item{gammas.se}{Standard errors of the gamma parameters.}
-\item{coefficients.se}{Standard errors of the estimated coefficients.}
-\item{shares.quantiles}{Quantiles of the estimated shares.}
-\item{probs.quantiles}{Quantiles of the estimated choice probabilities.}
-\item{trembles.quantiles}{Quantiles of the estimated tremble probabilities.}
-\item{coefficients.quantiles}{Quantiles of the estimated latent class regression coefficients.}
-\item{shares.score}{Score of the estimated shares.}
-\item{probs.score}{Score of the reported choice probabilities.}
-\item{trembles.score}{Score of the reported trembles.}
-\item{coefficients.score}{Score of the reported coefficients.}
-\item{shares.fisher}{Fisher information of the estimated shares.}
-\item{probs.fisher}{Fisher information of the reported choice probabilities.}
-\item{trembles.fisher}{Fisher information of the reported trembles.}
-\item{coefficients.fisher}{Fisher information of the reported coefficients.}
-\item{fit.args}{A list of the arguments used to fit the model.}
+An object of class \code{stratEst.model}. A list with the following elements.
+\item{strategies}{the fitted strategies.}
+\item{shares}{the strategy shares.}
+\item{probs}{the choice probabilities of the strategies.}
+\item{trembles}{the tremble probabilities of the strategies.}
+\item{gammas}{the gamma parameters of the strategies.}
+\item{coefficients}{ the coefficients of the covariates.}
+\item{shares.par}{the estimated strategy share parameters.}
+\item{probs.par}{the estimated choice probability parameters.}
+\item{trembles.par}{the estimated tremble parameters.}
+\item{gammas.par}{the estimated gamma parameters.}
+\item{coefficients.par}{the estimated coefficient parameters of the covariates.}
+\item{shares.indices}{the parameter indices of the strategy shares.}
+\item{probs.indices}{the parameter indices of the choice probabilities.}
+\item{trembles.indices}{the parameter indices of the tremble probabilities.}
+\item{coefficients.indices}{the parameter indices of the coefficients.}
+\item{loglike}{the log likelihood of the model.}
+\item{num.ids}{the number of individuals.}
+\item{num.obs}{the number of observations.}
+\item{num.par}{the total number of model parameters.}
+\item{free.par}{the number of free model parameters.}
+\item{res.degrees}{the residual degrees of freedom.}
+\item{aic}{the Akaike information criterion.}
+\item{bic}{the Bayesian information criterion.}
+\item{icl}{The integrated classification likelihood.}
+\item{crit.val}{the value of the selection criterion defined by the argument \code{crit}.}
+\item{eval}{the total number of iterations of the solver.}
+\item{tol.val}{the relative decrease of the log likelihood in the last iteration of the algorithm.}
+\item{convergence}{the maximum of the absolute scores of the estimated model parameters.}
+\item{entropy.model}{the entropy of the model.}
+\item{entropy.assignments}{the entropy of the posterior probability assignments of individuals to strategies.}
+\item{chi.global}{the chi square statistic for global model fit.}
+\item{chi.local}{the chi square statistics for local model fit.}
+\item{state.obs}{the weighted observations for each strategy state.}
+\item{post.assignments}{the posterior probability assignments of individuals to strategies.}
+\item{prior.assignments}{the prior probability of each individual to use a strategy as predicted by the individual covariates.}
+\item{shares.se}{the standard errors of the estimated share parameters.}
+\item{probs.se}{the standard errors of the estimated choice probability parameters.}
+\item{trembles.se}{the standard errors of the estimated tremble probability parameters.}
+\item{gammas.se}{the standard errors of the estimated gamma parameters.}
+\item{coefficients.se}{the standard errors of the estimated coefficients.}
+\item{shares.quantiles}{the quantiles of the estimated population shares.}
+\item{probs.quantiles}{the quantiles of the estimated choice probabilities.}
+\item{trembles.quantiles}{the quantiles of the estimated trembles.}
+\item{coefficients.quantiles}{the quantiles of the estimated coefficients.}
+\item{shares.score}{the scores of the estimated share parameters.}
+\item{probs.score}{the score of the estimated choice probabilities.}
+\item{trembles.score}{the score of the estimated tremble probabilities.}
+\item{coefficients.score}{the score of the estimated coefficient.}
+\item{shares.fisher}{the Fisher information matrix of the estimated shares.}
+\item{probs.fisher}{the Fisher information matrix of the estimated choice probabilities.}
+\item{trembles.fisher}{the Fisher information matrix of the estimated trembles.}
+\item{coefficients.fisher}{the fisher information matrix of the estimated coefficients.}
+\item{fit.args}{the input objects of the function call.}
 }
 \description{
-Performs variants of the strategy estimation method.
+The estimation function of the package.
 }
 \details{
-The estimation function \code{stratEst()} returns maximum-likelihood estimates for the population shares and choice probabilities of a set of candidate strategies given some data from an economic experiment. Candidate strategies can be supplied by the user in the form of deterministic finite-state automata. The number and the complexity of strategies can be restricted by the user or selected based on information criteria. stratEst also features latent class regression to assess the influence of covariates on strategy choice.
+The estimation function of the package obtains maximum likelihood estimates for the model parameters based on expectation maximization and Newton-Raphson algorithms.
 }
 \note{
-The strategy estimation method was introduced by (Dal Bo & Frechette 2011) to estimate the relative frequency of a fixed set of pure strategies in the indefinitely repeated prisoner's dilemma. Breitmoser (2015) extended the method to the estimation of behavior strategies. The \pkg{stratEst} package uses the EM algorithm (Dempster, Laird & Rubin 1977) and the Newton-Raphson method to obtain maximum-likelihood estimates for the population shares and choice probabilities of a set of candidate strategies. The package builds on other software contributions of the R community. To increase speed the estimation procedures, the package uses integration of C++ and R achieved by the Rcpp package (Eddelbuettel & Francois 2011) and the open source linear algebra library for the C++ language RppArmadillo (Sanderson & Curtin 2016).
+Strategy estimation was introduced by DalBo and Frechette (2011) to estimate the maximum likelihood frequencies of a set of candidate strategies in the repeated prisonner's dilemma. Breitmoser (2015) introduces model parameters for the choice probabilities of individual strategies to the strategy estimation model. Dvorak and Fehrler (2018) extend the basic strategy estimation model by individual level covariates to explain the selection of strategies by individuals. The estimation function of the package obtains maximum likelihood estimates for the model parameters based on expectation maximization (Dempster, Laird, and Rubin, 1977) and Newton-Raphson algorithms. To decrease the computation time, the package integrates \proglang{C++} and \proglang{R} with the help of the \proglang{R} packages \pkg{Rcpp} (Eddelbuettel and Francois, 2011) and the open source linear algebra library for the C++ language \pkg{RppArmadillo} (Sanderson and Curtin, 2016).
 }
 \examples{
 ## Strategy model for rock-paper-scissors data of Wang, Xu, and Zhou (2014).
@@ -169,13 +170,21 @@ model.DF2011 <- stratEst.model(data.DF2011, strategies.DF2011, sample.id = "trea
 # Note: The estimates for treatment bc = 4 reported in the paper represent a local optimum.
 model.FRD2012 <- stratEst.model(data.FRD2012, strategies.FRD2012, sample.id = "bc")
 
+## Replication of Dvorak, Fischbacher, and Schmelz (2020)
+covs <- c("intercept", "conformity.score")
+model.DFS2020 <- stratEst.model(data.DFS2020, strategies.DFS2020, covariates = covs)
+
 }
 \references{
 Breitmoser, Y. (2015): Cooperation, but no reciprocity: Individual strategies in the repeated prisoner's dilemma, \emph{American Economic Review}, 105, 2882-2910.
 
 Dal Bo, P. and G. R. Frechette (2011): The evolution of cooperation in infinitely repeated games: Experimental evidence, \emph{American Economic Review}, 101, 411-429.
 
-Dempster, A., N. Laird, and D. B. Rubin (1977): Maximum likelihood from incomplete data via the EM algorithm," \emph{Journal of the Royal Statistical Society Series B}, 39, 1-38.
+Dempster, A., N. Laird, and D. B. Rubin (1977): Maximum likelihood from incomplete data via the EM algorithm, \emph{Journal of the Royal Statistical Society Series B}, 39, 1-38.
+
+Dvorak, F. and S. Fehrler (2018): Negotiating Cooperation under Uncertainty: Communication in Noisy, Indefinitely Repeated Interactions, \emph{IZA Working Paper}, No. 11897.
+
+Dvorak, F., Fischbacher, U., K. Schmelz (2020): Incentives for Conformity and Anticonformity. \emph{TWI Working Paper}.
 
 Eddelbuettel, D. and R. Francois (2011): Rcpp: Seamless R and C++ Integration, \emph{Journal of Statistical Software}, 40, 1-18.
 

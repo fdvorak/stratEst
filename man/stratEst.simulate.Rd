@@ -19,36 +19,55 @@ stratEst.simulate(
 )
 }
 \arguments{
-\item{data}{A \code{stratEst.data} object. Alternatively, the arguments \code{num.ids}, \code{num.games}, and \code{num.periods} can be used if no data is available.}
+\item{data}{a \code{stratEst.data} object. Alternatively, the arguments \code{num.ids}, \code{num.games}, and \code{num.periods} can be used if no data is available.}
 
-\item{strategies}{A list of strategies. Each strategy is a data.frame of class \code{stratEst.strategy}. Each row of the data.frame represents one state of the strategy. The first row defines the initial state which is entered if the variable input is NA. Column names which start with the string 'output.' indicate the columns which contain the multinomial choice probabilities of the strategy. For example, a column labeled 'output.x' contains the probability to observe the output 'x'. The column 'tremble' contains a tremble probability for pure strategies. Column names which start with the string 'input.' indicate the columns which contain the deterministic state transition of the strategy. For example, a column with name 'input.x' indicates the state transition after observing input 'x'.}
+\item{strategies}{a list of strategies. Each element if the list must be an object of class \code{stratEst.strategy}.}
 
-\item{shares}{A vector of strategy shares. The elements to the order of strategies in the list \code{strategies}. Shares which are \code{NA} are estimated from the data. With more than one sample and sample specific shares, a list of column vectors is required.}
+\item{shares}{a numeric vector of strategy shares. The order of the elements corresponds to the order in \code{strategies}. \code{NA} values are not allowed. Use a list of numeric vectors if data has more than one sample and shares are sample specific.}
 
-\item{coefficients}{A matrix of regression coefficients. The column names correspond to the names of the strategies. The row names to the names of the covariates.}
+\item{coefficients}{a matrix of regression coefficients. Column names correspond to the names of the strategies, row names to the names of the covariates.}
 
-\item{covariate.mat}{A matrix with the covariates in columns. The covariate matrix must have as many rows as there are individuals.}
+\item{covariate.mat}{a matrix with the covariates in columns. The column names of the matrix indicate the names of the covariates. The matrix must have as many rows as there are individuals.}
 
-\item{num.ids}{Integer which specifies the number of individuals which are assigned to the stategies. Default is 100.}
+\item{num.ids}{an integer. The number of individuals. Default is 100.}
 
-\item{num.games}{Integer which specifies the number of games each individual plays. Default is 5 games.}
+\item{num.games}{an integer. The number of games. Default is 5.}
 
-\item{num.periods}{A column vector with as many elments as there are games. The elements of the vector are integer vaules which specify the number of periods of each game. Default is 5 periods in each game.}
+\item{num.periods}{a vector of integers with as many elements \code{num.games}. The elements specify the number of periods in each game. Default (\code{NULL}) means 5 periods in each game.}
 
-\item{fixed.assignment}{A logical indicating whether the assignment of individuals to strategies is fixed. If \code{FALSE} individuals are repeatedly assigned to strategies for each each game. If \code{TRUE}, individuals are only assigned once, and use the assigned strategy in each game. Default is \code{FALSE}.}
+\item{fixed.assignment}{a logical value. If \code{FALSE} individuals use potentially different strategies in each each game. If \code{TRUE}, individuals use the same strategy in each game. Default is \code{FALSE}.}
 
-\item{input.na}{A logical indicating whether the input in the first period of a game is \code{NA}. If \code{FALSE}, and input is randomly selected for the first period. Default is \code{FALSE}.}
+\item{input.na}{a logical value. If \code{FALSE} an input value is randomly selected for the first period. Default is \code{FALSE}.}
 
-\item{sample.id}{A character indicating the name of the variable which identifies the samples in data. Individual observations must be nested in samples. The same must be true for clusters if specified. If more than one sample exists, shares are estimated for each sample. All other parameters are estimated for the data of all samples. If the object is not supplied, it is assumed that the data contains only one sample.}
+\item{sample.id}{a character string indicating the name of the variable which identifies the samples in data. Individual observations must be nested in samples. Default is \code{NULL}.}
 }
 \value{
 A \code{stratEst.data} object. A data frame in the long format with the following variables:
-\item{id}{the individual.}
-\item{game}{the game.}
-\item{period}{the period.}
-\item{choice}{the choice.}
-\item{input}{the input.}
+\item{id}{the variable that identifies observations of the same individual.}
+\item{game}{the variable that identifies observations of the same game.}
+\item{period}{the period of the game.}
+\item{choice}{the discrete choices.}
+\item{input}{the inputs.}
+\item{sample}{the sample of the individual.}
+\item{strategy}{the strategy of the individual.}
 }
 \description{
-Simulates data which can be used to test the strategy estimation function \code{stratEst()}.
+The simulation function of the package.
+}
+\examples{
+## Simulate data of two strategies for choices "left" and "right".
+lr <- c("left","right")
+pi <- runif(1)
+pr <- c(1,0,0,1)
+tr <- c(1,2,1,2)
+mixed <- stratEst.strategy(choices = lr, inputs = lr, prob.choices = c(pi, 1 - pi))
+pure <- stratEst.strategy(choices = lr, inputs = lr, prob.choices = pr, tr.inputs = tr)
+gamma <- runif(1)/4
+pure$tremble <- gamma
+beta <- rnorm(1)
+p <- 1/sum(1 + exp(beta))
+sim.shares <- c(p, 1-p)
+sim.strategies <- list("mixed" = mixed, "pure" = pure)
+sim.data <- stratEst.simulate(strategies = sim.strategies, shares = sim.shares)
+
 }
