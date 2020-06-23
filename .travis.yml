@@ -2,7 +2,6 @@
 
 dist: trusty
 os:
-  - windows
   - linux
   - osx
 compiler:
