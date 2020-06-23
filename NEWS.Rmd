@@ -1,7 +1,7 @@
 ---
 title: "NEWS"
 author: "Fabian Dvorak"
-date: "11 May 2020"
+date: "23 June 2020"
 output: html_document
 ---
 
@@ -10,28 +10,29 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 # stratEst 1.0.0
-## Major changes
-* introduces the S3 classes stratEst, stratEst.data, and stratEst.strategy
-* new function stratEst.data() to reshape data.frame objects
+## Classes
+* introduces the S3 class stratEst.model
+* introduces the S3 class stratEst.data
+* introduces the S3 class stratEst.strategy
+* introduces the S3 class stratEst.check
+
+## Functions
+* new function stratEst.data() to reshape data
 * new function stratEst.simulate() to simulate data
+* new function stratEst.model() to fit models
+* new function stratEst.strategy() to generate strategies
+* new function stratEst.check() to check fitted models
+* new function stratEst.test() to test estimated model parameters
+* function stratEst() is deprecated
+
+## New features
 * introduces the possibility to estimate models with samples specific parameters
-* introduces a Firth penalty option for latent class regression models
+* introduces a Firth penalty option for models with covariates
 * introduces the possibilty to fix trembles and coefficients
 
-## Changes in function input and return objects
-* adds stratEst() input object sample.id
-* adds stratEst() input object quantiles
-* adds stratEst() input object sample.specific
-* adds stratEst() input object penalty
-* adds stratEst() return objects with endings .par for estimated parameters
-* adds stratEst() return object res.degrees
-* adds stratEst() return object num.obs
-* removes stratEst() input object cluster.id
-* changes stratEst() input object select to character vector
-
 ## Bug fixes 
-* bugfix for latent class regression with more than two strategies
-* bugfix for unsorted data
+* fixes bug in the estimation of models with covariates and more than two strategies
+* fixes bug for unsorted data
 
 # stratEst 0.1.2
 

@@ -3,7 +3,7 @@
 #' @importFrom Rcpp sourceCpp
 #' @param model a fitted model of class \code{stratEst.model}.
 #' @param chi.tests a logical. If \code{TRUE} chi square tests of global and local model fit are performed. Default is \code{FALSE}.
-#' @param bs.samples an interger. The number of parametric bootstrap samples for the chi square tests. Default is 100.
+#' @param bs.samples an integer. The number of parametric bootstrap samples for the chi square tests. Default is 100.
 #' @param verbose a logical, if \code{TRUE} messages of the checking process are printed to the console. Default is \code{FALSE}.
 #' @export
 #' @return A list of check results with the following elements:
@@ -290,8 +290,6 @@ stratEst.check <- function( model, chi.tests = F, bs.samples = 100, verbose = FA
   #   rownames(assignment.result) <- covariates
   #   stratEst.check.return$measurement <- assignment.result
   # }
-
-
 
   class(stratEst.check.return) <- c("stratEst.check","list")
 

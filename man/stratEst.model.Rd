@@ -159,7 +159,7 @@ Strategy estimation was introduced by DalBo and Frechette (2011) to estimate the
 }
 \examples{
 ## Strategy model for rock-paper-scissors data of Wang, Xu, and Zhou (2014).
-## Fit a mixture of the Nash strategy and a strategy that imitate the last choice.
+## Fit a mixture of the Nash strategy and a strategy that imitates the last choice.
 strategies.mixture = list("nash" = strategies.RPS$nash, "imitate" = strategies.RPS$imitate)
 model.mixture <- stratEst.model(data.WXZ2014,strategies.mixture)
 

@@ -11,7 +11,7 @@ stratEst.check(model, chi.tests = F, bs.samples = 100, verbose = FALSE)
 
 \item{chi.tests}{a logical. If \code{TRUE} chi square tests of global and local model fit are performed. Default is \code{FALSE}.}
 
-\item{bs.samples}{an interger. The number of parametric bootstrap samples for the chi square tests. Default is 100.}
+\item{bs.samples}{an integer. The number of parametric bootstrap samples for the chi square tests. Default is 100.}
 
 \item{verbose}{a logical, if \code{TRUE} messages of the checking process are printed to the console. Default is \code{FALSE}.}
 }

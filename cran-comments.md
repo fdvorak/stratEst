@@ -1,18 +1,22 @@
 ---
 title: "cran-comments"
 author: "Fabian Dvorak"
-date: "January 25 2019"
+date: "June 23 2020"
 output: html_document
 ---
 
-Thanks for your time. This is a patch release for version 0.1.1. This version:
+Thanks for your time. This is package version 1.0.0. This version introduces:
 
-* fixes a bug in the calculation of the score function for trembles
-* fixes a bug in the selection procedure if the input object strategies is an integer
-* adds the current working paper version of the project
+* S3 classes stratEst.model, stratEst.data, stratEst.strategy, and stratEst.check
+* function stratEst.data() to reshape data
+* function stratEst.simulate() to simulate data
+* function stratEst.model() to fit models
+* function stratEst.strategy() to generate strategies
+* function stratEst.check() to check fitted models
+* function stratEst.test() to test estimated model parameters
 
 ## Test environments
-* windows 10 pro install, R 3.5.2 (local)
+* windows 10 pro install, R 4.0.0 (local)
 * windows server 2012 R2 x64, R 3.5.2 patched (via appveyor)
 * windows, r-devel (via win-builder)
 * windows, r-release (via win-builder)
