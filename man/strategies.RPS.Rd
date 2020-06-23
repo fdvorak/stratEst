@@ -29,7 +29,7 @@ Six rock-paper-scissors strategies.
  \item{paper}{Strategy which plays paper.}
  \item{scissors}{Strategy which plays scissors.}
  \item{nash}{Nash equilibrium strategy which plays every action with probability one-third.}
- \item{mixed}{Strategy which plays every action witha certain probability.}
+ \item{mixed}{Strategy which plays every action with a certain probability.}
  \item{imitate}{Strategy which plays a random action in the first round and subsequently imitates the last choice.}
 }
 }

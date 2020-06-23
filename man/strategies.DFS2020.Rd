@@ -9,8 +9,8 @@ Each strategy is encoded as a stratEst.strategy object. The rows of the data fra
 \describe{
   \item{\code{prob.follow}}{Probability to follow own preference.}
   \item{\code{prob.deviate}}{Probability to deviate from the own preference.}
-  \item{\code{tr(not in line)}}{State transition for the input the choices of the others are not in line with th eown preference.}
-  \item{\code{tr(in line)}}{State transition for the input the choices of the others are in line with th eown preference.}
+  \item{\code{tr(not in line)}}{State transition for the input the choices of the others are not in line with the own preference.}
+  \item{\code{tr(in line)}}{State transition for the input the choices of the others are in line with the own preference.}
 }
 }
 \usage{
@@ -30,6 +30,6 @@ The conformist and anticonformist strategy identifies by Dvorak, Fischbacher, an
 strategies <- strategies.DFS2020[c("conformist","anticonformist")]
 }
 \references{
-Dvorak, F., Fischbacher, U. and K. Schmelz (2020). Incentives for Conformity and Anticonformity, TWI Working Paper Series.
+Dvorak F, Fischbacher U, Schmelz K (2020). "Incentives for Conformity and Anticonformity." \emph{TWI Working Paper Series}.
 }
 \keyword{datasets}

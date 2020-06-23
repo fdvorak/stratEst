@@ -26,9 +26,9 @@ knitr::opts_chunk$set(echo = TRUE)
 * function stratEst() is deprecated
 
 ## New features
-* introduces the possibility to estimate models with samples specific parameters
+* introduces the option to estimate models with samples specific parameters
 * introduces a Firth penalty option for models with covariates
-* introduces the possibilty to fix trembles and coefficients
+* introduces the option to fix trembles and coefficients
 
 ## Bug fixes 
 * fixes bug in the estimation of models with covariates and more than two strategies

@@ -36,7 +36,7 @@ stratEst(
 )
 }
 \arguments{
-\item{data}{A \code{stratEst.data} object or \code{data.frame}. Must contain the variables \code{choice},  \code{input}, \code{id}, \code{game}, \code{period}. The variable \code{id} identifies observations of the same individual across games and periods. The factor \code{input} indicates the dicrete information observed by the individual before making a choice. The factor \code{choice} indicates the choice of the individual.}
+\item{data}{A \code{stratEst.data} object or \code{data.frame}. Must contain the variables \code{choice},  \code{input}, \code{id}, \code{game}, \code{period}. The variable \code{id} identifies observations of the same individual across games and periods. The factor \code{input} indicates the discrete information observed by the individual before making a choice. The factor \code{choice} indicates the choice of the individual.}
 
 \item{strategies}{A list of strategies. Each strategy is a data.frame of class \code{stratEst.strategy}. Each row of the data.frame represents one state of the strategy. The first row defines the initial state which is entered if the variable input is NA. Column names which start with the string 'output.' indicate the columns which contain the multinomial choice probabilities of the strategy. For example, a column labeled 'output.x' contains the probability to observe the output 'x'. The column 'tremble' contains a tremble probability for pure strategies. Column names which start with the string 'input.' indicate the columns which contain the deterministic state transition of the strategy. For example, a column with name 'input.x' indicates the state transition after observing input 'x'.}
 
@@ -110,14 +110,14 @@ An object of class \code{stratEst}. A list with the following elements.
 \item{loglike}{The log-likelihood of the model. Larger values indicate a better fit of the model to the data.}
 \item{crit.val}{The value of the selection criterion defined under \code{crit}. Larger values indicate a better fit of the model.}
 \item{eval}{Number of iterations of the solver. The reported number is the sum of iterations performed in the inner and the outer run which produced the reported estimates.}
-\item{tol.val}{The percentual decrease of the log-likelihood in the last iteration of the algorithm. }
+\item{tol.val}{The relative decrease of the log-likelihood in the last iteration of the algorithm. }
 \item{convergence}{Maximum absolute score of the model parameters. Small values indicate convergence of the algorithm to a (local) maximum of the negative log likelihood.}
-\item{entropy}{Entropy of the posterior probability assignments of indviduals to strategies.}
+\item{entropy}{Entropy of the posterior probability assignments of individuals to strategies.}
 \item{state.obs}{A column vector with the number of weighted observations for each strategy state corresponding to the rows of \code{strategies}.}
 \item{posterior.assignments}{Posterior probability of each individual to use a strategy.}
 \item{prior.assignments}{Prior probability of each individual to use a strategy as predicted by the individual covariates.}
 \item{shares.se}{Standard errors of the estimated shares.}
-\item{probs.se}{Standard errors of the estimated chocie probabilities.}
+\item{probs.se}{Standard errors of the estimated choice probabilities.}
 \item{trembles.se}{Standard errors of the estimated trembles.}
 \item{coefficients.se}{Standard errors of the estimated coefficients.}
 \item{shares.score}{Score of the estimated shares.}
@@ -131,7 +131,7 @@ An object of class \code{stratEst}. A list with the following elements.
 \item{num.obs}{Number of observations.}
 \item{num.ids}{Number of individuals.}
 \item{num.par}{Total number of model parameters.}
-\item{free.par}{Total numbe rof free model parameters.}
+\item{free.par}{Total number of free model parameters.}
 \item{res.degrees}{Residual degrees of freedom (num.ids - free.par).}
 \item{shares.quantiles}{Quantiles of the estimated shares.}
 \item{probs.quantiles}{Quantiles of the estimated choice probabilities.}
@@ -142,7 +142,7 @@ An object of class \code{stratEst}. A list with the following elements.
 \item{gammas.se}{Standard errors of the gamma parameters.}#
 \item{aic}{Akaike information criterion.}
 \item{bic}{Bayesian information criterion.}
-\item{icl}{Integrated classifcation likelihood information criteria.}
+\item{icl}{Integrated classification likelihood information criteria.}
 }
 \description{
 Performs variants of the strategy estimation method.

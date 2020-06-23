@@ -53,11 +53,11 @@ Creates a stratEst.data object.
 The data generation function of the package.
 }
 \references{
-Dal Bo, P. and G. R. Frechette (2011): The evolution of cooperation in infinitely repeated games: Experimental evidence, \emph{American Economic Review}, 101, 411-429.
+Dal Bo P, Frechette GR (2011). "The Evolution of Cooperation in Infinitely Repeated Games: Experimental Evidence." \emph{American Economic Review}, 101(1), 411-429.
 
-Fudenberg, D., Rand, D. G., and Dreber, A. (2012): Slow to Anger and Fast to Forgive: Cooperation in an Uncertain World, \emph{American Economic Review}, 102, 720-749.
+Fudenberg D, Rand DG, Dreber A (2012). "Slow to Anger and Fast to Forgive: Cooperation in an Uncertain World." \emph{American Economic Review}, 102(2), 720-749.
 
-Wang, Z., Xu, B., and Zhou, H. (2014): Social cycling and conditional responses in the Rock-Paper-Scissors game. \emph{Scientific Reports} 4, 5830.
+Wang Z, Xu B, Zhou HJ (2014). "Social Cycling and Conditional Responses in the Rock-Paper-Scissors Game." \emph{Scientific Reports}, 4(1), 2045-2322.
 
 #' @examples
 ## Transform the rock-paper-scissors data of Wang, Xu, and Zhou (2014)

@@ -2,7 +2,7 @@
 % Please edit documentation in R/summary_stratEst_check.R
 \name{summary.stratEst.check}
 \alias{summary.stratEst.check}
-\title{Dethod dispatch for Generic Function Summary}
+\title{Method dispatch for Generic Function Summary}
 \usage{
 \method{summary}{stratEst.check}(object, ...)
 }
@@ -12,5 +12,5 @@
 \item{...}{additional arguments affecting the summary produced.}
 }
 \description{
-Dethod dispatch for Generic Function Summary
+Method dispatch for Generic Function Summary
 }

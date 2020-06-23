@@ -32,6 +32,6 @@
 #' @examples
 #' strategies <- strategies.FRD2012[c("ALLC","ALLD","TFT","GRIM","PTFT")]
 #' @references
-#' Fudenberg, D., Rand, D. G., and Dreber, A. (2012): Slow to Anger and Fast to Forgive: Cooperation in an Uncertain World, \emph{American Economic Review}, 102, 720-749.
+#' Fudenberg D, Rand DG, Dreber A (2012). "Slow to Anger and Fast to Forgive: Cooperation in an Uncertain World." \emph{American Economic Review}, 102(2), 720-749.
 #'
 "strategies.FRD2012"

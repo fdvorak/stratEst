@@ -23,8 +23,8 @@ data(DF2011)
 A dataset with observations from an experiment on social influence.
 }
 \references{
-Dvorak, F., Fischbacher, U. and K. Schmelz (2020). Incentives for Conformity and Anticonformity, TWI Working Paper Series.
+Dvorak F, Fischbacher U, Schmelz K (2020). "Incentives for Conformity and Anticonformity." \emph{TWI Working Paper Series}.
 
-Mehrabian A and C. A. Stefl (1995). Basic Temperament Components of Loneliness, Shyness, and Conformity, Social Behavior and Personality, 23(3), 253–263.
+Mehrabian A, Stefl CA (1995). "Basic Temperament Components of Loneliness, Shyness, and Conformity." \emph{Social Behavior and Personality}, 23(3), 253–263.
 }
 \keyword{datasets}

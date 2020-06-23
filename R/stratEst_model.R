@@ -29,7 +29,7 @@
 #' @param step.size a number between zero and one. The step size of the Fisher scoring step which updates the coefficients. Values smaller than one slow down the convergence of the algorithm and prevent overshooting. Default is one.
 #' @param penalty a logical. If \code{TRUE} the Firth penalty is used to estimate the coefficients of the latent class regression model. Default is \code{FALSE}.
 #' @param verbose a logical. If \code{TRUE} information about the estimation process are printed to the console. Default is \code{FALSE}.
-#' @note Strategy estimation was introduced by DalBo and Frechette (2011) to estimate the maximum likelihood frequencies of a set of candidate strategies in the repeated prisonner's dilemma. Breitmoser (2015) introduces model parameters for the choice probabilities of individual strategies to the strategy estimation model. Dvorak and Fehrler (2018) extend the basic strategy estimation model by individual level covariates to explain the selection of strategies by individuals. The estimation function of the package obtains maximum likelihood estimates for the model parameters based on expectation maximization (Dempster, Laird, and Rubin, 1977) and Newton-Raphson algorithms. To decrease the computation time, the package integrates \proglang{C++} and \proglang{R} with the help of the \proglang{R} packages \pkg{Rcpp} (Eddelbuettel and Francois, 2011) and the open source linear algebra library for the C++ language \pkg{RppArmadillo} (Sanderson and Curtin, 2016).
+#' @note Strategy estimation was introduced by Dal Bo and Frechette (2011) to estimate the maximum likelihood frequencies of a set of candidate strategies in the repeated prisoner's dilemma. Breitmoser (2015) introduces model parameters for the choice probabilities of individual strategies to the strategy estimation model. Dvorak and Fehrler (2018) extend the basic strategy estimation model by individual level covariates to explain the selection of strategies by individuals. The estimation function of the package obtains maximum likelihood estimates for the model parameters based on expectation maximization (Dempster, Laird, and Rubin, 1977) and Newton-Raphson algorithms. To decrease the computation time, the package integrates \proglang{C++} and \proglang{R} with the help of the \proglang{R} packages \pkg{Rcpp} (Eddelbuettel and Francois, 2011) and the open source linear algebra library for the C++ language \pkg{RppArmadillo} (Sanderson and Curtin, 2016).
 #' @return An object of class \code{stratEst.model}. A list with the following elements.
 #' \item{strategies}{the fitted strategies.}
 #' \item{shares}{the strategy shares.}
@@ -87,23 +87,23 @@
 #' @description The estimation function of the package.
 #' @details The estimation function of the package obtains maximum likelihood estimates for the model parameters based on expectation maximization and Newton-Raphson algorithms.
 #' @references
-#' Breitmoser, Y. (2015): Cooperation, but no reciprocity: Individual strategies in the repeated prisoner's dilemma, \emph{American Economic Review}, 105, 2882-2910.
+#' Breitmoser Y (2015). "Cooperation, but no Reciprocity: Individual Strategies in the Repeated Prisoner’s Dilemma." \emph{American Economic Review}, 105(9), 2882-2910.
 #'
-#' Dal Bo, P. and G. R. Frechette (2011): The evolution of cooperation in infinitely repeated games: Experimental evidence, \emph{American Economic Review}, 101, 411-429.
+#' Dal Bo P, Frechette GR (2011). "The Evolution of Cooperation in Infinitely Repeated Games: Experimental Evidence." \emph{American Economic Review}, 101(1), 411-429.
 #'
-#' Dempster, A., N. Laird, and D. B. Rubin (1977): Maximum likelihood from incomplete data via the EM algorithm, \emph{Journal of the Royal Statistical Society Series B}, 39, 1-38.
+#' Dempster A, Laird N, Rubin DB (1977). "Maximum Likelihood from Incomplete Data via the EM Algorithm." \emph{Journal of the Royal Statistical Society Series B}, 39(1), 1-38.
 #'
-#' Dvorak, F. and S. Fehrler (2018): Negotiating Cooperation under Uncertainty: Communication in Noisy, Indefinitely Repeated Interactions, \emph{IZA Working Paper}, No. 11897.
+#' Dvorak F, Fehrler S (2018). "Negotiating Cooperation under Uncertainty: Communication in Noisy, Indefinitely Repeated Interactions." \emph{IZA Working Paper}, No. 11897.
 #'
-#' Dvorak, F., Fischbacher, U., K. Schmelz (2020): Incentives for Conformity and Anticonformity. \emph{TWI Working Paper}.
+#' Dvorak F, Fischbacher U, Schmelz K (2020). "Incentives for Conformity and Anticonformity." \emph{TWI Working Paper Series}.
 #'
-#' Eddelbuettel, D. and R. Francois (2011): Rcpp: Seamless R and C++ Integration, \emph{Journal of Statistical Software}, 40, 1-18.
+#' Eddelbuettel D, Francois R (2011). "Rcpp: Seamless R and C++ Integration." \emph{Journal of Statistical Software}, 40(8), 1-18.
 #'
-#' Fudenberg, D., Rand, D. G., and Dreber, A. (2012): Slow to Anger and Fast to Forgive: Cooperation in an Uncertain World, \emph{American Economic Review}, 102, 720-749.
+#' Fudenberg D, Rand DG, Dreber A (2012). "Slow to Anger and Fast to Forgive: Cooperation in an Uncertain World." \emph{American Economic Review}, 102(2), 720-749.
 #'
-#' Sanderson, C. and R. Curtin (2016): Armadillo: a template-based C++ library for linear algebra. \emph{Journal of Open Source Software}, 1-26.
+#' Sanderson C, Curtin R (2016). "Armadillo: A Template-Based C++ Library for Linear Algebra." \emph{Journal of Open Source Software}, 1, 26.
 #'
-#' Wang, Z., Xu, B., and Zhou, H. (2014): Social cycling and conditional responses in the Rock-Paper-Scissors game. \emph{Scientific Reports} 4, 5830.
+#' Wang Z, Xu B, Zhou HJ (2014). "Social Cycling and Conditional Responses in the Rock-Paper-Scissors Game." \emph{Scientific Reports}, 4(1), 2045-2322.
 #'
 #' @examples
 #' ## Strategy model for rock-paper-scissors data of Wang, Xu, and Zhou (2014).

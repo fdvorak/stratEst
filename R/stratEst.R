@@ -1,7 +1,7 @@
 #' Strategy Estimation Function
 #' @useDynLib stratEst,.registration = TRUE
 #' @importFrom Rcpp sourceCpp
-#' @param data A \code{stratEst.data} object or \code{data.frame}. Must contain the variables \code{choice},  \code{input}, \code{id}, \code{game}, \code{period}. The variable \code{id} identifies observations of the same individual across games and periods. The factor \code{input} indicates the dicrete information observed by the individual before making a choice. The factor \code{choice} indicates the choice of the individual.
+#' @param data A \code{stratEst.data} object or \code{data.frame}. Must contain the variables \code{choice},  \code{input}, \code{id}, \code{game}, \code{period}. The variable \code{id} identifies observations of the same individual across games and periods. The factor \code{input} indicates the discrete information observed by the individual before making a choice. The factor \code{choice} indicates the choice of the individual.
 #' @param strategies A list of strategies. Each strategy is a data.frame of class \code{stratEst.strategy}. Each row of the data.frame represents one state of the strategy. The first row defines the initial state which is entered if the variable input is NA. Column names which start with the string 'output.' indicate the columns which contain the multinomial choice probabilities of the strategy. For example, a column labeled 'output.x' contains the probability to observe the output 'x'. The column 'tremble' contains a tremble probability for pure strategies. Column names which start with the string 'input.' indicate the columns which contain the deterministic state transition of the strategy. For example, a column with name 'input.x' indicates the state transition after observing input 'x'.
 #' @param shares A vector of strategy shares. The elements to the order of strategies in the list \code{strategies}. Shares which are \code{NA} are estimated from the data. With more than one sample and sample specific shares, a list of column vectors is required.
 #' @param coefficients Column vector which contains the latent class regression coefficients. The elements correspond to the vector of estimates.
@@ -47,14 +47,14 @@
 #' \item{loglike}{The log-likelihood of the model. Larger values indicate a better fit of the model to the data.}
 #' \item{crit.val}{The value of the selection criterion defined under \code{crit}. Larger values indicate a better fit of the model.}
 #' \item{eval}{Number of iterations of the solver. The reported number is the sum of iterations performed in the inner and the outer run which produced the reported estimates.}
-#' \item{tol.val}{The percentual decrease of the log-likelihood in the last iteration of the algorithm. }
+#' \item{tol.val}{The relative decrease of the log-likelihood in the last iteration of the algorithm. }
 #' \item{convergence}{Maximum absolute score of the model parameters. Small values indicate convergence of the algorithm to a (local) maximum of the negative log likelihood.}
-#' \item{entropy}{Entropy of the posterior probability assignments of indviduals to strategies.}
+#' \item{entropy}{Entropy of the posterior probability assignments of individuals to strategies.}
 #' \item{state.obs}{A column vector with the number of weighted observations for each strategy state corresponding to the rows of \code{strategies}.}
 #' \item{posterior.assignments}{Posterior probability of each individual to use a strategy.}
 #' \item{prior.assignments}{Prior probability of each individual to use a strategy as predicted by the individual covariates.}
 #' \item{shares.se}{Standard errors of the estimated shares.}
-#' \item{probs.se}{Standard errors of the estimated chocie probabilities.}
+#' \item{probs.se}{Standard errors of the estimated choice probabilities.}
 #' \item{trembles.se}{Standard errors of the estimated trembles.}
 #' \item{coefficients.se}{Standard errors of the estimated coefficients.}
 #' \item{shares.score}{Score of the estimated shares.}
@@ -68,7 +68,7 @@
 #' \item{num.obs}{Number of observations.}
 #' \item{num.ids}{Number of individuals.}
 #' \item{num.par}{Total number of model parameters.}
-#' \item{free.par}{Total numbe rof free model parameters.}
+#' \item{free.par}{Total number of free model parameters.}
 #' \item{res.degrees}{Residual degrees of freedom (num.ids - free.par).}
 #' \item{shares.quantiles}{Quantiles of the estimated shares.}
 #' \item{probs.quantiles}{Quantiles of the estimated choice probabilities.}
@@ -79,7 +79,7 @@
 #' \item{gammas.se}{Standard errors of the gamma parameters.}#
 #' \item{aic}{Akaike information criterion.}
 #' \item{bic}{Bayesian information criterion.}
-#' \item{icl}{Integrated classifcation likelihood information criteria.}
+#' \item{icl}{Integrated classification likelihood information criteria.}
 #' @description Performs variants of the strategy estimation method.
 #' @details The estimation function \code{stratEst()} returns maximum-likelihood estimates for the population shares and choice probabilities of a set of candidate strategies given some data from an economic experiment. Candidate strategies can be supplied by the user in the form of deterministic finite-state automata. The number and the complexity of strategies can be restricted by the user or selected based on information criteria. stratEst also features latent class regression to assess the influence of covariates on strategy choice.
 #' @references

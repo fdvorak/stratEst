@@ -1,4 +1,4 @@
-#' Dethod dispatch for Generic Function Summary
+#' Method dispatch for Generic Function Summary
 #' @param object An object returned by the function\code{stratEst.check()}. An object of class \code{stratEst.check}.
 #' @param ... additional arguments affecting the summary produced.
 #' @export

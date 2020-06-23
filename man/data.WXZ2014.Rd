@@ -23,6 +23,6 @@ data(data.WXZ2014)
 A stratEst.data object that contains the data of Wang, Xu, and Zhou (2014).
 }
 \references{
-Wang, Z., Xu, B., and Zhou, H. (2014): Social cycling and conditional responses in the Rock-Paper-Scissors game. \emph{Scientific Reports} 4, 5830.
+Wang Z, Xu B, Zhou HJ (2014). "Social Cycling and Conditional Responses in the Rock-Paper-Scissors Game." \emph{Scientific Reports}, 4(1), 2045-2322.
 }
 \keyword{datasets}

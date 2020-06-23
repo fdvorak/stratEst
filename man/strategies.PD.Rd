@@ -37,7 +37,7 @@ List of 24 prisoner's dilemma strategies (Dal Bo and Frechette 2011; Fudenberg, 
  \item{GRIM}{Strategy which cooperates until one player defects, then GRIM defects forever.}
  \item{GRIM2}{Strategy which cooperates until two consecutive rounds occur in which one player defected, then GRIM2 defects forever.}
  \item{GRIM3}{Strategy which cooperates until three consecutive rounds occur in which one player defected, then GRIM3 defects forever.}
- \item{M1BF}{Strategy which cooperates if both players cooperated, and defects if both players defected in the last round. If the own action was coperation and the other player defected, cooperate with some probability. If the own action was defection and the other player cooperated, cooperate with some (potentially different) probability.}
+ \item{M1BF}{Strategy which cooperates if both players cooperated, and defects if both players defected in the last round. If the own action was cooperation and the other player defected, cooperate with some probability. If the own action was defection and the other player cooperated, cooperate with some (potentially different) probability.}
  \item{PT2FT}{Strategy which cooperates if both players cooperated in the last two rounds, both players defected in the last two rounds, or both players defected two rounds ago and cooperated in the last round. Otherwise PT2FT defect.}
  \item{PTFT}{Strategy which cooperates if both players chose the same action last round, otherwise PTFT defects.Also known as WSLS.}
  \item{RAND}{Strategy which uniformly randomizes between cooperation and defection.}
@@ -55,10 +55,10 @@ List of 24 prisoner's dilemma strategies (Dal Bo and Frechette 2011; Fudenberg, 
 strategies <- strategies.PD[c("ALLC","ALLD","TFT","GRIM","PTFT")]
 }
 \references{
-Breitmoser, Y. (2015): Cooperation, but no reciprocity: Individual strategies in the repeated prisoner's dilemma, \emph{American Economic Review}, 105, 2882-2910.
+Breitmoser Y (2015). "Cooperation, but no Reciprocity: Individual Strategies in the Repeated Prisoner’s Dilemma." \emph{American Economic Review}, 105(9), 2882-2910.
 
-Dal Bo, P. and G. R. Frechette (2011): The evolution of cooperation in infinitely repeated games: Experimental evidence, \emph{American Economic Review}, 101, 411-429.
+Dal Bo P, Frechette GR (2011). "The Evolution of Cooperation in Infinitely Repeated Games: Experimental Evidence." \emph{American Economic Review}, 101(1), 411-429.
 
-Fudenberg, D., Rand, D. G., and Dreber, A. (2012): Slow to Anger and Fast to Forgive: Cooperation in an Uncertain World, \emph{American Economic Review}, 102, 720-749.
+Fudenberg D, Rand DG, Dreber A (2012). "Slow to Anger and Fast to Forgive: Cooperation in an Uncertain World." \emph{American Economic Review}, 102(2), 720-749.
 }
 \keyword{datasets}

@@ -35,5 +35,5 @@ model.mixture.check <- stratEst.check( model.mixture )
 print(model.mixture.check$fit)
 }
 \references{
-Wang, Z., Xu, B., and Zhou, H. (2014): Social cycling and conditional responses in the Rock-Paper-Scissors game. \emph{Scientific Reports} 4, 5830.
+Wang Z, Xu B, Zhou HJ (2014). "Social Cycling and Conditional Responses in the Rock-Paper-Scissors Game." \emph{Scientific Reports}, 4(1), 2045-2322.
 }

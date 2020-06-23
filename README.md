@@ -25,14 +25,14 @@ checking, and model selection.
 ## Installation
 
 The most recent CRAN version of stratEst is installed by executing the
-following command in the  console:
+following command in the R console:
 
 ``` r
 install.packages("stratEst")
 ```
 
 The development version of the package can be installed from GitHub with
-the help of the package  (Wickham, Hester, and Chang 2020):
+the help of the package devtools (Wickham, Hester, and Chang 2020):
 
 ``` r
 install.packages("devtools")
@@ -56,16 +56,16 @@ model.mixture <- stratEst.model(data.WXZ2014,strategies.mixture)
 
   - Dal Bo P, Frechette GR (2011). “The Evolution of Cooperation in
     Infinitely Repeated Games: Experimental Evidence.” American Economic
-    Review, 101(1), 411–429.
+    Review, 101(1), 411-429.
   - Dempster A, Laird N, Rubin DB (1977). “Maximum Likelihood from
     Incomplete Data via the EM Algorithm.” Journal of the Royal
-    Statistical Society Series B, 39(1), 1–38.
-  - Eddelbuettel D, François R (2011). “Rcpp: Seamless R and C++
-    Integration.” Journal of Statistical Software, 40(8), 1–18.
+    Statistical Society Series B, 39(1), 1-38.
+  - Eddelbuettel D, Francois R (2011). “Rcpp: Seamless R and C++
+    Integration.” Journal of Statistical Software, 40(8), 1-18.
   - Sanderson C, Curtin R (2016). “Armadillo: A Template-Based C++
-    Library for Linear Algebra.” Journal of Open Source Software, 1, 26.
+    Library for Linear Algebra.”
   - Wang Z, Xu B, Zhou HJ (2014). “Social Cycling and Conditional
-    Responses in the Rock- Paper-Scissors Game.” Scientific Reports,
-    4(1), 5830 2045–2322.
-  - Wickham H, Hester J, Chang W (2020b). devtools: Tools to Make
-    Developing R Packages Easier. R package version 2.3.0.
+    Responses in the Rock-Paper-Scissors Game.” Scientific Reports,
+    4(1), 2045-2322.
+  - Wickham H, Hester J, Chang W (2020). “devtools: Tools to Make
+    Developing R Packages Easier.” R package version 2.3.0.

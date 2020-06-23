@@ -43,6 +43,6 @@ c("ALLC","TFT","TF2T","TF3T","T2FT","T2F2T","GRIM","GRIM2","GRIM3","ALLD","DTFT"
 strategies <- strategies.FRD2012[c("ALLC","ALLD","TFT","GRIM","PTFT")]
 }
 \references{
-Fudenberg, D., Rand, D. G., and Dreber, A. (2012): Slow to Anger and Fast to Forgive: Cooperation in an Uncertain World, \emph{American Economic Review}, 102, 720-749.
+Fudenberg D, Rand DG, Dreber A (2012). "Slow to Anger and Fast to Forgive: Cooperation in an Uncertain World." \emph{American Economic Review}, 102(2), 720-749.
 }
 \keyword{datasets}

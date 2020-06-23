@@ -18,6 +18,6 @@
 #' @usage data(data.FRD2012)
 #' @source \url{https://www.aeaweb.org/articles?id=10.1257/aer.102.2.720}
 #' @references
-#' Fudenberg, D., Rand, D. G., and Dreber, A. (2012): Slow to Anger and Fast to Forgive: Cooperation in an Uncertain World, \emph{American Economic Review}, 102, 720-749.
+#' Fudenberg D, Rand DG, Dreber A (2012). "Slow to Anger and Fast to Forgive: Cooperation in an Uncertain World." \emph{American Economic Review}, 102(2), 720-749.
 #'
 "data.FRD2012"
