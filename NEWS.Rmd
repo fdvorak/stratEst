@@ -9,6 +9,9 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+# stratEst 1.0.1
+
+
 # stratEst 1.0.0
 ## Classes
 * introduces the S3 class stratEst.model
