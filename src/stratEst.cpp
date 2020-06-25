@@ -1,4 +1,4 @@
-//#define ARMA_NO_DEBUG
+#define ARMA_NO_DEBUG
 #include <RcppArmadillo.h>
 using namespace Rcpp;
 
@@ -51,7 +51,11 @@ arma::field<arma::mat> stratEst_EM(arma::cube& output_cube, arma::cube& sum_outp
   arma::umat indices_responses_to_sum = find( responses_to_sum == 1 );
   arma::umat indices_non_fixed_responses = find( indices_responses == 0 && responses_to_sum == 0 );
   int free_responses = 0;
-  free_responses = num_responses_to_est - num_responses_to_est/num_cols_response_mat;
+  if( response == "pure" ){
+    free_responses = num_responses_to_est/num_cols_response_mat;
+  }else{
+    free_responses = num_responses_to_est - num_responses_to_est/num_cols_response_mat;
+  }
   int free_params = free_shares + free_responses + num_trembles_to_est;
   double eps = 1;
   double eps_now = 1;
@@ -432,7 +436,11 @@ arma::field<arma::mat> stratEst_LCR_EM(arma::cube& output_cube, arma::cube& sum_
   arma::umat indices_responses_to_sum = find( responses_to_sum == 1 );
   arma::umat indices_non_fixed_responses = find( indices_responses == 0 && responses_to_sum == 0 );
   int free_responses = 0;
-  free_responses = ( num_responses_to_est - num_responses_to_est/num_cols_response_mat )*num_samples_responses;
+  if( response == "pure" ){
+    free_responses = ( num_responses_to_est/num_cols_response_mat )*num_samples_responses;
+  }else{
+    free_responses = ( num_responses_to_est - num_responses_to_est/num_cols_response_mat )*num_samples_responses;
+  }
   int free_params = free_responses + num_trembles_to_est + num_coefficients_to_est;
   double eps = arma::datum::inf;
   double eps_now = arma::datum::inf;
@@ -3160,7 +3168,7 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec sid , arma::ma
     final_indices_shares = zero_indices_shares;
   }
 
-  //arma::mat final_shares = final_shares_vec( find( final_indices_shares > 0 ) );
+  final_shares = final_shares_vec( find( final_indices_shares > 0 ) );
   int num_final_shares = final_shares.n_elem;
   arma::mat final_score_shares = score_shares( find( final_indices_shares > 0 ) );
   arma::vec indices_shares_vec = vectorise( final_indices_shares );
