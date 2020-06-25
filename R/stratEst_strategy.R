@@ -86,7 +86,7 @@ stratEst.strategy <- function( choices, inputs = NULL, prob.choices = NULL, tr.i
   # check prob.choices
   if( is.null( prob.choices ) == F ){
     if( all( is.na( prob.choices ) ) == F ){
-      if( class( prob.choices ) != "numeric" ){
+      if( class( prob.choices ) != "numeric" & class( prob.choices ) != "integer" ){
         stop(paste("stratEst.strategy error: prob.choices must be numeric.",sep=""))
       }
       if( any( is.na(prob.choices) == F & ( prob.choices < 0 | prob.choices > 1 ) ) ){
