@@ -7,7 +7,7 @@ stratEst.simulate.check.strategies <- function( strategies  ){
 
   #check strategies
   if( "list" %in% class(strategies) ){
-    if( all( "stratEst.strategy" %in%  class(strategies[[1]]) | "data.frame" %in% class(strategies[[1]]) ) ){
+    if( "stratEst.strategy" %in%  class(strategies[[1]]) | "data.frame" %in% class(strategies[[1]]) ){
       num_samples_strategies = 1
       num_strats = length(strategies)
       state <- NULL
