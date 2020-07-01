@@ -2945,8 +2945,8 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec sid , arma::ma
       if( LCR ){
         BS_shares_SE = sqrt( BS_shares_SE/BS_samples_coefficients );
         BS_coefficients_SE = sqrt( BS_coefficients_SE/BS_samples_coefficients );
-        BS_shares_quantiles = quantile( BS_shares_SE_mat , quantile_vec , 1  );
-        BS_coefficients_quantiles = quantile( BS_coefficients_SE_mat , quantile_vec , 1  );
+        BS_shares_quantiles = arma::quantile( BS_shares_SE_mat , quantile_vec , 1  );
+        BS_coefficients_quantiles = arma::quantile( BS_coefficients_SE_mat , quantile_vec , 1  );
         if( BS_samples_coefficients/BS_samples < 0.9 ){
           BS_shares_SE.fill(-1);
           BS_coefficients_SE.fill(-1);
@@ -2957,7 +2957,7 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec sid , arma::ma
       }
       else{
         BS_shares_SE = sqrt( BS_shares_SE/BS_samples_shares );
-        BS_shares_quantiles = quantile( BS_shares_SE_mat , quantile_vec , 1  );
+        BS_shares_quantiles = arma::quantile( BS_shares_SE_mat , quantile_vec , 1  );
         if( BS_samples_shares/BS_samples < 0.9 ){
           BS_shares_SE.fill(-1);
           BS_shares_quantiles.fill(-1);
@@ -2965,9 +2965,9 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec sid , arma::ma
         }
       }
       BS_responses_SE = sqrt( BS_responses_SE/BS_samples_responses );
-      BS_responses_quantiles = quantile( BS_responses_SE_mat , quantile_vec , 1  );
+      BS_responses_quantiles = arma::quantile( BS_responses_SE_mat , quantile_vec , 1  );
       BS_trembles_SE = sqrt( BS_trembles_SE/BS_samples_trembles );
-      BS_trembles_quantiles = quantile( BS_trembles_SE_mat , quantile_vec , 1  );
+      BS_trembles_quantiles = arma::quantile( BS_trembles_SE_mat , quantile_vec , 1  );
       if( BS_samples_responses/BS_samples < 0.9 ){
         BS_responses_SE.fill(-1);
         BS_responses_quantiles.fill(-1);
