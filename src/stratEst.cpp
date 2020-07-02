@@ -1,4 +1,5 @@
 #define ARMA_NO_DEBUG
+#define ARMA_USE_CXX14
 #include <RcppArmadillo.h>
 using namespace Rcpp;
 
@@ -1295,7 +1296,8 @@ arma::field<arma::mat> stratEst_SE(arma::cube& output_cube, arma::cube& sum_outp
   else{  // LCR == false
     if( k > 1 ){
       for (int i = 0; i < num_ids ; i++) {
-        arma::rowvec individual_shares = share_mat.col(sample_of_ids_shares(i)-1).t();
+        int sample_of_ids_shares_i = sample_of_ids_shares(i);
+        arma::rowvec individual_shares = share_mat.col(sample_of_ids_shares_i-1).t();
         arma::rowvec score_contributions_shares = i_shares_mat.row(i) - individual_shares;
         int start_index_id_fisher = k*(sample_of_ids_shares(i)-1);
         score_shares(arma::span(start_index_id_fisher,(start_index_id_fisher+k-1))) += score_contributions_shares.t();
@@ -1800,7 +1802,8 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec sid , arma::ma
     arma::mat complete_output_slice(rows_strategies , num_outputs , arma::fill::zeros );
     arma::uvec id_vec_i = id_vec == (i+1);
     for( int l = 0; l < rows_strategies; l++) {
-      arma::uvec state_mat_l = state_mat.col( complete_strat_id(l) - 1 ) == state(l);
+      int complete_strat_id_l = complete_strat_id(l);
+      arma::uvec state_mat_l = state_mat.col( complete_strat_id_l - 1 ) == state(l);
       arma::rowvec complete_output_slice_row( num_outputs , arma::fill::zeros );
       complete_output_slice_row = sum( output_as_mat.rows( find( state_mat_l && id_vec_i ) ) , 0 );
       complete_output_slice.row(l) = complete_output_slice_row;
@@ -2429,45 +2432,47 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec sid , arma::ma
           num_it_trembles = unique_non_zero_trembles.n_elem;
           arma::vec trembles_indices_vec = arma::linspace(1,num_estimated_trembles,num_estimated_trembles);
           int counter = 0;
-          for (int t1 = 0; t1 < (num_it_trembles-1); t1++) {
-            for (int t2 = t1+1; t2 < num_it_trembles; t2++) {
-              counter = counter + 1;
-              if( print_messages == true ){
-                Rcout<< "select trembles (" << tremble_run << "/" << counter << ")     \r";
-              }
-              fused_indices_trembles = indices_trembles;
-              arma::vec indices_ones( num_estimated_trembles , arma::fill::zeros );
-              arma::vec c1 = select_indices_trembles( find( indices_trembles == t1+1 ) );
-              arma::vec c2 = select_indices_trembles( find( indices_trembles == t2+1 ) );
-              if(  c1(0) == c2(0) ){
-                arma::vec fused_trembles = estimated_trembles;
-                for(int sam = 0; sam < num_samples_trembles; sam++) {
-                  //fused_trembles(t1) = (estimated_trembles(sam*max_indices_trembles + t1) + estimated_trembles(sam*max_indices_trembles + t2))/2;
-                  indices_ones( find( trembles_indices_vec == ( sam*max_indices_trembles + t2 + 1 ) ) ).fill(1);
+          if( num_it_trembles >= 1 ){
+            for (int t1 = 0; t1 < (num_it_trembles-1); t1++) {
+              for (int t2 = t1+1; t2 < num_it_trembles; t2++) {
+                counter = counter + 1;
+                if( print_messages == true ){
+                  Rcout<< "select trembles (" << tremble_run << "/" << counter << ")     \r";
                 }
-                fused_indices_trembles.replace( (t2+1) , (t1+1) );
-                fused_trembles.shed_rows( find( indices_ones == 1 ) );
-                fused_trembles.fill( arma::fill::randu );
-                fused_trembles /= 4;
-                arma::vec unique_non_zero_restrictions = unique( fused_indices_trembles( find( fused_indices_trembles != 0 ) ) );
-                int num_unique_non_zero_restrictions = unique_non_zero_restrictions.n_elem;
-                for (int i = 0; i < num_unique_non_zero_restrictions; i++) {
-                  fused_indices_trembles.replace( unique_non_zero_restrictions(i) , i+1 );
-                }
-                arma::mat pre_eval_mat = R_k(12,0);
-                R_temp = stratEst_EM(output_cube, sum_outputs_cube, strat_id, R_k(0,0), R_k(1,0), fused_trembles, R_k(3,0), R_k(4,0), R_k(5,0), indices_shares, indices_responses, fused_indices_trembles, responses_to_sum, response, pre_eval_mat(0,0), outer_tol_eval, outer_max_eval, sample_of_ids_shares, num_ids_sample_shares, sample_of_ids_responses, num_ids_sample_responses, sample_of_ids_trembles, num_ids_sample_trembles );
-                arma::vec crit_vals = R_temp( 7 , 0 );
-                double crit_fused = crit_vals( crit_index );
-                if( std::isnan( crit_fused ) ){
-                  crit_fused = arma::datum::inf;
-                }
-                if ( crit_fused < crit_min  ){
-                  R_fused = R_temp;
-                  crit_min = crit_fused;
-                  new_indices_responses = indices_responses;
-                  new_indices_trembles = fused_indices_trembles;
-                  trigger = 1;
-                  triggered = true;
+                fused_indices_trembles = indices_trembles;
+                arma::vec indices_ones( num_estimated_trembles , arma::fill::zeros );
+                arma::vec c1 = select_indices_trembles( find( indices_trembles == t1+1 ) );
+                arma::vec c2 = select_indices_trembles( find( indices_trembles == t2+1 ) );
+                if(  c1(0) == c2(0) ){
+                  arma::vec fused_trembles = estimated_trembles;
+                  for(int sam = 0; sam < num_samples_trembles; sam++) {
+                    //fused_trembles(t1) = (estimated_trembles(sam*max_indices_trembles + t1) + estimated_trembles(sam*max_indices_trembles + t2))/2;
+                    indices_ones( find( trembles_indices_vec == ( sam*max_indices_trembles + t2 + 1 ) ) ).fill(1);
+                  }
+                  fused_indices_trembles.replace( (t2+1) , (t1+1) );
+                  fused_trembles.shed_rows( find( indices_ones == 1 ) );
+                  fused_trembles.fill( arma::fill::randu );
+                  fused_trembles /= 4;
+                  arma::vec unique_non_zero_restrictions = unique( fused_indices_trembles( find( fused_indices_trembles != 0 ) ) );
+                  int num_unique_non_zero_restrictions = unique_non_zero_restrictions.n_elem;
+                  for (int i = 0; i < num_unique_non_zero_restrictions; i++) {
+                    fused_indices_trembles.replace( unique_non_zero_restrictions(i) , i+1 );
+                  }
+                  arma::mat pre_eval_mat = R_k(12,0);
+                  R_temp = stratEst_EM(output_cube, sum_outputs_cube, strat_id, R_k(0,0), R_k(1,0), fused_trembles, R_k(3,0), R_k(4,0), R_k(5,0), indices_shares, indices_responses, fused_indices_trembles, responses_to_sum, response, pre_eval_mat(0,0), outer_tol_eval, outer_max_eval, sample_of_ids_shares, num_ids_sample_shares, sample_of_ids_responses, num_ids_sample_responses, sample_of_ids_trembles, num_ids_sample_trembles );
+                  arma::vec crit_vals = R_temp( 7 , 0 );
+                  double crit_fused = crit_vals( crit_index );
+                  if( std::isnan( crit_fused ) ){
+                    crit_fused = arma::datum::inf;
+                  }
+                  if ( crit_fused < crit_min  ){
+                    R_fused = R_temp;
+                    crit_min = crit_fused;
+                    new_indices_responses = indices_responses;
+                    new_indices_trembles = fused_indices_trembles;
+                    trigger = 1;
+                    triggered = true;
+                  }
                 }
               }
             }
@@ -2663,7 +2668,7 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec sid , arma::ma
         arma::rowvec indices_coefficients_first_row = indices_coefficients.row(0);
         for (int i = 1; i < k; i++) {
           int target_index = indices_coefficients_first_row(i);
-          if( target_index > 0 ){
+          if( target_index >= 1 ){
             start_coefficients( target_index - 1 ) = start_intercepts( i-1 );
           }
         }
@@ -2804,21 +2809,25 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec sid , arma::ma
       arma::vec sample_of_ids_trembles_BS( num_sampled_ids , arma::fill::zeros );
       arma::vec num_ids_sample_trembles_BS( num_samples , arma::fill::zeros );
       for (int j = 0; j < num_sampled_ids; j++) {
-        output_cube_BS_sample.slice(j) = output_cube.slice( sampled_ids(j) - 1 );
-        sum_outputs_cube_BS_sample.slice(j) = sum_outputs_cube.slice( sampled_ids(j) - 1 );
-        arma::vec unique_sample_of_ids_shares_BS = unique( sample_id( find( id_vec == sampled_ids(j) ) ) );
+        int sampled_ids_j = sampled_ids(j);
+        output_cube_BS_sample.slice(j) = output_cube.slice( sampled_ids_j - 1 );
+        sum_outputs_cube_BS_sample.slice(j) = sum_outputs_cube.slice( sampled_ids_j - 1 );
+        arma::vec unique_sample_of_ids_shares_BS = unique( sample_id( find( id_vec == sampled_ids_j ) ) );
 
-        sample_of_ids_shares_BS(j) = sample_of_ids_shares( sampled_ids(j) - 1 ); //unique_sample_of_ids_shares_BS(0);
-        num_ids_sample_shares_BS( sample_of_ids_shares_BS(j) - 1 ) += 1; //unique_sample_of_ids_shares_BS(0)
+        int sample_of_ids_shares_j = sample_of_ids_shares( sampled_ids_j - 1 );
+        sample_of_ids_shares_BS(j) =  sample_of_ids_shares_j;
+        num_ids_sample_shares_BS( sample_of_ids_shares_j - 1 ) += 1;
 
-        sample_of_ids_responses_BS(j) = sample_of_ids_responses( sampled_ids(j) - 1 ); //unique_sample_of_ids_shares_BS(0);
-        num_ids_sample_responses_BS( sample_of_ids_responses_BS(j) - 1 ) += 1; //unique_sample_of_ids_shares_BS(0)
+        int sample_of_ids_responses_j = sample_of_ids_responses( sampled_ids_j - 1 );
+        sample_of_ids_responses_BS(j) = sample_of_ids_responses_j;
+        num_ids_sample_responses_BS( sample_of_ids_responses_j - 1 ) += 1;
 
-        sample_of_ids_trembles_BS(j) = sample_of_ids_trembles( sampled_ids(j) - 1 ); //unique_sample_of_ids_shares_BS(0);
-        num_ids_sample_trembles_BS( sample_of_ids_trembles_BS(j) - 1 ) += 1; //unique_sample_of_ids_shares_BS(0)
+        int sample_of_ids_trembles_j = sample_of_ids_trembles( sampled_ids_j - 1 );
+        sample_of_ids_trembles_BS(j) = sample_of_ids_trembles_j;
+        num_ids_sample_trembles_BS( sample_of_ids_trembles_j - 1 ) += 1;
 
         if( LCR ){
-          covariate_mat_BS_sample.row(j) = covariate_mat.row( sampled_ids(j) - 1 );
+          covariate_mat_BS_sample.row(j) = covariate_mat.row( sampled_ids_j - 1 );
         }
       }
 
