@@ -10,8 +10,8 @@ Copyright: See the file COPYRIGHTS for copyright, authorship and license details
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
-LinkingTo: Rcpp, RcppArmadillo
-Imports: Rcpp (>= 0.12.18), RcppArmadillo (>= 0.9.900.0.0), stats
+LinkingTo: Rcpp, RcppArmadillo (>= 0.9.900.0.0)
+Imports: Rcpp (>= 0.12.18), stats
 RoxygenNote: 7.1.0
 Suggests: 
     testthat,
