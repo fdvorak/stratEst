@@ -21,17 +21,17 @@ test_that("Example: Dal Bo & Frechette 2011",  {
 })
 
 
-test_that("Example: Fudenberg, Rand, Dreber (2012)" , {
-  skip_on_cran()
-  set.seed(1)
-  data <- stratEst.data(FRD2012,input =c("last.choice","last.other") )
-  model.FRD2012 <- stratEst.model(data,strategies.FRD2012,sample.id="bc",verbose=F)
-  expect_equal(0.193,round(as.numeric(model.FRD2012$shares$bc.1.5[2]),3))
-  expect_equal(0.139,round(as.numeric(model.FRD2012$shares$bc.1.5[7]),3))
-  expect_equal(0.053,round(as.numeric(model.FRD2012$shares.se[2]),3))
-  expect_equal(0.035,round(as.numeric(model.FRD2012$shares.se[3]),3))
-  expect_equal(0.46,round(as.numeric(model.FRD2012$gammas.par[1]),2))
-})
+# test_that("Example: Fudenberg, Rand, Dreber (2012)" , {
+#   skip_on_cran()
+#   set.seed(1)
+#   data <- stratEst.data(FRD2012,input =c("last.choice","last.other") )
+#   model.FRD2012 <- stratEst.model(data,strategies.FRD2012,sample.id="bc",verbose=F)
+#   expect_equal(0.193,round(as.numeric(model.FRD2012$shares$bc.1.5[2]),3))
+#   expect_equal(0.139,round(as.numeric(model.FRD2012$shares$bc.1.5[7]),3))
+#   expect_equal(0.053,round(as.numeric(model.FRD2012$shares.se[2]),3))
+#   expect_equal(0.035,round(as.numeric(model.FRD2012$shares.se[3]),3))
+#   expect_equal(0.46,round(as.numeric(model.FRD2012$gammas.par[1]),2))
+# })
 
 
 test_that("Example: Dvorak, Fischbacher, and Schmelz (2020)" , {

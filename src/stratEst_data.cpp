@@ -1,4 +1,4 @@
-#define ARMA_NO_DEBUG
+//#define ARMA_NO_DEBUG
 #define ARMA_USE_CXX14
 #include <RcppArmadillo.h>
 using namespace Rcpp;

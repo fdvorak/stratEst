@@ -16,8 +16,10 @@ stratEst.check.data <- function( data ){
   if( is.null(data$period) ) {
     stop("stratEst error: Data does not contain the variable 'period'.")
   }
+  input.is.null = F
   if( is.null(data$input) ) {
-    stop("stratEst error: Data does not contain the variable 'input'.")
+    input.is.null = T
+    data$input <- 1
   }
   if( is.null(data$choice) ) {
     stop("stratEst error: Data does not contain the variable 'choice'.")
@@ -68,7 +70,7 @@ stratEst.check.data <- function( data ){
     stop("stratEst error: The variable 'choice' in data cannot contain NA values.");
   }
 
-  stratEst.check.data.return <- list( "data" = data , "id" = id , "game" = game , "period" = period , "input" = input , "output" = output, "input.factor" = input_factor , "output.factor" = output_factor , "levels.input" = levels_input , "levels.output" = levels_output )
+  stratEst.check.data.return <- list( "data" = data , "id" = id , "game" = game , "period" = period , "input" = input , "output" = output, "input.factor" = input_factor , "output.factor" = output_factor , "levels.input" = levels_input , "levels.output" = levels_output, "input.is.null" = input.is.null )
 
   return(stratEst.check.data.return)
 }

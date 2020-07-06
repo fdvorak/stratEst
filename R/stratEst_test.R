@@ -9,7 +9,7 @@
 #' @export
 #' @return A \code{data.frame} with one row for each tested parameter and 6 variables:
 #' \item{estimate}{the parameter estimate.}
-#' \item{diff}{the difference between the estimated parameter and the numeric value (if supplied).}
+#' \item{diff}{the difference between the estimated parameter and the numeric value.}
 #' \item{std.error}{the standard error of the estimated parameter.}
 #' \item{t.value}{the t statistic.}
 #' \item{res.degrees}{the residual degrees of freedom of the model.}
@@ -17,14 +17,12 @@
 #' @details The test function of the package.
 #' @references
 #' Wang Z, Xu B, Zhou HJ (2014). "Social Cycling and Conditional Responses in the Rock-Paper-Scissors Game." \emph{Scientific Reports}, 4(1), 2045-2322.
-#'
 #' @examples
 #' ## Test if the choice probabilities of a mixed strategy for rock-paper-scissors.
 #' ## The rock-paper-scissors data is from Wang, Xu, and Zhou (2014).
 #' model.mixed <- stratEst.model(data = data.WXZ2014, strategies = strategies.RPS["mixed"])
 #' t.probs <- stratEst.test(model = model.mixed, par = "probs", values = 1/3)
 #' print(t.probs)
-#'
 #' @export
 stratEst.test <- function( model, par = c("shares","probs","trembles","coefficients"), values = 0, alternative = "two.sided", digits = 4 ){
 
@@ -93,22 +91,11 @@ stratEst.test <- function( model, par = c("shares","probs","trembles","coefficie
     }else{
       stop("stratEst error: The argument 'alternative' must be one of the following chracter strings: 'two.sided','greater' or 'smaller'.")
     }
-    if( any( values != 0 ) ){
-      test_matrix = cbind( est , diff , se , z , rep(model$res.degrees, length(est)) , p )
-      colnames(test_matrix) <- c("estimate","diff","std.error","t.value","df","p.value")
-    }else{
-      test_matrix = cbind( est , se , z , rep(model$res.degrees, length(est)) , p )
-      colnames(test_matrix) <- c("estimate","std.error","t.value","df","p.value")
-    }
+    test_matrix = cbind( est , diff , se , z , rep(model$res.degrees, length(est)) , p )
+    colnames(test_matrix) <- c("estimate","diff","std.error","t.value","df","p.value")
     rownames(test_matrix) <- row_names
     par_data <- data.frame(round(test_matrix,digits))
-
-  # colnames
-  if( any( values != 0 ) ){
     colnames(par_data) <- c("estimate","diff","std.error","t.value","df","p.value")
-  }else{
-    colnames(par_data) <- c("estimate","std.error","t.value","df","p.value")
-  }
 
   return(par_data)
 

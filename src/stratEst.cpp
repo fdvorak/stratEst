@@ -1,4 +1,4 @@
-#define ARMA_NO_DEBUG
+//#define ARMA_NO_DEBUG
 #define ARMA_USE_CXX14
 #include <RcppArmadillo.h>
 using namespace Rcpp;
@@ -80,7 +80,6 @@ arma::field<arma::mat> stratEst_EM(arma::cube& output_cube, arma::cube& sum_outp
   }
   int num_sample_of_ids_max = max( sample_of_ids_max );
   arma::mat state_obs( num_rows_response_mat*num_sample_of_ids_max , num_cols_response_mat , arma::fill::zeros );
-  //arma::mat state_obs( num_rows_response_mat*num_sample_of_ids_max , 1 , arma::fill::zeros );
   arma::vec new_shares = shares;
   arma::mat new_share_mat = share_mat;
   arma::mat new_responses = responses;
@@ -368,10 +367,6 @@ arma::field<arma::mat> stratEst_EM(arma::cube& output_cube, arma::cube& sum_outp
     arma::mat weigthed_output_cube_slice = weigthed_output_cube.slice(i);
     int sample_of_id = sample_of_ids_max(i);
     state_obs( arma::span( (sample_of_id-1)*num_rows_response_mat , sample_of_id*num_rows_response_mat - 1 ) , arma::span::all ) += weigthed_output_cube_slice( arma::span( 0 , num_rows_response_mat - 1 ) , arma::span::all );
-
-    // arma::mat weigthed_sums_cube_slice = weigthed_sums_cube.slice(i);
-    // int sample_of_id = sample_of_ids_max(i);
-    // state_obs( arma::span( (sample_of_id-1)*num_rows_response_mat , sample_of_id*num_rows_response_mat - 1 ) , arma::span::all ) += weigthed_sums_cube_slice( arma::span( 0 , num_rows_response_mat - 1 ) , 0 );
   }
 
   // calculate selection criteria
@@ -618,10 +613,6 @@ arma::field<arma::mat> stratEst_LCR_EM(arma::cube& output_cube, arma::cube& sum_
 
         // share contribution of subject as posterior probability of i to use k / N
         arma::vec i_shares = pr_entity_k.each_row() / sum( pr_entity_k , 0 );
-        // arma::vec new_shares_col = new_share_mat( arma::span::all , sample_of_ids_shares(i) - 1 );
-        // new_shares_col += ( i_shares  / num_ids_sample_shares( sample_of_ids_shares(i) - 1 ) );
-        // new_share_mat( arma::span::all , sample_of_ids_shares(i) - 1 ) = new_shares_col;
-
         i_shares_mat.row(i) = i_shares.t();
         arma::mat lines_entity_k = repmat( i_shares , 1 , num_cols_response_mat );
         arma::mat entity_slice( num_rows_response_mat , num_cols_response_mat );
@@ -2518,43 +2509,6 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec sid , arma::ma
       if( select_strategies == false || K == 1 ){
         kill = K+1;
       }
-      // if( kill == 0 && select_strategies ){
-      //   arma::vec all_strats = survivors( find( survivors != 0 ) );
-      //   arma::mat shares_strats = R(0,0);
-      //   int num_strats = shares_strats.n_rows;
-      //   int num_zero_share = 0;
-      //   int first_zero_share = 0;
-      //   for (int s = 0; s < num_strats; s++){
-      //     if( arma::max( shares_strats(s,arma::span::all) ) < 0.01 ){
-      //       num_zero_share = num_zero_share + 1;
-      //       killed = s;
-      //       survivors( find( survivors == all_strats( killed ) ) ).fill(0);
-      //       K = K - 1;      // reduce number of strategies
-      //       killed = 0;     // s already killed
-      //       kill = -1;      // start all over again with reduced set
-      //       if( print_messages == true && num_zero_share == 1 ){
-      //         first_zero_share = s+1;
-      //         Rcout<< "\r";
-      //         Rcout<< "eliminate strategy " << s+1 << " (estimated share(s) smaller than 1 percent)";
-      //       }
-      //       else if( print_messages == true && num_zero_share == 2 ){
-      //         Rcout<< "\r";
-      //         Rcout<< "eliminate strategies " << first_zero_share << ", " << s+1;
-      //       }
-      //       else if( print_messages == true && num_zero_share > 2 ){
-      //         Rcout<< ", " << s+1;
-      //       }
-      //     }
-      //   }
-      //   if( print_messages == true && kill == -1 ){
-      //     if( num_zero_share > 1 ){
-      //       Rcout<< " (estimated population share(s) smaller than 1 percent)";
-      //     }
-      //     Rcout<< "\n";
-      //     Rcout<< "model with " << K << " strategies\n";
-      //   }
-      // }
-
       if( integer_strategies == true && kill == 1  ){
         kill = K;
       }
@@ -2951,6 +2905,7 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec sid , arma::ma
 
     }
     // store bootstrap results
+    if( num_shares_to_est > 0 ){
       if( LCR ){
         BS_shares_SE = sqrt( BS_shares_SE/BS_samples_coefficients );
         BS_coefficients_SE = sqrt( BS_coefficients_SE/BS_samples_coefficients );
@@ -2973,6 +2928,8 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec sid , arma::ma
           Rcout<<"stratEst warning: Bootstrap for shares failed. More than 10 percent of the bootstrap samples did not produce estimates.\n";
         }
       }
+    }
+    if( num_responses_to_est > 0 ){
       BS_responses_SE = sqrt( BS_responses_SE/BS_samples_responses );
       BS_responses_quantiles = arma::quantile( BS_responses_SE_mat , quantile_vec , 1  );
       BS_trembles_SE = sqrt( BS_trembles_SE/BS_samples_trembles );
@@ -2982,11 +2939,14 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec sid , arma::ma
         BS_responses_quantiles.fill(-1);
         Rcout<<"stratEst warning: Bootstrap for responses failed. More than 10 percent of the bootstrap samples did not produce estimates.\n";
       }
+    }
+    if( num_trembles_to_est > 0 ){
       if( BS_samples_trembles/BS_samples < 0.9 ){
         BS_trembles_SE.fill(-1);
         BS_trembles_quantiles.fill(-1);
         Rcout<<"stratEst warning: Bootstrap for trembles failed. More than 10 percent of the bootstrap samples did not produce estimates.\n";
       }
+    }
     if( print_messages == true ){
       Rcout<< "\n";
     }
@@ -3099,8 +3059,14 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec sid , arma::ma
   arma::mat expected = probabilities_mat;
   expected.each_col() %= sum_observed_mat;
   arma::umat non_zero = find( expected != 0 );
-  double chi = accu(((observed(non_zero) - expected(non_zero)) % (observed(non_zero) - expected(non_zero)))/expected(non_zero) );
-  chi_mat(0,0) = chi;
+  int num_non_zero = non_zero.n_elem;
+  double chi = 0;
+  if( num_non_zero > 0 ){
+    chi = accu(((observed(non_zero) - expected(non_zero)) % (observed(non_zero) - expected(non_zero)))/expected(non_zero) );
+  }
+  if( arma::is_finite(chi) ){
+    chi_mat(0,0) = chi;
+  }
 
   //local chi square
   arma::mat chi_local( 1 , k , arma::fill::zeros );
@@ -3118,8 +3084,14 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec sid , arma::ma
     arma::mat expected_id = probabilities_mat.rows( find( strat_id == k_id ) );
     expected_id %= sum_observed_id;
     arma::umat non_zero_id = find( expected_id != 0 );
-    double chi_id = accu(((observed_id(non_zero_id) - expected_id(non_zero_id)) % (observed_id(non_zero_id) - expected_id(non_zero_id)))/expected_id(non_zero_id) );
-    chi_local(k_id-1) += chi_id;
+    int num_non_zero_id = non_zero_id.n_elem;
+    double chi_id = 0;
+    if( num_non_zero_id > 0 ){
+      chi_id = accu(((observed_id(non_zero_id) - expected_id(non_zero_id)) % (observed_id(non_zero_id) - expected_id(non_zero_id)))/expected_id(non_zero_id) );
+    }
+    if( k_id > 0 && arma::is_finite(chi_id) ){
+      chi_local(k_id-1) += chi_id;
+    }
   }
 
   arma::mat SE_shares = R_SE(0,0);

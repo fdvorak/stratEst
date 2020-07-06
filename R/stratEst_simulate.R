@@ -316,6 +316,7 @@ stratEst.simulate <- function( data = NULL, strategies, shares = NULL, coefficie
           sid_sbj = strategy_assignment_mat[i,g]
           indices_strat <- sid == sid_sbj
           response_mat_sbj <- matrix(response_mat[ indices_strat , ],sum(indices_strat),ncol(response_mat))
+          response_mat_sbj <- abs(response_mat_sbj)
           transition_mat_sbj <- matrix(transition_mat[ indices_strat , ],sum(indices_strat),ncol(transition_mat))
           state <- 1
           for( p in 1:num.periods[g] ){
@@ -425,6 +426,7 @@ stratEst.simulate <- function( data = NULL, strategies, shares = NULL, coefficie
         sid_sbj = strategy_assignment_vec[i]
         indices_strat <- sid == sid_sbj
         response_mat_sbj <- matrix(response_mat[ indices_strat , ],sum(indices_strat),ncol(response_mat))
+        response_mat_sbj <- abs(response_mat_sbj)
         transition_mat_sbj <- matrix(transition_mat[ indices_strat , ],sum(indices_strat),ncol(transition_mat))
         for( g in 1:num.games ){
           unique.periods <- unique(period[id==unique.ids.sample[i] & game == unique.games[g]])

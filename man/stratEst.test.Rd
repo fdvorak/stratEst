@@ -26,7 +26,7 @@ stratEst.test(
 \value{
 A \code{data.frame} with one row for each tested parameter and 6 variables:
 \item{estimate}{the parameter estimate.}
-\item{diff}{the difference between the estimated parameter and the numeric value (if supplied).}
+\item{diff}{the difference between the estimated parameter and the numeric value.}
 \item{std.error}{the standard error of the estimated parameter.}
 \item{t.value}{the t statistic.}
 \item{res.degrees}{the residual degrees of freedom of the model.}
@@ -44,7 +44,6 @@ The test function of the package.
 model.mixed <- stratEst.model(data = data.WXZ2014, strategies = strategies.RPS["mixed"])
 t.probs <- stratEst.test(model = model.mixed, par = "probs", values = 1/3)
 print(t.probs)
-
 }
 \references{
 Wang Z, Xu B, Zhou HJ (2014). "Social Cycling and Conditional Responses in the Rock-Paper-Scissors Game." \emph{Scientific Reports}, 4(1), 2045-2322.

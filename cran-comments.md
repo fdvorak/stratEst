@@ -1,22 +1,17 @@
 ---
 title: "cran-comments"
 author: "Fabian Dvorak"
-date: "June 23 2020"
+date: "July 06 2020"
 output: html_document
 ---
 
-Thanks for your time. This is package version 1.0.0. This version introduces:
+Thanks for your time. This is patch release 1.0.1. This version:
 
-* function stratEst.data() to reshape data
-* function stratEst.simulate() to simulate data
-* function stratEst.model() to fit models
-* function stratEst.strategy() to generate strategies
-* function stratEst.check() to check fitted models
-* function stratEst.test() to test estimated model parameters
-* S3 class stratEst.model
-* S3 class stratEst.data
-* S3 class stratEst.strategy
-* S3 class stratEst.check
+* fixes clang-UBSAN and gcc UBSAN errors
+* makes sure RcppArmadillo package version >= 0.9.900.0.0 is installed
+* fixes bug in strategy checking function of stratEst.simulate()
+* corrects number of free parameters in the estimation of pure response probabilities
+* corrects object shares.par with more than one sample
 
 ## Test environments
 * windows 10 pro install, R 4.0.0 (local)

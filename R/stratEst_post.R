@@ -1,6 +1,6 @@
 # This function executes the post-processing after the estimation
 
-stratEst.post <- function( data , cpp.output , stratEst.return , strategies , covariates , response , unique_ids , num_unique_ids , input , output , unique_inputs , unique_outputs , num_unique_inputs , num_unique_outputs , sample , sample.id , sample_factor , num_samples , specific_shares , specific_probs , specific_trembles , sample_is_factor , integer_strategies , LCR , probs_mat_col_index , crit , num_obs , se , quantiles, output_factor ){
+stratEst.post <- function( data , cpp.output , stratEst.return , strategies , covariates , response , unique_ids , num_unique_ids , input , output , unique_inputs , unique_outputs , num_unique_inputs , num_unique_outputs , sample , sample.id , sample_factor , num_samples , specific_shares , specific_probs , specific_trembles , sample_is_factor , integer_strategies , LCR , probs_mat_col_index , crit , num_obs , se , quantiles, output_factor, input.is.null ){
 
   num_probs_to_est = length(stratEst.return$probs.par)
   num_trembles_to_est = length(stratEst.return$trembles.par)
@@ -22,7 +22,6 @@ stratEst.post <- function( data , cpp.output , stratEst.return , strategies , co
       }
       colnames(prob_mat) <- r_names
 
-
       transition_mat <- matrix(stratEst.return$strategies[, ((1+num_unique_outputs+1):(1+num_unique_outputs+num_unique_inputs))],nrow(stratEst.return$strategies), num_unique_inputs)
       t_names <- rep(NA,num_unique_inputs)
       for( ins in 1:num_unique_inputs ){
@@ -31,7 +30,11 @@ stratEst.post <- function( data , cpp.output , stratEst.return , strategies , co
       colnames(transition_mat) <- t_names
       tremble_vec <- cpp.output$trembles
       colnames(tremble_vec) <- "tremble"
-      strategies_mat <- as.data.frame(cbind(prob_mat,tremble_vec,transition_mat))
+      if( input.is.null == F ){
+        strategies_mat <- as.data.frame(cbind(prob_mat,tremble_vec,transition_mat))
+      }else{
+        strategies_mat <- as.data.frame(cbind(prob_mat,tremble_vec))
+      }
 
       names_of_strategies <- NULL
       for( s in 1:num_strategies ){
@@ -70,6 +73,9 @@ stratEst.post <- function( data , cpp.output , stratEst.return , strategies , co
               }
             }
           }
+        }
+        if( input.is.null ){
+          strategy <- strategy[, -grep(")", colnames(strategy))]
         }
         strategies_list[[strs]] <- strategy
       }
@@ -113,7 +119,11 @@ stratEst.post <- function( data , cpp.output , stratEst.return , strategies , co
       colnames(transition_mat) <- t_names
       tremble_vec <- cpp.output$trembles
       colnames(tremble_vec) <- "tremble"
-      strategies_mat <- as.data.frame(cbind(prob_mat,tremble_vec,transition_mat))
+      if( input.is.null == F ){
+        strategies_mat <- as.data.frame(cbind(prob_mat,tremble_vec,transition_mat))
+      }else{
+        strategies_mat <- as.data.frame(cbind(prob_mat,tremble_vec))
+      }
 
       names_of_strategies <- NULL
 
@@ -158,6 +168,9 @@ stratEst.post <- function( data , cpp.output , stratEst.return , strategies , co
               }
             }
           }
+          if( input.is.null ){
+            strategy <- strategy[, -grep(")", colnames(strategy))]
+          }
           strategies_list_sample[[str]] <- strategy
         }
         names(strategies_list_sample) <- names_of_strategies[unique_original_sids]
@@ -170,6 +183,31 @@ stratEst.post <- function( data , cpp.output , stratEst.return , strategies , co
   if( "list" %in% class(strategies)){
     names_of_strategies <- names_of_strategies[ cpp.output$selected.strats ]
   }
+
+  # kill tremble iff all trembles are NA
+  all.trembles.na = T
+  strategies.clean <- stratEst.return$strategies
+  if( "list" %in% class(stratEst.return$strategies[[1]]) ){
+    for( i in 1:length(stratEst.return$strategies) ){
+      for( j in 1:length(stratEst.return$strategies[[i]])){
+        if( any( is.na(stratEst.return$strategies[[i]][[j]]$tremble ) == F ) ){
+          all.trembles.na = F
+        }
+        strategies.clean[[i]][[j]] <- stratEst.return$strategies[[i]][[j]][,!colnames(stratEst.return$strategies[[i]][[j]])=="tremble"]
+      }
+    }
+  }else{
+    for( i in 1:length(stratEst.return$strategies) ){
+      if( any( is.na(stratEst.return$strategies[[i]]$tremble ) == F ) ){
+        all.trembles.na = F
+      }
+      strategies.clean[[i]] <- stratEst.return$strategies[[i]][,!colnames(stratEst.return$strategies[[i]])=="tremble"]
+    }
+  }
+  if( all.trembles.na ){
+    stratEst.return$strategies <- strategies.clean
+  }
+
 
   # shares post-processing
   shares_mat <- stratEst.return$shares

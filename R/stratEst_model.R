@@ -105,7 +105,7 @@
 #'
 #' Wang Z, Xu B, Zhou HJ (2014). "Social Cycling and Conditional Responses in the Rock-Paper-Scissors Game." \emph{Scientific Reports}, 4(1), 2045-2322.
 #'
-#' @examples
+#'#' @examples
 #' ## Strategy model for rock-paper-scissors data of Wang, Xu, and Zhou (2014).
 #' ## Fit a mixture of the Nash strategy and a strategy that imitates the last choice.
 #' strategies.mixture = list("nash" = strategies.RPS$nash, "imitate" = strategies.RPS$imitate)
@@ -113,10 +113,6 @@
 #'
 #' ## Replication of Dal Bo and Frechette (2011), Table 7, page 424
 #' model.DF2011 <- stratEst.model(data.DF2011, strategies.DF2011, sample.id = "treatment")
-#'
-#' ## Replication of Fudenberg, Rand, Dreber (2012), Table 3, page 733
-#' # Note: The estimates for treatment bc = 4 reported in the paper represent a local optimum.
-#' model.FRD2012 <- stratEst.model(data.FRD2012, strategies.FRD2012, sample.id = "bc")
 #'
 #' ## Replication of Dvorak, Fischbacher, and Schmelz (2020)
 #' covs <- c("intercept", "conformity.score")
@@ -145,6 +141,7 @@ stratEst.model <- function( data, strategies, shares = NULL, coefficients = NULL
     output_factor <- stratEst.return.data$output.factor
     levels_input <- stratEst.return.data$levels.input
     levels_output <- stratEst.return.data$levels.output
+    input.is.null <- stratEst.return.data$input.is.null
   }
 
   # check sample.id
@@ -296,7 +293,7 @@ stratEst.model <- function( data, strategies, shares = NULL, coefficients = NULL
   stratEst.return <- list("strategies" = cpp.output$strategies, "shares" = cpp.output$shares, "coefficients" = cpp.output$coefficients, "probs" = cpp.output$responses, "trembles" = cpp.output$trembles, "gammas" = 0, "shares.par" = cpp.output$shares.list$shares.par, "probs.par" = cpp.output$responses.list$responses.par, "trembles.par" = cpp.output$trembles.list$trembles.par,"gammas.par" = 0,  "coefficients.par" =  cpp.output$coefficients.list$coefficients.par,  "shares.indices" = cpp.output$shares.list$shares.indices, "probs.indices" = cpp.output$responses.list$responses.indices, "trembles.indices" = cpp.output$trembles.list$trembles.indices, "coefficients.indices" = cpp.output$coefficients.list$coefficients.indices, "loglike" = cpp.output$fit[1,1], "num.ids" = NA, "num.obs" = NA, "num.par" = NA, "free.par" = NA, "res.degrees" = NA, "aic" = NA, "bic" = NA, "icl" = NA, "entropy.model" = NA, "entropy.assignments" = NA, "chi.square" = NULL, "fit" = NA, "crit.val" = cpp.output$fit[1,2], "eval" = cpp.output$solver[1,1], "tol.val" = cpp.output$solver[1,2], "convergence" = cpp.output$convergence, "state.obs" = cpp.output$state.obs, "post.assignment" = cpp.output$assignments, "prior.assignment" = cpp.output$priors, "shares.se" = cpp.output$shares.list$shares.se, "probs.se" = cpp.output$responses.list$responses.se, "trembles.se" = cpp.output$trembles.list$trembles.se, "gammas.se" = 0, "coefficients.se" = cpp.output$coefficients.list$coefficients.se, "shares.quantiles" = NA, "probs.quantiles" = NA, "trembles.quantiles" = NA, "coefficients.quantiles" = NA, "shares.covar" = cpp.output$shares.list$shares.covar, "shares.score" =  cpp.output$shares.list$shares.score, "shares.fisher" = cpp.output$shares.list$shares.fisher, "probs.covar" = cpp.output$responses.list$responses.covar, "probs.score" = cpp.output$responses.list$responses.score, "probs.fisher" = cpp.output$responses.list$responses.fisher, "trembles.covar" = cpp.output$trembles.list$trembles.covar, "trembles.score" = cpp.output$trembles.list$trembles.score, "trembles.fisher" = cpp.output$trembles.list$trembles.fisher, "coefficients.covar" = cpp.output$coefficients.list$coefficients.covar, "coefficients.score" = cpp.output$coefficients.list$coefficients.score, "coefficients.fisher" = cpp.output$coefficients.list$coefficients.fisher, "covariate.mat" = cpp.output$coefficients.list$covariate.mat  );
 
   # post-processing
-  stratEst.return <- stratEst.post( data , cpp.output , stratEst.return , strategies , covariates , response , unique_ids , num_unique_ids , input , output , unique_inputs , unique_outputs , num_unique_inputs , num_unique_outputs , sample , sample.id , sample_factor , num_samples , specific_shares , specific_responses , specific_trembles , sample_is_factor , integer_strategies , cpp.output$lcr , response_mat_col_index , crit , num_obs , se , quantile_vec, output_factor )
+  stratEst.return <- stratEst.post( data , cpp.output , stratEst.return , strategies , covariates , response , unique_ids , num_unique_ids , input , output , unique_inputs , unique_outputs , num_unique_inputs , num_unique_outputs , sample , sample.id , sample_factor , num_samples , specific_shares , specific_responses , specific_trembles , sample_is_factor , integer_strategies , cpp.output$lcr , response_mat_col_index , crit , num_obs , se , quantile_vec, output_factor, input.is.null )
 
   stratEst.return$fit.args = fit.args
 

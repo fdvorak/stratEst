@@ -1,7 +1,7 @@
 ---
 title: "NEWS"
 author: "Fabian Dvorak"
-date: "23 June 2020"
+date: "06 July 2020"
 output: html_document
 ---
 
@@ -10,6 +10,11 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 # stratEst 1.0.1
+* fixes clang-UBSAN and gcc UBSAN errors
+* makes sure RcppArmadillo package version >= 0.9.900.0.0 is installed
+* fixes bug in strategy checking function of stratEst.simulate()
+* corrects number of free parameters in the estimation of pure response probabilities
+* corrects object shares.par with more than one sample
 
 
 # stratEst 1.0.0
