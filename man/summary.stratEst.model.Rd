@@ -4,18 +4,12 @@
 \alias{summary.stratEst.model}
 \title{Method dispatch for Generic Function Summary}
 \usage{
-\method{summary}{stratEst.model}(
-  object,
-  ...,
-  objects = c("model", "fit", "shares", "coefficients", "strategies", "parameters")
-)
+\method{summary}{stratEst.model}(object, ...)
 }
 \arguments{
 \item{object}{An object returned by the estimation function\code{stratEst.model()}. An object of class \code{stratEst.model}.}
 
 \item{...}{additional arguments affecting the summary produced.}
-
-\item{objects}{the summary objects to print.}
 }
 \description{
 Method dispatch for Generic Function Summary

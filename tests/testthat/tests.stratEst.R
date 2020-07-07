@@ -107,36 +107,36 @@ test_that("core systematic tests",  {
 #   expect_equal(14,round(as.numeric(length(select_both_global$probs.par))))
 # })
 
-# test_that("multivariate output test",  {
-#   skip_on_cran()
-#   N = 32                                       # number of subjects
-#   num_probs = c(2,3,4,5)                       # number of distinct probs of the machines
-#   tremble = 0.2
-#   shares = runif(5)                            # generate 5 shares
-#   shares = shares/sum(shares)                  # normalize shares
-#   for( m in 1:length(num_probs)){
-#     strats <- list()
-#     for( s in 1:5 ){
-#       check = 0
-#       while( check == 0 ){
-#         strategy_mat = matrix(runif(5*num_probs[m]),5,num_probs[m])
-#         strategy_mat = matrix(as.numeric(strategy_mat == apply(strategy_mat,1,max)),5,num_probs[m])
-#         if( sum(as.numeric(apply(strategy_mat,1,sum) == 1)) == 5 ){ check = 1 }
-#       }
-#       strats[[s]] <- stratEst.strategy(choices = as.character(c(1:num_probs[m])), inputs = as.character(c(1:5)), prob.choices = c(t(strategy_mat)) )
-#     }
-#
-#     data <- stratEst.simulate(strategies = strats,shares = shares)
-#
-#     P = stratEst.model(data,strats,response="pure",outer.runs = 2, verbose = F)
-#     M = stratEst.model(data,strats,response="mixed",outer.runs = 2, verbose = F)
-#
-#     P_l = nrow( P$probs )
-#     M_l = nrow( M$probs )
-#
-#     expect_equal( 25 , round(as.numeric(P_l)) )
-#     expect_equal( 25  , round(as.numeric(M_l)) )
-#
-#   }
-# })
+test_that("multivariate output test",  {
+  skip_on_cran()
+  N = 32                                       # number of subjects
+  num_probs = c(2,3,4,5)                       # number of distinct probs of the machines
+  tremble = 0.2
+  shares = runif(5)                            # generate 5 shares
+  shares = shares/sum(shares)                  # normalize shares
+  for( m in 1:length(num_probs)){
+    strats <- list()
+    for( s in 1:5 ){
+      check = 0
+      while( check == 0 ){
+        strategy_mat = matrix(runif(5*num_probs[m]),5,num_probs[m])
+        strategy_mat = matrix(as.numeric(strategy_mat == apply(strategy_mat,1,max)),5,num_probs[m])
+        if( sum(as.numeric(apply(strategy_mat,1,sum) == 1)) == 5 ){ check = 1 }
+      }
+      strats[[s]] <- stratEst.strategy(choices = as.character(c(1:num_probs[m])), inputs = as.character(c(1:5)), prob.choices = c(t(strategy_mat)) )
+    }
+
+    data <- stratEst.simulate(strategies = strats,shares = shares)
+
+    P = stratEst.model(data,strats,response="pure",outer.runs = 2, verbose = F)
+    M = stratEst.model(data,strats,response="mixed",outer.runs = 2, verbose = F)
+
+    P_l = nrow( P$probs )
+    M_l = nrow( M$probs )
+
+    expect_equal( 25 , round(as.numeric(P_l)) )
+    expect_equal( 25  , round(as.numeric(M_l)) )
+
+  }
+})
 

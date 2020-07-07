@@ -1,22 +1,12 @@
 #' Method dispatch for Generic Function Summary
 #' @param object An object returned by the estimation function\code{stratEst.model()}. An object of class \code{stratEst.model}.
 #' @param ... additional arguments affecting the summary produced.
-#' @param objects the summary objects to print.
 #' @export
 
-summary.stratEst.model <- function( object , ... , objects = c("model","fit","shares","coefficients","strategies","parameters")){
+summary.stratEst.model <- function( object , ... ){
 
   stratEst.return <- object
 
-  if( "character" %in% class(objects) == F ){
-    stop(paste("stratEst.summary error: The object ",as.character(objects)," supplied as argument 'objects' must be a character vector.",sep=""))
-  }else{
-    for( i in 1:length(objects)){
-      if( objects[i] %in% c("model","fit","shares","coefficients","strategies","parameters") == F ){
-        stop(paste("stratEst.summary error: The object ",as.character(objects)," can only contain the character strings: model, fit, shares, coefficients, strategies, and parameters.",sep=""))
-      }
-    }
-  }
   convergence_string <- ifelse( is.null(stratEst.return$convergence) , "no parameters estimated" , ifelse( max( stratEst.return$convergence[ is.na(stratEst.return$convergence) == F ] ) < 0.001 , "yes" , ifelse( any( stratEst.return$convergence[ is.na(stratEst.return$convergence) == F ] < 0.001 ) , "partial" , "no") ) )
 
     writeLines("")
