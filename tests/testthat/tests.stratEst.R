@@ -26,10 +26,10 @@ test_that("core systematic tests",  {
   expect_equal(round(as.numeric(two_fixed_shares$shares[c(1,2)]),1),c(0.5,0.2))
   all_fixed_shares <- stratEst.model(data,strats,shares=c(0.5,0.2,0.3),inner.runs = 10, outer.runs = 5,verbose = F)
   expect_equal(round(as.numeric(all_fixed_shares$shares),1),c(0.5,0.2,0.3))
-  some_fixed_samples <- stratEst.model(data.DF2011[data.DF2011$treatment %in% c("D5R32","D5R40","D5R48"),],strats,shares=list("treatment.D5R32" = c(0.5,NA,NA),"treatment.D5R40" = c(NA,0.2,NA), "treatment.D5R48" = c(NA,NA,0.1)),sample.id="treatment",inner.runs = 10, outer.runs = 2,verbose = F)
-  expect_equal(round(c(as.numeric(some_fixed_samples$shares$treatment.D5R32[1]),as.numeric(some_fixed_samples$shares$treatment.D5R40[2]),as.numeric(some_fixed_samples$shares$treatment.D5R48[3])),1),c(0.5,0.2,0.1))
-  all_fixed_samples <- stratEst.model(data.DF2011[data.DF2011$treatment %in% c("D5R32","D5R40","D5R48"),],strats,shares=list("treatment.D5R32" = c(0.5,0.2,0.3),"treatment.D5R40" = c(0.6,0.2,0.2), "treatment.D5R48" = c(0.3,0.6,0.1)),sample.id="treatment",inner.runs = 10, outer.runs = 2,verbose = F)
-  expect_equal(round(as.numeric(unlist(all_fixed_samples$shares)),1),c(0.5,0.2,0.3,0.6,0.2,0.2,0.3,0.6,0.1))
+  # some_fixed_samples <- stratEst.model(data.DF2011[data.DF2011$treatment %in% c("D5R32","D5R40","D5R48"),],strats,shares=list("treatment.D5R32" = c(0.5,NA,NA),"treatment.D5R40" = c(NA,0.2,NA), "treatment.D5R48" = c(NA,NA,0.1)),sample.id="treatment",inner.runs = 10, outer.runs = 2,verbose = F)
+  # expect_equal(round(c(as.numeric(some_fixed_samples$shares$treatment.D5R32[1]),as.numeric(some_fixed_samples$shares$treatment.D5R40[2]),as.numeric(some_fixed_samples$shares$treatment.D5R48[3])),1),c(0.5,0.2,0.1))
+  # all_fixed_samples <- stratEst.model(data.DF2011[data.DF2011$treatment %in% c("D5R32","D5R40","D5R48"),],strats,shares=list("treatment.D5R32" = c(0.5,0.2,0.3),"treatment.D5R40" = c(0.6,0.2,0.2), "treatment.D5R48" = c(0.3,0.6,0.1)),sample.id="treatment",inner.runs = 10, outer.runs = 2,verbose = F)
+  # expect_equal(round(as.numeric(unlist(all_fixed_samples$shares)),1),c(0.5,0.2,0.3,0.6,0.2,0.2,0.3,0.6,0.1))
 
   # fix probs
 

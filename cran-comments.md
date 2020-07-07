@@ -1,17 +1,17 @@
 ---
 title: "cran-comments"
 author: "Fabian Dvorak"
-date: "July 06 2020"
+date: "July 07 2020"
 output: html_document
 ---
 
-Thanks for your time. This is patch release 1.0.1. This version:
+Thanks for your time. This is a patch release. Version 1.0.1:
 
 * fixes clang-UBSAN and gcc UBSAN errors
 * makes sure RcppArmadillo package version >= 0.9.900.0.0 is installed
-* fixes bug in strategy checking function of stratEst.simulate()
-* corrects number of free parameters in the estimation of pure response probabilities
-* corrects object shares.par with more than one sample
+* fixes bug in function stratEst.simulate()
+* corrects the number of free parameters returned by stratEst.model()
+* corrects object returned by stratEst.model()
 
 ## Test environments
 * windows 10 pro install, R 4.0.0 (local)
@@ -23,6 +23,7 @@ Thanks for your time. This is patch release 1.0.1. This version:
 * ubuntu 14.04.5 LTS , r-oldrel, 3.6.3 (with travis-ci)
 * ubuntu 14.04.5 LTS , r-devel, 4.0.1 (with travis-ci)
 * ubuntu 14.04.5 LTS , r-release, 4.0.0 (with travis-ci)
+* linux-x86_64-rocker-gcc-san (with rhub)
 
 ## R CMD check results
 * windows x86_64-w64-mingw32, r-oldrel, 3.6.3 (with win-builder)
@@ -33,6 +34,7 @@ Thanks for your time. This is patch release 1.0.1. This version:
 * ubuntu 14.04.5 LTS , r-oldrel, 3.6.3 (with travis-ci)
 * ubuntu 14.04.5 LTS , r-devel, 4.0.1 (with travis-ci)
 * ubuntu 14.04.5 LTS , r-release, 4.0.0 (with travis-ci)
+* linux-x86_64-rocker-gcc-san (with rhub)
 
 0 errors | 0 warnings | 0 notes
 
