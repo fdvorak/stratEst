@@ -2833,7 +2833,6 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec sid , arma::ma
           arma::vec estimated_responses = R(1,0);
           arma::vec estimated_responses_BS( estimated_responses.n_elem , arma::fill::zeros );
           arma::mat indices_responses_BS = indices_responses;
-          indices_responses_BS.fill(0);
           int num_estimated_responses = estimated_responses.n_elem;
           int num_col_indices = indices_responses.n_cols;
           int max_indices_responses = indices_responses.max();
@@ -2842,12 +2841,12 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec sid , arma::ma
           arma::vec responses_BS( num_col_indices*num_samples_responses , arma::fill::zeros );
           for (int r1 = 0; r1 < num_it_responses; r1++) {
             arma::vec indices_ones( num_estimated_responses , arma::fill::zeros );
+            indices_responses_BS.fill(0);
             for(int r3 = 1; r3 <= num_col_indices; r3++) {
               for(int sam = 0; sam < num_samples_responses; sam++) {
                 indices_ones( find( responses_indices_vec  == sam*max_indices_responses + r1*num_col_indices + r3 ) ).fill(1);
               }
               indices_responses_BS( find( indices_responses == r1*num_col_indices + r3 ) ).fill(r3);
-
             }
             responses_BS = estimated_responses( find( indices_ones == 1 ) );
             if( LCR ){
@@ -2932,8 +2931,6 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec sid , arma::ma
     if( num_responses_to_est > 0 ){
       BS_responses_SE = sqrt( BS_responses_SE/BS_samples_responses );
       BS_responses_quantiles = arma::quantile( BS_responses_SE_mat , quantile_vec , 1  );
-      BS_trembles_SE = sqrt( BS_trembles_SE/BS_samples_trembles );
-      BS_trembles_quantiles = arma::quantile( BS_trembles_SE_mat , quantile_vec , 1  );
       if( BS_samples_responses/BS_samples < 0.9 ){
         BS_responses_SE.fill(-1);
         BS_responses_quantiles.fill(-1);
@@ -2941,6 +2938,8 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec sid , arma::ma
       }
     }
     if( num_trembles_to_est > 0 ){
+      BS_trembles_SE = sqrt( BS_trembles_SE/BS_samples_trembles );
+      BS_trembles_quantiles = arma::quantile( BS_trembles_SE_mat , quantile_vec , 1  );
       if( BS_samples_trembles/BS_samples < 0.9 ){
         BS_trembles_SE.fill(-1);
         BS_trembles_quantiles.fill(-1);
