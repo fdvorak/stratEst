@@ -52,20 +52,13 @@ Creates a stratEst.data object.
 \details{
 The data generation function of the package.
 }
-\references{
-Dal Bo P, Frechette GR (2011). "The Evolution of Cooperation in Infinitely Repeated Games: Experimental Evidence." \emph{American Economic Review}, 101(1), 411-429.
-
-Fudenberg D, Rand DG, Dreber A (2012). "Slow to Anger and Fast to Forgive: Cooperation in an Uncertain World." \emph{American Economic Review}, 102(2), 720-749.
-
-Wang Z, Xu B, Zhou HJ (2014). "Social Cycling and Conditional Responses in the Rock-Paper-Scissors Game." \emph{Scientific Reports}, 4(1), 2045-2322.
-
-#' @examples
+\examples{
 ## Transform the rock-paper-scissors data of Wang, Xu, and Zhou (2014)
 data.WXZ2014 <- stratEst.data(WXZ2014, input = c("choice"), choice = "choice", input.lag = 1)
 
 ## Transform the prisoner's dilemma data of Dal Bo and Frechette (2011).
 data.DF2011 <- stratEst.data(DF2011, choice ="choice", input =c("choice","other.choice"), input.lag = 1)
 
-#' ## Transform the prisoner's dilemma data of Fudenberg, Rand, and Dreber (2012).
+## Transform the prisoner's dilemma data of Fudenberg, Rand, and Dreber (2012).
 data.FRD2012 <- stratEst.data(data = FRD2012, choice ="choice", input =c("last.choice","last.other"))
 }

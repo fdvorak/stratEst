@@ -157,6 +157,20 @@ The estimation function of the package obtains maximum likelihood estimates for 
 \note{
 Strategy estimation was introduced by Dal Bo and Frechette (2011) to estimate the maximum likelihood frequencies of a set of candidate strategies in the repeated prisoner's dilemma. Breitmoser (2015) introduces model parameters for the choice probabilities of individual strategies to the strategy estimation model. Dvorak and Fehrler (2018) extend the basic strategy estimation model by individual level covariates to explain the selection of strategies by individuals. The estimation function of the package obtains maximum likelihood estimates for the model parameters based on expectation maximization (Dempster, Laird, and Rubin, 1977) and Newton-Raphson algorithms. To decrease the computation time, the package integrates \proglang{C++} and \proglang{R} with the help of the \proglang{R} packages \pkg{Rcpp} (Eddelbuettel and Francois, 2011) and the open source linear algebra library for the C++ language \pkg{RppArmadillo} (Sanderson and Curtin, 2016).
 }
+\examples{
+## Strategy model for rock-paper-scissors data of Wang, Xu, and Zhou (2014).
+## Fit a mixture of the Nash strategy and a strategy that imitates the last choice.
+strategies.mixture = list("nash" = strategies.RPS$nash, "imitate" = strategies.RPS$imitate)
+model.mixture <- stratEst.model(data.WXZ2014,strategies.mixture)
+
+## Replication of Dal Bo and Frechette (2011), Table 7, page 424
+model.DF2011 <- stratEst.model(data.DF2011, strategies.DF2011, sample.id = "treatment")
+
+## Replication of Dvorak, Fischbacher, and Schmelz (2020)
+covs <- c("intercept", "conformity.score")
+model.DFS2020 <- stratEst.model(data.DFS2020, strategies.DFS2020, covariates = covs)
+
+}
 \references{
 Breitmoser Y (2015). "Cooperation, but no Reciprocity: Individual Strategies in the Repeated Prisoner’s Dilemma." \emph{American Economic Review}, 105(9), 2882-2910.
 
@@ -175,17 +189,4 @@ Fudenberg D, Rand DG, Dreber A (2012). "Slow to Anger and Fast to Forgive: Coope
 Sanderson C, Curtin R (2016). "Armadillo: A Template-Based C++ Library for Linear Algebra." \emph{Journal of Open Source Software}, 1, 26.
 
 Wang Z, Xu B, Zhou HJ (2014). "Social Cycling and Conditional Responses in the Rock-Paper-Scissors Game." \emph{Scientific Reports}, 4(1), 2045-2322.
-
-#' @examples
-## Strategy model for rock-paper-scissors data of Wang, Xu, and Zhou (2014).
-## Fit a mixture of the Nash strategy and a strategy that imitates the last choice.
-strategies.mixture = list("nash" = strategies.RPS$nash, "imitate" = strategies.RPS$imitate)
-model.mixture <- stratEst.model(data.WXZ2014,strategies.mixture)
-
-## Replication of Dal Bo and Frechette (2011), Table 7, page 424
-model.DF2011 <- stratEst.model(data.DF2011, strategies.DF2011, sample.id = "treatment")
-
-## Replication of Dvorak, Fischbacher, and Schmelz (2020)
-covs <- c("intercept", "conformity.score")
-model.DFS2020 <- stratEst.model(data.DFS2020, strategies.DFS2020, covariates = covs)
 }

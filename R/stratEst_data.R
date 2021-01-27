@@ -25,7 +25,7 @@
 #' ## Transform the prisoner's dilemma data of Dal Bo and Frechette (2011).
 #' data.DF2011 <- stratEst.data(DF2011, choice ="choice", input =c("choice","other.choice"), input.lag = 1)
 #'
-#' #' ## Transform the prisoner's dilemma data of Fudenberg, Rand, and Dreber (2012).
+#' ## Transform the prisoner's dilemma data of Fudenberg, Rand, and Dreber (2012).
 #' data.FRD2012 <- stratEst.data(data = FRD2012, choice ="choice", input =c("last.choice","last.other"))
 #' @export
 stratEst.data <- function( data, choice = "choice", input = c("input"), input.lag = 0, input.sep = "", id = "id", game = "game", period = "period", add = NULL, drop = NULL ){
