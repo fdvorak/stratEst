@@ -2,7 +2,6 @@
 ^CRAN-RELEASE$
 ^.*\.Rproj$
 ^\.Rproj\.user$
-^\.travis\.yml$
 ^\.gitattributes$
 ^cran-comments\.Rmd$
 ^README\.Rmd$
@@ -17,3 +16,4 @@
 ^stratEst-Ex_x64\.Rout$
 ^tests_i386$
 ^tests_x64$
+^\.github$

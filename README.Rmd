@@ -49,3 +49,8 @@ model.mixture <- stratEst.model(data.WXZ2014,strategies.mixture)
 * Wang Z, Xu B, Zhou HJ (2014). "Social Cycling and Conditional Responses in the Rock-Paper-Scissors Game." Scientific Reports, 4(1), 2045-2322.
 * Wickham H, Hester J, Chang W (2020). "devtools: Tools to Make Developing R Packages
 Easier." R package version 2.3.0.
+
+<!-- badges: start -->
+[![R-CMD-check](https://github.com/fdvorak/stratEst/workflows/R-CMD-check/badge.svg)](https://github.com/fdvorak/stratEst/actions)
+<!-- badges: end -->
+
