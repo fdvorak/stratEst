@@ -14,8 +14,9 @@ LinkingTo: Rcpp, RcppArmadillo (>= 0.9.900.0.0)
 Imports: Rcpp (>= 0.12.18), stats
 RoxygenNote: 7.1.1
 Suggests: 
-    testthat,
-    spelling
+    DiagrammeR (>= 1.0.6.1),
+    spelling,
+    testthat
 Depends: R (>= 3.5)
 URL: http://github.com/fdvorak/stratEst
 BugReports: http://github.com/fdvorak/stratEst/issues
