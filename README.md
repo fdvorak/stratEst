@@ -54,18 +54,23 @@ model.mixture <- stratEst.model(data.WXZ2014,strategies.mixture)
 
 ## References
 
-  - Dal Bo P, Frechette GR (2011). “The Evolution of Cooperation in
+-   Dal Bo P, Frechette GR (2011). “The Evolution of Cooperation in
     Infinitely Repeated Games: Experimental Evidence.” American Economic
     Review, 101(1), 411-429.
-  - Dempster A, Laird N, Rubin DB (1977). “Maximum Likelihood from
+-   Dempster A, Laird N, Rubin DB (1977). “Maximum Likelihood from
     Incomplete Data via the EM Algorithm.” Journal of the Royal
     Statistical Society Series B, 39(1), 1-38.
-  - Eddelbuettel D, Francois R (2011). “Rcpp: Seamless R and C++
+-   Eddelbuettel D, Francois R (2011). “Rcpp: Seamless R and C++
     Integration.” Journal of Statistical Software, 40(8), 1-18.
-  - Sanderson C, Curtin R (2016). “Armadillo: A Template-Based C++
+-   Sanderson C, Curtin R (2016). “Armadillo: A Template-Based C++
     Library for Linear Algebra.”
-  - Wang Z, Xu B, Zhou HJ (2014). “Social Cycling and Conditional
+-   Wang Z, Xu B, Zhou HJ (2014). “Social Cycling and Conditional
     Responses in the Rock-Paper-Scissors Game.” Scientific Reports,
     4(1), 2045-2322.
-  - Wickham H, Hester J, Chang W (2020). “devtools: Tools to Make
+-   Wickham H, Hester J, Chang W (2020). “devtools: Tools to Make
     Developing R Packages Easier.” R package version 2.3.0.
+
+<!-- badges: start -->
+
+[![R-CMD-check](https://github.com/fdvorak/stratEst/workflows/R-CMD-check/badge.svg)](https://github.com/fdvorak/stratEst/actions)
+<!-- badges: end -->
