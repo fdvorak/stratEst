@@ -56,7 +56,7 @@ plot.stratEst.strategy <- function( x, y, ... , show.legend = T, show.title = T,
     if( "tremble" %in% colnames(strategy) ){
       for( i in 1:nrow(probs)){
         if( is.na(strategy$tremble[i]) == F ){
-          probs[i,] = probs[i,]*(1-strategy$tremble[i]) + (1-probs[i,])*strategy$tremble[i]
+          probs[i,] = probs[i,]*(1-strategy$tremble[i]) + ((1-probs[i,])*strategy$tremble[i])/(num.choices-1)
         }
       }
     }
