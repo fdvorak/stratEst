@@ -1,54 +1,55 @@
 ---
 title: "cran-comments"
 author: "Fabian Dvorak"
-date: "July 07 2020"
+date: "August 11 2021"
 output: html_document
 ---
 
-Thanks for your time. This is a patch release. Version 1.0.1:
+Thanks for your time. This is a minor release. Version 1.1.0:
 
-* fixes clang-UBSAN and gcc UBSAN errors
-* makes sure RcppArmadillo package version >= 0.9.900.0.0 is installed
-* fixes bug in function stratEst.simulate()
-* corrects the number of free parameters returned by stratEst.model()
-* corrects object returned by stratEst.model()
+* introduces a plot method for strategies
+* fixes bug in the computation of bootstrapped standard errors
+* correct minor errors in documentation
+* removes the outdated check_cluster_id function
 
 ## Test environments
-* windows 10 pro install, R 4.0.0 (local)
-* windows x86_64-w64-mingw32, r-oldrel, 3.6.3 (with win-builder)
-* windows x86_64-w64-mingw32, r-devel, 2020-06-19 r78718 (with win-builder)
-* windows x86_64-w64-mingw32, r-release, 4.0.2 (with win-builder)
-* mac OS X	10.13.6, r-oldrel, 3.6.3 (with travis-ci)
-* mac OS X	10.13.6, r-release, 4.0.0 (with travis-ci)
-* ubuntu 14.04.5 LTS , r-oldrel, 3.6.3 (with travis-ci)
-* ubuntu 14.04.5 LTS , r-devel, 4.0.1 (with travis-ci)
-* ubuntu 14.04.5 LTS , r-release, 4.0.0 (with travis-ci)
-* linux-x86_64-rocker-gcc-san (with rhub)
+* windows 10 pro install, R 4.1.1                (local)
+* windows server, x86_64, r-release, R 4.1.0     (with github actions)
+* windows server, x86_64, r-oldrel, R 4.0.5      (with github actions)
+* mac OS X	10.15.7, x86_64, r-release, R 4.1.0  (with github actions)
+* mac OS X	10.15.7, x86_64, r-devel             (with github actions)
+* mac OS X	10.15.7, x86_64, r-oldrel, R 4.0.5   (with github actions)
+* ubuntu 18.04.5 LTS, x86_64, r-devel,           (with github actions)
+* ubuntu 18.04.5 LTS, x86_64, r-oldrel, R 4.0.5  (with github actions)
+* ubuntu 18.04.5 LTS, x86_64, r-release, R 4.1.0 (with github actions)
+
 
 ## R CMD check results
-* windows x86_64-w64-mingw32, r-oldrel, 3.6.3 (with win-builder)
-* windows x86_64-w64-mingw32, r-devel, 2020-06-19 r78718 (with win-builder)
-* windows x86_64-w64-mingw32, r-release, 4.0.2 (with win-builder)
-* mac OS X	10.13.6, r-oldrel, 3.6.3 (with travis-ci)
-* mac OS X	10.13.6, r-release, 4.0.0 (with travis-ci)
-* ubuntu 14.04.5 LTS , r-oldrel, 3.6.3 (with travis-ci)
-* ubuntu 14.04.5 LTS , r-devel, 4.0.1 (with travis-ci)
-* ubuntu 14.04.5 LTS , r-release, 4.0.0 (with travis-ci)
-* linux-x86_64-rocker-gcc-san (with rhub)
+* windows 10 pro install, R 4.1.1                (local)
+* windows server, x86_64, r-release, R 4.1.0     (with github actions)
+* windows server, x86_64, r-oldrel, R 4.0.5      (with github actions)
+* mac OS X	10.15.7, x86_64, r-release, R 4.1.0  (with github actions)
+* mac OS X	10.15.7, x86_64, r-devel             (with github actions)
+* mac OS X	10.15.7, x86_64, r-oldrel, R 4.0.5   (with github actions)
 
 0 errors | 0 warnings | 0 notes
 
-* windows 10 pro install, R 4.0.0 (local)
+* ubuntu 18.04.5 LTS, x86_64, r-devel,           (with github actions)
+* ubuntu 18.04.5 LTS, x86_64, r-oldrel, R 4.0.5  (with github actions)
+* ubuntu 18.04.5 LTS, x86_64, r-release, R 4.1.0 (with github actions)
 
-0 errors √ | 0 warnings √ | 1 note x
+0 errors ✔ | 0 warnings ✔ | 1 note ✖
 
-> checking for non-standard things in the check directory ... NOTE
-  Found the following files/directories:
-    'examples_i386' 'examples_x64' 'stratEst-Ex_i386.Rout'
-    'stratEst-Ex_x64.Rout' 'tests_i386' 'tests_x64'
-    
-I couldn't fix this by adding these folders to Rbuildignore.
+❯ checking installed package size ... NOTE
+    installed size is 10.0Mb
+    sub-directories of 1Mb or more:
+      libs   8.7Mb
+
+My understanding is that the inflation of the libs subdirectory is due to the use of Rcpp. The main functions of the stratEst package have been written in C++ using Rcpp and RcppArmadillo.
+
 
 ## Downstream dependencies
-No downstream dependencies of the package.
+No downstream dependencies of the package according to revdepcheck::revdep_check.
+
+
 

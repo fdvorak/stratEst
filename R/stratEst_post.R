@@ -77,6 +77,7 @@ stratEst.post <- function( data , cpp.output , stratEst.return , strategies , co
         if( input.is.null ){
           strategy <- strategy[, -grep(")", colnames(strategy))]
         }
+        attr(strategy, "class") <- c("stratEst.strategy","data.frame")
         strategies_list[[strs]] <- strategy
       }
       stratEst.return$strategies <- strategies_list
@@ -88,6 +89,7 @@ stratEst.post <- function( data , cpp.output , stratEst.return , strategies , co
       for( i in 1:num_strategies ){
         strategy <- stratEst.return$strategies[ post_sid == unique_post_sids[i] , ]
         rownames(strategy) <- c(1:nrow(strategy))
+        attr(strategy, "class") <- c("stratEst.strategy","data.frame")
         strategies_list[[i]] <- strategy
       }
     }

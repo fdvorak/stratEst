@@ -2,6 +2,7 @@
 #' @param x An object of class \code{stratEst.strategy}.
 #' @param y Argument two of the generic function.
 #' @param ... Further arguments passed to or from other methods.
+#' @param title String. The title of the plot.
 #' @param show.legend Logical. Hide plot legend if FALSE. Default is TRUE.
 #' @param show.title Logical. Hide plot title if FALSE. Default is TRUE.
 #' @param node.fontsize Font-size of the plot labels.
@@ -17,10 +18,10 @@
 #' @param ranksep Separation of nodes with the same rank.
 #' @export
 
-plot.stratEst.strategy <- function( x, y, ... , show.legend = T, show.title = T,  node.fontsize = 25, main.fontsize = 30, arrow.fontsize = 20, legend.fontsize = 20, legend.width = 2, node.width = 1, arrowsize = 1, node.penwidth = 1, arrow.penwidth = 1, fillcolor = NULL, ranksep = 0  ){
+plot.stratEst.strategy <- function( x, y, ... , title = NULL, show.legend = T, show.title = T,  node.fontsize = 25, main.fontsize = 30, arrow.fontsize = 20, legend.fontsize = 20, legend.width = 1, node.width = 1, arrowsize = 1, node.penwidth = 1, arrow.penwidth = 1, fillcolor = NULL, ranksep = 0  ){
 
   if( is.null(fillcolor) ){
-    def.palette <- c("#B3CDE3","#CCEBC5","#DECBE4","#FED9A6","#FFFFCC","#E5D8BD","#FDDAEC","#B3E2CD","#FDCDAC","#CBD5E8","#F4CAE4","#E6F5C9","#FFF2AE","#F1E2CC","#FBB4AE")
+    def.palette <- c("#B3CDE3","#DECBE4","#CCEBC5","#FED9A6","#FFFFCC","#E5D8BD","#FDDAEC","#B3E2CD","#FDCDAC","#CBD5E8","#F4CAE4","#E6F5C9","#FFF2AE","#F1E2CC","#FBB4AE")
   }else{
     def.palette <- fillcolor
   }
@@ -41,6 +42,7 @@ plot.stratEst.strategy <- function( x, y, ... , show.legend = T, show.title = T,
     # retrieve information from strategy
     strategy <- x
     strategy_name <- deparse(substitute(x))
+    plot_title <- ifelse( is.null(title), strategy_name, title )
     #strategy_name <- gsub(".*\\$","",strategy_name)
     states <- rownames(strategy)
     num.states <- length(states)
@@ -86,7 +88,7 @@ plot.stratEst.strategy <- function( x, y, ... , show.legend = T, show.title = T,
       "labelloc='t';",
       paste("fontsize = ",main.fontsize,";",sep=""),
       "fontname='sans-serif';",
-      ifelse( show.title , paste("label = '",strategy_name,"';",sep=""), ""),
+      ifelse( show.title , paste("label = '",plot_title,"';",sep=""), ""),
       ifelse( show.legend , paste(
       "placeholder[label=' ', color = white];",
       "start[",
