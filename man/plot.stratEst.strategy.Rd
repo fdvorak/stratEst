@@ -8,13 +8,14 @@
   x,
   y,
   ...,
+  title = NULL,
   show.legend = T,
   show.title = T,
   node.fontsize = 25,
   main.fontsize = 30,
   arrow.fontsize = 20,
   legend.fontsize = 20,
-  legend.width = 2,
+  legend.width = 1,
   node.width = 1,
   arrowsize = 1,
   node.penwidth = 1,
@@ -29,6 +30,8 @@
 \item{y}{Argument two of the generic function.}
 
 \item{...}{Further arguments passed to or from other methods.}
+
+\item{title}{String. The title of the plot.}
 
 \item{show.legend}{Logical. Hide plot legend if FALSE. Default is TRUE.}
 
