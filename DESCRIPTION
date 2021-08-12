@@ -11,12 +11,11 @@ License: GPL-3
 Encoding: UTF-8
 LazyData: true
 LinkingTo: Rcpp, RcppArmadillo (>= 0.9.900.0.0)
-Imports: Rcpp (>= 0.12.18), stats
+Imports: Rcpp (>= 0.12.18), stats, graphics
 RoxygenNote: 7.1.1
 Suggests: 
     DiagrammeR (>= 1.0.6.1),
     DiagrammeRsvg (>= 0.1),
-    rsvg (>= 2.0.0),
     spelling,
     testthat
 Depends: R (>= 3.5)

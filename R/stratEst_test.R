@@ -3,9 +3,10 @@
 #' @importFrom Rcpp sourceCpp
 #' @param model a fitted model of class \code{stratEst.model}.
 #' @param par a character vector. The class of model parameters to be tested. Default is \code{c("shares","probs","trembles", "coefficients")}.
-#' @param values a numeric vector. The values the parameter estimates are compared to. Default is zero.
+#' @param values a numeric vector. The values the parameter estimates are compared to. Default is NA which means zero.
 #' @param alternative  a character string. The alternative hypothesis. Options are \code{"two.sided"}, \code{"greater"} or \code{"less"}. Default is \code{"two.sided"}.
 #' @param digits an integer. The number of digits of the result.
+#' @param plot.tests a logical. Plots tests if \code{TRUE}.
 #' @export
 #' @return A \code{data.frame} with one row for each tested parameter and 6 variables:
 #' \item{estimate}{the parameter estimate.}
@@ -24,7 +25,7 @@
 #' t.probs <- stratEst.test(model = model.mixed, par = "probs", values = 1/3)
 #' print(t.probs)
 #' @export
-stratEst.test <- function( model, par = c("shares","probs","trembles","coefficients"), values = 0, alternative = "two.sided", digits = 4 ){
+stratEst.test <- function( model, par = c("shares","probs","trembles","coefficients"), values = NA, alternative = "two.sided", digits = 4, plot.tests = T ){
 
   # checks
   if( "stratEst.model" %in% class(model) == F ){
@@ -39,11 +40,13 @@ stratEst.test <- function( model, par = c("shares","probs","trembles","coefficie
       }
     }
   }
-  if( "numeric" %in% class(values) == F ){
-    stop("stratEst.test error: The object passed to the argument 'values' must be numeric.")
-  }
-  if( "numeric" %in% class(values) == F | length(digits) != 1 ){
-    stop("stratEst.test error: The object passed to the argument 'digits' must be a positive integer.")
+  if( all(is.na(values)) == F ){
+    if( "numeric" %in% class(values) == F ){
+      stop("stratEst.test error: The object passed to the argument 'values' must be numeric.")
+    }
+    if( "numeric" %in% class(values) == F | length(digits) != 1 ){
+      stop("stratEst.test error: The object passed to the argument 'digits' must be a positive integer.")
+    }
   }
 
   par_matrix <- NULL
@@ -79,6 +82,10 @@ stratEst.test <- function( model, par = c("shares","probs","trembles","coefficie
     se <- c(se,ses)
     row_names <- c(row_names,paste("trembles.par.",as.character(seq(1,length(model$trembles.par),by = 1)),sep=""))
   }
+
+  if( all(is.na(values)) ){
+    values = rep(0,length(est))
+  }
     diff <- est-values
     z <- diff/se
     # p-value
@@ -96,6 +103,24 @@ stratEst.test <- function( model, par = c("shares","probs","trembles","coefficie
     rownames(test_matrix) <- row_names
     par_data <- data.frame(round(test_matrix,digits))
     colnames(par_data) <- c("estimate","diff","std.error","t.value","df","p.value")
+
+  # plot the differences
+  if( plot.tests ){
+    # function for SEs
+    error.ses <- function(xx, yy, upper, lower=upper, length=0, color = "black" ,...){
+      if(length(xx) != length(yy) | length(yy) !=length(lower) | length(lower) != length(upper))
+        stop("vectors must be same length")
+      graphics::segments( xx-lower , yy  , xx + upper , yy ,  lty = 1, lwd = 1.2 , col = color, lend = 2  )
+    }
+    graphics::dotchart( rev(est), labels = rev(row_names), main = "parameter tests", lcolor = "transparent", bty = 'n', pt.cex = 1.3)
+    if( length(values) == 1 ){
+      values = rep(values,length(est))
+    }
+    graphics::points(rev(values),c(1:length(est)),col = "red")
+    error.ses(rev(est),c(1:length(est)),stats::qt(p=.05/2, df=rep(model$res.degrees, length(est)), lower.tail=FALSE)*rev(se))
+    par(xpd=T)
+    graphics::legend("bottom", inset=c(0,-0.55), legend=c("estimate","value","CI"), pch=c(1,1,NA), lty = c(NA,NA,1), col = c("black","red"),bty="n",ncol = 3, pt.cex = c(1.3,1,0))
+  }
 
   return(par_data)
 

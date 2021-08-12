@@ -4,12 +4,14 @@
 \alias{summary.stratEst.model}
 \title{Method dispatch for Generic Function Summary}
 \usage{
-\method{summary}{stratEst.model}(object, ...)
+\method{summary}{stratEst.model}(object, ..., plot.shares = TRUE)
 }
 \arguments{
 \item{object}{An object returned by the estimation function\code{stratEst.model()}. An object of class \code{stratEst.model}.}
 
 \item{...}{additional arguments affecting the summary produced.}
+
+\item{plot.shares}{Logical. If TRUE a barchart of the shares is plotted.}
 }
 \description{
 Method dispatch for Generic Function Summary

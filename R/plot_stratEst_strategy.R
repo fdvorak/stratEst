@@ -16,12 +16,10 @@
 #' @param arrow.penwidth Width of the nodes.
 #' @param fillcolor Vector of hex-color codes of the choices.
 #' @param ranksep Separation of nodes with the same rank.
-#' @param file String. A valid path followed by a file name. Must end with either .pdf or .png. Default is NA and no file is written.
-#' @param file.width Output width in pixels or NULL for default.
-#' @param file.height Output height in pixels or NULL for default.
+#' @param file String. A valid path followed by a file name. Should end with .svg. Default is NA and no file is written.
 #' @export
 
-plot.stratEst.strategy <- function( x, y, ... , title = NULL, show.legend = T, show.title = T,  node.fontsize = 25, main.fontsize = 40, arrow.fontsize = 20, legend.fontsize = 20, legend.width = 1, node.width = 1, arrowsize = 1, node.penwidth = 1, arrow.penwidth = 1, fillcolor = NULL, ranksep = 0, file = NA, file.width = NULL, file.height = NULL ){
+plot.stratEst.strategy <- function( x, y, ... , title = NULL, show.legend = T, show.title = T,  node.fontsize = 25, main.fontsize = 40, arrow.fontsize = 20, legend.fontsize = 20, legend.width = 1, node.width = 1, arrowsize = 1, node.penwidth = 1, arrow.penwidth = 1, fillcolor = NULL, ranksep = 0, file = NA ){
 
   if( is.null(fillcolor) ){
     def.palette <- c("#B3CDE3","#DECBE4","#CCEBC5","#FED9A6","#FFFFCC","#E5D8BD","#FDDAEC","#B3E2CD","#FDCDAC","#CBD5E8","#F4CAE4","#E6F5C9","#FFF2AE","#F1E2CC","#FBB4AE")
@@ -143,17 +141,7 @@ plot.stratEst.strategy <- function( x, y, ... , title = NULL, show.legend = T, s
     )
 
     if( is.na(file) == F ){
-      if( substr(file, nchar(file)-3, nchar(file)) == ".pdf" ){
-        temp<-tempfile()
-        cat(DiagrammeRsvg::export_svg(DiagrammeR::grViz(string)),file=temp)
-        rsvg::rsvg_pdf(temp,file, width = file.width, height = file.height)
-      }else if(substr(file, nchar(file)-3, nchar(file)) == ".png" ){
-        temp<-tempfile()
-        cat(DiagrammeRsvg::export_svg(DiagrammeR::grViz(string)),file=temp)
-        rsvg::rsvg_png(temp,file, width = file.width, height = file.height)
-      }else{
-        stop("File path must end with .pdf or .png")
-      }
+        cat(DiagrammeRsvg::export_svg(DiagrammeR::grViz(string)),file=file)
     }
 
     DiagrammeR::grViz(string)

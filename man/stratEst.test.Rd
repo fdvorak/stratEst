@@ -7,9 +7,10 @@
 stratEst.test(
   model,
   par = c("shares", "probs", "trembles", "coefficients"),
-  values = 0,
+  values = NA,
   alternative = "two.sided",
-  digits = 4
+  digits = 4,
+  plot.tests = T
 )
 }
 \arguments{
@@ -17,11 +18,13 @@ stratEst.test(
 
 \item{par}{a character vector. The class of model parameters to be tested. Default is \code{c("shares","probs","trembles", "coefficients")}.}
 
-\item{values}{a numeric vector. The values the parameter estimates are compared to. Default is zero.}
+\item{values}{a numeric vector. The values the parameter estimates are compared to. Default is NA which means zero.}
 
 \item{alternative}{a character string. The alternative hypothesis. Options are \code{"two.sided"}, \code{"greater"} or \code{"less"}. Default is \code{"two.sided"}.}
 
 \item{digits}{an integer. The number of digits of the result.}
+
+\item{plot.tests}{a logical. Plots tests if \code{TRUE}.}
 }
 \value{
 A \code{data.frame} with one row for each tested parameter and 6 variables:

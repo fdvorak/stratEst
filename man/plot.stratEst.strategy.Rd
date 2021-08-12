@@ -12,7 +12,7 @@
   show.legend = T,
   show.title = T,
   node.fontsize = 25,
-  main.fontsize = 30,
+  main.fontsize = 40,
   arrow.fontsize = 20,
   legend.fontsize = 20,
   legend.width = 1,
@@ -21,7 +21,8 @@
   node.penwidth = 1,
   arrow.penwidth = 1,
   fillcolor = NULL,
-  ranksep = 0
+  ranksep = 0,
+  file = NA
 )
 }
 \arguments{
@@ -58,6 +59,8 @@
 \item{fillcolor}{Vector of hex-color codes of the choices.}
 
 \item{ranksep}{Separation of nodes with the same rank.}
+
+\item{file}{String. A valid path followed by a file name. Should end with .svg. Default is NA and no file is written.}
 }
 \description{
 Plot Method for stratEst.strategy

@@ -59,7 +59,7 @@ summary.stratEst.model <- function( object , ..., plot.shares = TRUE ){
       error.ses <- function(xx, yy, upper, lower=upper, length=0, color = "black" ,...){
         if(length(xx) != length(yy) | length(yy) !=length(lower) | length(lower) != length(upper))
           stop("vectors must be same length")
-        segments( xx , yy -lower , xx , yy + upper ,  lty = 1, lwd = 1.2 , col = ses.color, lend = 2  )
+        graphics::segments( xx , yy -lower , xx , yy + upper ,  lty = 1, lwd = 1.2 , col = color, lend = 2  )
       }
 
       model <- object
@@ -67,14 +67,14 @@ summary.stratEst.model <- function( object , ..., plot.shares = TRUE ){
         shares <- do.call(rbind,model$shares)
         num.strategies <- ncol(shares)
         num.treatments <- nrow(shares)
-        par(mar = c(5,4,4,10))
-        bars <- barplot(shares, beside = T, main = "estimated shares", xlab="strategies", ylab="frequency", ylim=c(0,1), col = def.palette[1:num.treatments], legend = rownames(shares), args.legend = list(x = 'right', bty='n', inset=c(-0.40,0), xpd = TRUE ) )
+        graphics::par(mar = c(5,4,4,10))
+        bars <- graphics::barplot(shares, beside = T, main = "estimated shares", xlab="strategies", ylab="frequency", ylim=c(0,1), col = def.palette[1:num.treatments], legend = rownames(shares), args.legend = list(x = 'right', bty='n', inset=c(-0.40,0), xpd = TRUE ) )
         error.ses(t(bars),c(t(shares)),c(model$shares.se))
-        par(mar = c(5.1, 4.1, 4.1, 2.1))
+        graphics::par(mar = c(5.1, 4.1, 4.1, 2.1))
       }else{
         shares <- model$shares
         num.strategies <- ncol(shares)
-        bars <- barplot(shares, beside = T, main = "estimated shares", xlab="strategies", ylab="frequency", ylim=c(0,1), col = def.palette[1:num.strategies] )
+        bars <- graphics::barplot(shares, beside = T, main = "estimated shares", xlab="strategies", ylab="frequency", ylim=c(0,1), col = def.palette[1:num.strategies] )
         error.ses(bars,c(shares),c(model$shares.se))
       }
 
