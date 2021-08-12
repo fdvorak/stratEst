@@ -4,7 +4,7 @@
 #' @param plot.shares Logical. If TRUE a barchart of the shares is plotted.
 #' @export
 
-summary.stratEst.model <- function( object , ..., plot.shares = FALSE ){
+summary.stratEst.model <- function( object , ..., plot.shares = TRUE ){
 
   stratEst.return <- object
 
