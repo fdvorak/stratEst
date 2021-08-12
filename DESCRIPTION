@@ -16,7 +16,7 @@ RoxygenNote: 7.1.1
 Suggests: 
     DiagrammeR (>= 1.0.6.1),
     DiagrammeRsvg (>= 0.1),
-    rsvg (2.1.2),
+    rsvg (>= 2.0.0),
     spelling,
     testthat
 Depends: R (>= 3.5)
