@@ -19,7 +19,7 @@ Suggests:
     spelling,
     testthat
 Depends: R (>= 3.5)
-URL: http://github.com/fdvorak/stratEst
-BugReports: http://github.com/fdvorak/stratEst/issues
+URL: https://github.com/fdvorak/stratEst
+BugReports: https://github.com/fdvorak/stratEst/issues
 NeedsCompilation: yes
 Language: en-US
