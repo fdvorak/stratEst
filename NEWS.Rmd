@@ -9,7 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 # stratEst 1.1.0
-* introduces a plot method for strategies
+* introduces a plot method for strategies and shares
 * fixes bug in the computation of bootstrapped standard errors
 * correct minor errors in documentation
 * removes the outdated check_cluster_id function

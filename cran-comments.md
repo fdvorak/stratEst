@@ -1,13 +1,13 @@
 ---
 title: "cran-comments"
 author: "Fabian Dvorak"
-date: "August 11 2021"
+date: "August 18 2021"
 output: html_document
 ---
 
 Thanks for your time. This is a minor release. Version 1.1.0:
 
-* introduces a plot method for strategies
+* introduces a plot method for strategies and shares
 * fixes bug in the computation of bootstrapped standard errors
 * correct minor errors in documentation
 * removes the outdated check_cluster_id function
