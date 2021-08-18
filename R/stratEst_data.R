@@ -19,9 +19,6 @@
 #' \item{input}{the inputs.}
 #' @details The data generation function of the package.
 #' @examples
-#' ## Transform the rock-paper-scissors data of Wang, Xu, and Zhou (2014)
-#' data.WXZ2014 <- stratEst.data(WXZ2014, input = c("choice"), choice = "choice", input.lag = 1)
-#'
 #' ## Transform the prisoner's dilemma data of Dal Bo and Frechette (2011).
 #' data.DF2011 <- stratEst.data(DF2011, choice = "choice",
 #'                              input=c("choice", "other.choice"), input.lag = 1)
