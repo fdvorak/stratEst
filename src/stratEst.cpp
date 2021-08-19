@@ -428,6 +428,7 @@ arma::field<arma::mat> stratEst_LCR_EM(arma::cube& output_cube, arma::cube& sum_
   int num_samples_trembles = sample_of_ids_trembles.max();
   int num_coefficients_to_est = coefficients.n_elem;
   int num_coefficients = coefficients_mat.n_rows*num_cols_coefficients_mat;
+  int num_coefficients_minus_one = num_coefficients-1;
   int num_coefficients_short_vec = num_coefficients - coefficients_mat.n_rows;
   arma::umat indices_responses_to_sum = find( responses_to_sum == 1 );
   arma::umat indices_non_fixed_responses = find( indices_responses == 0 && responses_to_sum == 0 );
@@ -818,16 +819,16 @@ arma::field<arma::mat> stratEst_LCR_EM(arma::cube& output_cube, arma::cube& sum_
 
     // update coefficients
     if( estimate_coefficients && num_coefficients_to_est > 0 ){
-          short_score_vec = score_vec( arma::span( num_rows_coefficients_mat , num_coefficients-1 ) );
-          arma::mat lower_hessian_mat = hessian_mat( arma::span( num_rows_coefficients_mat , num_coefficients-1 ) , arma::span( num_rows_coefficients_mat , num_coefficients-1 ) );
-          arma::mat lower_fisher = fisher_info( arma::span( num_rows_coefficients_mat , num_coefficients-1 ) , arma::span( num_rows_coefficients_mat , num_coefficients-1 ) );
+          short_score_vec = score_vec( arma::span( num_rows_coefficients_mat , num_coefficients_minus_one ) );
+          arma::mat lower_hessian_mat = hessian_mat( arma::span( num_rows_coefficients_mat , num_coefficients_minus_one ) , arma::span( num_rows_coefficients_mat , num_coefficients_minus_one ) );
+          arma::mat lower_fisher = fisher_info( arma::span( num_rows_coefficients_mat , num_coefficients_minus_one ) , arma::span( num_rows_coefficients_mat , num_coefficients_minus_one ) );
           arma::mat inverted_mat( num_coefficients_to_est , num_coefficients_to_est , arma::fill::none );
           arma::mat to_invert_mat = -lower_hessian_mat;                       // observed fisher is negative hesiian since we are minimizing the log likelihood
       if( pinv( inverted_mat , to_invert_mat ) ){
               if( penalty == true ){
                 for(int c = 0; c < num_coefficients_to_est; c++){
                   arma::mat d_hessian_slice = d_hessian_cube.slice(num_rows_coefficients_mat+c);
-                  arma::mat lower_d_hessian_mat = d_hessian_slice( arma::span( num_rows_coefficients_mat , num_coefficients-1 ) , arma::span( num_rows_coefficients_mat , num_coefficients-1 ) );
+                  arma::mat lower_d_hessian_mat = d_hessian_slice( arma::span( num_rows_coefficients_mat , num_coefficients_minus_one ) , arma::span( num_rows_coefficients_mat , num_coefficients_minus_one ) );
                   penalty_vec(c) = trace(inverted_mat*lower_d_hessian_mat)/2;
                 }
                 short_score_vec += penalty_vec;      // minus because the negative log likelihood is minimized
@@ -981,6 +982,7 @@ arma::field<arma::mat> stratEst_SE(arma::cube& output_cube, arma::cube& sum_outp
   int num_cols_coefficient_mat = coefficient_mat.n_cols;
   int num_coefficients_to_est = coefficients.n_elem;
   int num_coefficients = num_rows_coefficient_mat*num_cols_coefficient_mat;
+  int num_coefficients_minus_one = num_coefficients-1;
   int k = share_mat.n_rows;
   int num_samples = share_mat.n_cols;
   int num_samples_responses = sample_of_ids_responses.max();
@@ -1217,7 +1219,7 @@ arma::field<arma::mat> stratEst_SE(arma::cube& output_cube, arma::cube& sum_outp
 
   if( LCR ){
     // SEs of coefficients
-    arma::mat lower_hessian_mat = hessian_mat( arma::span( num_rows_coefficient_mat , num_coefficients-1 ) , arma::span( num_rows_coefficient_mat , num_coefficients-1 ) );
+    arma::mat lower_hessian_mat = hessian_mat( arma::span( num_rows_coefficient_mat , num_coefficients_minus_one ) , arma::span( num_rows_coefficient_mat , num_coefficients_minus_one ) );
     arma::mat inverse_neg_lower_hessian_mat = -lower_hessian_mat;
     if( false ){
       arma::vec unique_clusters = unique( cluster_id_vec );
@@ -1228,7 +1230,7 @@ arma::field<arma::mat> stratEst_SE(arma::cube& output_cube, arma::cube& sum_outp
         score_contributions_clusters.slice(c) = score_contribution_cluster.t() * score_contribution_cluster;
       }
       arma::mat meat_mat = sum( score_contributions_clusters , 2 );
-      arma::mat lower_meat_mat = meat_mat( arma::span( num_rows_coefficient_mat , num_coefficients-1 ) , arma::span( num_rows_coefficient_mat , num_coefficients-1 ) );
+      arma::mat lower_meat_mat = meat_mat( arma::span( num_rows_coefficient_mat , num_coefficients_minus_one ) , arma::span( num_rows_coefficient_mat , num_coefficients_minus_one ) );
       if( pinv( inverse_neg_lower_hessian_mat , -lower_hessian_mat ) ){
         coefficients_covar = inverse_neg_lower_hessian_mat * lower_meat_mat * inverse_neg_lower_hessian_mat;
         SE_coefficients = sqrt( coefficients_covar.diag() );
@@ -1253,7 +1255,7 @@ arma::field<arma::mat> stratEst_SE(arma::cube& output_cube, arma::cube& sum_outp
 
     // SE of shares from covar mat coefficients via delta method
     arma::mat covar_mat_coefficients( num_coefficients , num_coefficients, arma::fill::zeros );
-    arma::mat covar_lower_mat_coefficients = covar_mat_coefficients( arma::span( num_rows_coefficient_mat , num_coefficients-1 ) , arma::span( num_rows_coefficient_mat , num_coefficients-1 ) );
+    arma::mat covar_lower_mat_coefficients = covar_mat_coefficients( arma::span( num_rows_coefficient_mat , num_coefficients_minus_one ) , arma::span( num_rows_coefficient_mat , num_coefficients_minus_one ) );
     arma::mat inverse_neg_hessian_mat = -hessian_mat;
     if( pinv( inverse_neg_hessian_mat , -hessian_mat ) ){
       covar_mat_coefficients = inverse_neg_hessian_mat;
