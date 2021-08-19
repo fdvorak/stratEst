@@ -19,7 +19,6 @@ Thanks for your time. This is a patch release. Version 1.1.1:
 * ubuntu 18.04.5 LTS, x86_64, r-devel,           (with github actions)
 * ubuntu 18.04.5 LTS, x86_64, r-oldrel, R 4.0.5  (with github actions)
 * ubuntu 18.04.5 LTS, x86_64, r-release, R 4.1.0 (with github actions)
-* linux-x86_64-rocker-gcc-san                    (with rhub)
 
 ## R CMD check results
 * windows 10 pro install, R 4.1.1                (local)
