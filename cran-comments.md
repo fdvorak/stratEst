@@ -5,9 +5,9 @@ date: "August 19 2021"
 output: html_document
 ---
 
-Thanks for your time. This is a patch release. Version 1.1.1:
+Thanks for your time. This is a patch release. Version 1.1.2:
 
-* fixes UBSAN problems of version 1.1.0
+* 2nd try to fix all UBSAN problems of version 1.1.0
 
 ## Test environments
 * windows 10 pro install, R 4.1.1                (local)

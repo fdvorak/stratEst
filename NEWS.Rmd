@@ -9,6 +9,9 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+# stratEst 1.1.2
+* fix remaining UBSAN problems of version 1.1.0
+
 # stratEst 1.1.1
 * fixes UBSAN problems of version 1.1.0
 

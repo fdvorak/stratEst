@@ -208,7 +208,7 @@ arma::field<arma::mat> stratEst_EM(arma::cube& output_cube, arma::cube& sum_outp
     for (int i = 0; i < num_ids; i++) {
       int sample_of_ids_responses_int = sample_of_ids_responses(i);
       int sample_of_ids_trembles_int = sample_of_ids_trembles(i);
-      arma::mat response_mat_id = response_cube.slice( sample_of_ids_responses_int) - 1 );
+      arma::mat response_mat_id = response_cube.slice( sample_of_ids_responses_int - 1 );
       arma::mat tremble_mat_id = tremble_cube.slice( sample_of_ids_trembles_int - 1 );
 
       // calculate emission probabilities with trembles
