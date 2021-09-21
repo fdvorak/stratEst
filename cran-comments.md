@@ -1,13 +1,13 @@
 ---
 title: "cran-comments"
 author: "Fabian Dvorak"
-date: "September 15 2021"
+date: "September 21 2021"
 output: html_document
 ---
 
-Thanks for your time. I'm terribly sorry for this but I cannot reproduce the UBSAN errors on my windows machine (rhub::check_with_sanitizers gives me a preperror). I carefully went through the entire c++ code and tried to fix all potential problems. This is version 1.1.2:
+Thanks for your time. I'm terribly sorry for this but I cannot reproduce the UBSAN errors on my windows machine (rhub::check_with_sanitizers gives me a preperror). This is the next try to fix the UBSAN errors. This is version 1.1.3:
 
-* 2nd try to fix UBSAN problems of version 1.1.0
+* next try to fix UBSAN problems of version 1.1.0
 
 ## Test environments
 * windows 10 pro install, R 4.1.1                (local)

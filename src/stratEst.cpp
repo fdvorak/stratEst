@@ -228,12 +228,12 @@ arma::field<arma::mat> stratEst_EM(arma::cube& output_cube, arma::cube& sum_outp
       }
 
       // log likelihood contribution of subject
-      pr_entity_k %= share_mat( arma::span::all , sample_of_ids_shares(i) - 1 );
+      int sample_of_ids_shares_int = sample_of_ids_shares(i);
+      pr_entity_k %= share_mat( arma::span::all , sample_of_ids_shares_int - 1 );
       new_ll_val += -log( sum( pr_entity_k , 0 ) );
 
       // share contribution of subject as posterior probability of i to use k / N
       arma::vec i_shares = pr_entity_k.each_row() / sum( pr_entity_k , 0 );
-      int sample_of_ids_shares_int = sample_of_ids_shares(i);
       arma::uvec shares_to_est_col = find( indices_shares( arma::span::all , sample_of_ids_shares_int - 1 ) != 0 );
       arma::vec new_shares_col = new_share_mat( arma::span::all , sample_of_ids_shares_int - 1 );
       new_shares_col( shares_to_est_col ) += ( i_shares( shares_to_est_col )  / num_ids_sample_shares( sample_of_ids_shares_int - 1 ) );

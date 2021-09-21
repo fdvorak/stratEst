@@ -163,13 +163,6 @@ Strategy estimation was introduced by Dal Bo and Frechette (2011) to estimate th
 strategies.mixture = list("nash" = strategies.RPS$nash, "imitate" = strategies.RPS$imitate)
 model.mixture <- stratEst.model(data.WXZ2014,strategies.mixture)
 
-## Replication of Dal Bo and Frechette (2011), Table 7, page 424
-model.DF2011 <- stratEst.model(data.DF2011, strategies.DF2011, sample.id = "treatment")
-
-## Replication of Dvorak, Fischbacher, and Schmelz (2020)
-covs <- c("intercept", "conformity.score")
-model.DFS2020 <- stratEst.model(data.DFS2020, strategies.DFS2020, covariates = covs)
-
 }
 \references{
 Breitmoser Y (2015). "Cooperation, but no Reciprocity: Individual Strategies in the Repeated Prisoner’s Dilemma." \emph{American Economic Review}, 105(9), 2882-2910.
