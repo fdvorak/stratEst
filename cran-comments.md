@@ -5,7 +5,7 @@ date: "September 21 2021"
 output: html_document
 ---
 
-Thanks for your time. I'm terribly sorry for this but I cannot reproduce the UBSAN errors on my windows machine (rhub::check_with_sanitizers gives me a preperror). This is the next try to fix the UBSAN errors. This is version 1.1.3:
+Thanks for your time. I'm terribly sorry for this but I cannot reproduce the UBSAN errors on my windows machine (rhub::check_with_sanitizers gives me a preperror). This is another shot in the dark to fix the UBSAN errors. This is version 1.1.3:
 
 * next try to fix UBSAN problems of version 1.1.0
 
