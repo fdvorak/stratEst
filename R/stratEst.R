@@ -93,7 +93,7 @@
 #'
 #' Sanderson, C. and R. Curtin (2016): Armadillo: a template-based C++ library for linear algebra. \emph{Journal of Open Source Software}, 1-26.
 #' @export
-stratEst <- function( data , strategies , shares , coefficients , covariates , sample.id ,  response = "mixed" , sample.specific = c("shares","probs","trembles") , r.probs = "no" , r.trembles = "global" , select = NULL , min.strategies = 1 , crit = "bic" , se = "analytic" , outer.runs = 1 , outer.tol = 1e-10 , outer.max = 1000 , inner.runs = 10 , inner.tol = 1e-5 , inner.max = 10 , lcr.runs = 100 , lcr.tol = 1e-10 , lcr.max = 1000 , bs.samples = 1000 , quantiles = c(0.01,0.05,0.5,0.95,0.99) , stepsize = 1 , penalty = F , verbose = TRUE ){
+stratEst <- function( data , strategies , shares , coefficients , covariates , sample.id ,  response = "mixed" , sample.specific = c("shares","probs","trembles") , r.probs = "no" , r.trembles = "global" , select = NULL , min.strategies = 1 , crit = "bic" , se = "analytic" , outer.runs = 1 , outer.tol = 1e-10 , outer.max = 1000 , inner.runs = 10 , inner.tol = 1e-5 , inner.max = 10 , lcr.runs = 100 , lcr.tol = 1e-10 , lcr.max = 1000 , bs.samples = 1000 , quantiles = c(0.01,0.05,0.5,0.95,0.99) , stepsize = 1 , penalty = FALSE , verbose = TRUE ){
 
   .Deprecated("stratEst.model")
 
@@ -133,7 +133,7 @@ stratEst <- function( data , strategies , shares , coefficients , covariates , s
   }
 
   # check cluster.id
-  #if( T ){
+  #if( TRUE ){
     cluster <- matrix(0,1,1)
   #}
   # else{
@@ -209,7 +209,7 @@ stratEst <- function( data , strategies , shares , coefficients , covariates , s
       }
     }else{
       coefficient_mat <- stratEst.check.coefficients( coefficients , covariates , num_strats , names_strategies )
-      if( LCR == F ){
+      if( LCR == FALSE ){
         warning("stratEst warning: No covariates specified. The input object 'coefficients' is ignored.");
       }
     }

@@ -11,6 +11,12 @@
 
 \item{digits}{Further arguments passed to or from other methods.}
 }
+\value{
+A \code{stratEst.strategy} object with rounded variable values. A data.frame with the following variables:
+\item{prob.x}{the probability of choice \code{x}.}
+\item{tremble}{the probability to observe a tremble.}
+\item{tr(x)}{the deterministic state transitions of the strategy for input \code{x}.}
+}
 \description{
 Round Method for stratEst.strategy
 }

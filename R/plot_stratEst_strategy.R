@@ -17,9 +17,10 @@
 #' @param fillcolor Vector of hex-color codes of the choices.
 #' @param ranksep Separation of nodes with the same rank.
 #' @param file String. A valid path followed by a file name. Should end with .svg. Default is NA and no file is written.
+#' @return No return value, called to create a plot.
 #' @export
 
-plot.stratEst.strategy <- function( x, y, ... , title = NULL, show.legend = T, show.title = T,  node.fontsize = 25, main.fontsize = 40, arrow.fontsize = 20, legend.fontsize = 20, legend.width = 1, node.width = 1, arrowsize = 1, node.penwidth = 1, arrow.penwidth = 1, fillcolor = NULL, ranksep = 0, file = NA ){
+plot.stratEst.strategy <- function( x, y, ... , title = NULL, show.legend = TRUE, show.title = TRUE,  node.fontsize = 25, main.fontsize = 40, arrow.fontsize = 20, legend.fontsize = 20, legend.width = 1, node.width = 1, arrowsize = 1, node.penwidth = 1, arrow.penwidth = 1, fillcolor = NULL, ranksep = 0, file = NA ){
 
   if( is.null(fillcolor) ){
     def.palette <- c("#B3CDE3","#DECBE4","#CCEBC5","#FED9A6","#FFFFCC","#E5D8BD","#FDDAEC","#B3E2CD","#FDCDAC","#CBD5E8","#F4CAE4","#E6F5C9","#FFF2AE","#F1E2CC","#FBB4AE")
@@ -58,13 +59,13 @@ plot.stratEst.strategy <- function( x, y, ... , title = NULL, show.legend = T, s
     probs_NA <- apply(is.na(probs),1,sum)> 0
     if( "tremble" %in% colnames(strategy) ){
       for( i in 1:nrow(probs)){
-        if( is.na(strategy$tremble[i]) == F ){
+        if( is.na(strategy$tremble[i]) == FALSE ){
           probs[i,] = probs[i,]*(1-strategy$tremble[i]) + ((1-probs[i,])*strategy$tremble[i])/(num.choices-1)
         }
       }
     }
     pure_row <- apply(probs == 1,1,sum) == 1
-    pure_row[is.na(pure_row)] = F
+    pure_row[is.na(pure_row)] = FALSE
     pure_choice <- rep(NA,length(pure_row))
     for( i in 1:length(pure_row)){
       if( pure_row[i] ){
@@ -131,7 +132,7 @@ plot.stratEst.strategy <- function( x, y, ... , title = NULL, show.legend = T, s
                 )
               , collapse = ''),
               ""),
-      ifelse( is.null(transitions) == F,
+      ifelse( is.null(transitions) == FALSE,
               paste( sapply(c(1:num.states),  function(s)  paste(
                 paste( sapply(c(1:num.states), function(s2) ifelse( sum(transitions[s,] == s2) > 0, paste(states[s],"->",states[s2],"[label='",paste(paste(inputs[transitions[s,] == s2],sep=" "),collapse=", "),"'",arrow_options,"];",sep=""), "" )), collapse = "")
                 ,collapse="")), collapse=""),""),
@@ -140,7 +141,7 @@ plot.stratEst.strategy <- function( x, y, ... , title = NULL, show.legend = T, s
       "}"
     )
 
-    if( is.na(file) == F ){
+    if( is.na(file) == FALSE ){
         cat(DiagrammeRsvg::export_svg(DiagrammeR::grViz(string)),file=file)
     }
 

@@ -80,7 +80,7 @@ stratEst.simulate <- function( data = NULL, strategies, shares = NULL, coefficie
   }
 
   #check shares
-  if( is.null(shares) == F ) {
+  if( is.null(shares) == FALSE ) {
     stratEst.simulate.check.shares.return <- stratEst.simulate.check.shares( shares , LCR , num_strats )
     shares = stratEst.simulate.check.shares.return$shares
     num_samples_shares = stratEst.simulate.check.shares.return$num_samples
@@ -102,20 +102,20 @@ stratEst.simulate <- function( data = NULL, strategies, shares = NULL, coefficie
     }
   }else{
     coefficient_mat <- stratEst.simulate.check.coefficients( coefficients , covariate_mat , num_strats , names_strategies_lcr )
-    if( LCR == F ){
+    if( LCR == FALSE ){
       warning("stratEst warning: No covariates specified. The input object 'coefficients' is ignored.");
     }
   }
 
   # check data
-  if( is.null( data ) == F ){
+  if( is.null( data ) == FALSE ){
     if( "stratEst.data" %in% class(data) | "data.frame" %in% class(data) ){
-      if( is.null(covariate.mat) == F & num.ids != length(unique(data$id)) ){
+      if( is.null(covariate.mat) == FALSE & num.ids != length(unique(data$id)) ){
         stop("stratEst error: The object 'covariate.mat' must have as many rows as there are unique ids in 'data'.")
       }
       num.ids <- length(unique(data$id))
       sample_vec <- rep(1,nrow(data))
-      if( is.null(sample.id) == F ){
+      if( is.null(sample.id) == FALSE ){
         if( sample.id %in% colnames(data)){
           sample_vec <- data[,sample.id]
         }
@@ -149,7 +149,7 @@ stratEst.simulate <- function( data = NULL, strategies, shares = NULL, coefficie
   if( is.null( data ) ){
     # check num.ids
     num.ids <- as.integer(num.ids)
-    if( "integer" %in% class(num.ids) == F ){
+    if( "integer" %in% class(num.ids) == FALSE ){
       stop("stratEst error: Input object 'num.ids' has to be of class 'integer'.")
     }else{
       if( num.ids < 0 ){
@@ -159,7 +159,7 @@ stratEst.simulate <- function( data = NULL, strategies, shares = NULL, coefficie
 
 
     # check num.games
-    if( "numeric" %in% class(num.games) == F ){
+    if( "numeric" %in% class(num.games) == FALSE ){
       stop("stratEst error: Input object 'num.games' has to be of class 'numeric'.")
     }else{
       num.games <- round(num.games)
@@ -172,7 +172,7 @@ stratEst.simulate <- function( data = NULL, strategies, shares = NULL, coefficie
     if( is.null( num.periods ) ){
       num.periods <- rep(5,num.games)
     }else{
-      if( "numeric" %in% class(num.periods) == F ){
+      if( "numeric" %in% class(num.periods) == FALSE ){
         stop("stratEst error: Input object 'num.periods' has to be of class 'numeric'.")
       }else{
         if( length(num.periods) != num.games ){
@@ -186,7 +186,7 @@ stratEst.simulate <- function( data = NULL, strategies, shares = NULL, coefficie
     }
 
     # check fixed.assignment
-    if( "logical" %in% class(fixed.assignment) == F ){
+    if( "logical" %in% class(fixed.assignment) == FALSE ){
       stop("stratEst error: Input object 'fixed.assignment' has to be of class 'logical'.")
     }
   }
@@ -263,12 +263,12 @@ stratEst.simulate <- function( data = NULL, strategies, shares = NULL, coefficie
       if( fixed.assignment ){
         rand_vec = stats::runif(num.ids)
         for( i in 1:num.ids){
-          assigned = F
+          assigned = FALSE
           for( s in 1:num_strats ){
-            if( assigned == F ){
+            if( assigned == FALSE ){
               if( rand_vec[i] <= sum( priors_individuals[i,(1:s)]) ){
                 strategy_assignment_mat[i,] <- rep( s , num.games )
-                assigned = T
+                assigned = TRUE
               }
             }
           }
@@ -277,12 +277,12 @@ stratEst.simulate <- function( data = NULL, strategies, shares = NULL, coefficie
         rand_mat = matrix(stats::runif(num.ids*num.games),num.ids,num.games)
         for( i in 1:num.ids){
           for( j in 1:num.games ){
-            assigned = F
+            assigned = FALSE
             for( s in 1:num_strats ){
-              if( assigned == F ){
+              if( assigned == FALSE ){
                 if( rand_mat[i,j] <= sum( priors_individuals[i,(1:s)]) ){
                   strategy_assignment_mat[i,j] <- s
-                  assigned = T
+                  assigned = TRUE
                 }
               }
             }
@@ -408,12 +408,12 @@ stratEst.simulate <- function( data = NULL, strategies, shares = NULL, coefficie
       strategy_assignment_vec <- rep(NA,num.ids.sample)
       rand_vec = stats::runif(num.ids.sample)
       for( i in 1:num.ids.sample){
-        assigned = F
+        assigned = FALSE
         for( s in 1:num_strats ){
-          if( assigned == F ){
+          if( assigned == FALSE ){
             if( rand_vec[i] <= sum( priors_individuals[i,(1:s)]) ){
               strategy_assignment_vec[i] <- s
-              assigned = T
+              assigned = TRUE
             }
           }
         }

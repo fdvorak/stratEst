@@ -4,7 +4,7 @@
 \alias{stratEst.check}
 \title{Check model assumptions}
 \usage{
-stratEst.check(model, chi.tests = F, bs.samples = 100, verbose = FALSE)
+stratEst.check(model, chi.tests = FALSE, bs.samples = 100, verbose = FALSE)
 }
 \arguments{
 \item{model}{a fitted model of class \code{stratEst.model}.}

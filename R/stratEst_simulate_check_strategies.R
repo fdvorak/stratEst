@@ -29,7 +29,7 @@ stratEst.simulate.check.strategies <- function( strategies  ){
       transition_mat_col_index <- matrix(NA,num_strats,num_unique_inputs)
       for( le in 1:num_strats ){
         strategy <- strategies[[le]]
-        if( "stratEst.strategy" %in%  class(strategy) == F & "data.frame" %in% class(strategy) == F ){
+        if( "stratEst.strategy" %in%  class(strategy) == FALSE & "data.frame" %in% class(strategy) == FALSE ){
           stop(paste("stratEst error: Strategy ",le," in the list 'strategies' is not an object of class data.frame.",sep=""))
         }
         state_strategy <- c(1:nrow(strategy))
@@ -86,7 +86,7 @@ stratEst.simulate.check.strategies <- function( strategies  ){
         }
       }
       for( sam in 1:num_samples_strategies){
-        if( "list" %in% class( strategies_list[[sam]] ) == F ){
+        if( "list" %in% class( strategies_list[[sam]] ) == FALSE ){
           stop(paste("stratEst error: Element ",sam, "of list 'strategies' is not an object of class list.",sep=""))
         }
         strategies <- strategies_list[[sam]]
@@ -104,7 +104,7 @@ stratEst.simulate.check.strategies <- function( strategies  ){
         transition_mat_col_index <- matrix(NA,num_strats,num_unique_inputs)
         for( le in 1:num_strats ){
           strategy <- strategies[[le]]
-          if( "data.frame" %in% class(strategy) == F ){
+          if( "data.frame" %in% class(strategy) == FALSE ){
             stop(paste("stratEst error: Strategy ",le," in list", sam ,"of list 'strategies' is not an object of class data.frame.",sep=""))
           }
           state_strategy <- c(1:nrow(strategy))

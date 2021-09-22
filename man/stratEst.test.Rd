@@ -10,7 +10,7 @@ stratEst.test(
   values = NA,
   alternative = "two.sided",
   digits = 4,
-  plot.tests = T
+  plot.tests = TRUE
 )
 }
 \arguments{
@@ -31,9 +31,9 @@ A \code{data.frame} with one row for each tested parameter and 6 variables:
 \item{estimate}{the parameter estimate.}
 \item{diff}{the difference between the estimated parameter and the numeric value.}
 \item{std.error}{the standard error of the estimated parameter.}
-\item{t.value}{the t statistic.}
+\item{t.value}{the TRUE statistic.}
 \item{res.degrees}{the residual degrees of freedom of the model.}
-\item{p.value}{the p value of the t statistic.}
+\item{p.value}{the p value of the TRUE statistic.}
 }
 \description{
 Runs t-tests if model parameters differ from user defined values

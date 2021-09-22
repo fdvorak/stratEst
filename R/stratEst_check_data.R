@@ -2,7 +2,7 @@
 
 stratEst.check.data <- function( data ){
 
-  if( "data.frame" %in% class(data) == F ){
+  if( "data.frame" %in% class(data) == FALSE ){
     stop("stratEst error: The input object 'data' must be an object of class 'stratEst.data'.")
   }
 
@@ -16,9 +16,9 @@ stratEst.check.data <- function( data ){
   if( is.null(data$period) ) {
     stop("stratEst error: Data does not contain the variable 'period'.")
   }
-  input.is.null = F
+  input.is.null = FALSE
   if( is.null(data$input) ) {
-    input.is.null = T
+    input.is.null = TRUE
     data$input <- 1
   }
   if( is.null(data$choice) ) {

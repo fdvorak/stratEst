@@ -2,13 +2,14 @@
 #' @param object An object returned by the estimation function\code{stratEst.model()}. An object of class \code{stratEst.model}.
 #' @param ... additional arguments affecting the summary produced.
 #' @param plot.shares Logical. If TRUE a barchart of the shares is plotted.
+#' @return No return value, prints a summary of the model to the console.
 #' @export
 
 summary.stratEst.model <- function( object , ..., plot.shares = TRUE ){
 
   stratEst.return <- object
 
-  convergence_string <- ifelse( is.null(stratEst.return$convergence) , "no parameters estimated" , ifelse( max( stratEst.return$convergence[ is.na(stratEst.return$convergence) == F ] ) < 0.001 , "yes" , ifelse( any( stratEst.return$convergence[ is.na(stratEst.return$convergence) == F ] < 0.001 ) , "partial" , "no") ) )
+  convergence_string <- ifelse( is.null(stratEst.return$convergence) , "no parameters estimated" , ifelse( max( stratEst.return$convergence[ is.na(stratEst.return$convergence) == FALSE ] ) < 0.001 , "yes" , ifelse( any( stratEst.return$convergence[ is.na(stratEst.return$convergence) == FALSE ] < 0.001 ) , "partial" , "no") ) )
 
     writeLines("")
     writeLines(paste(deparse(substitute(object)),sep=""))
@@ -27,7 +28,7 @@ summary.stratEst.model <- function( object , ..., plot.shares = TRUE ){
       print(round(stratEst.return$shares,2))
     }
     writeLines("")
-    if( is.null(stratEst.return$coefficients) == F ){
+    if( is.null(stratEst.return$coefficients) == FALSE ){
       writeLines("latent class coefficients")
       writeLines(paste(rep("-",nchar("latent class coefficients")),collapse = ""))
       print(round(stratEst.return$coefficients,2))
@@ -67,14 +68,15 @@ summary.stratEst.model <- function( object , ..., plot.shares = TRUE ){
         shares <- do.call(rbind,model$shares)
         num.strategies <- ncol(shares)
         num.treatments <- nrow(shares)
+        old.mar <- graphics::par("mar", no.readonly = FALSE)
+        on.exit(graphics::par(old.mar))
         graphics::par(mar = c(5,4,4,10))
-        bars <- graphics::barplot(shares, beside = T, main = "estimated shares", xlab="strategies", ylab="frequency", ylim=c(0,1), col = def.palette[1:num.treatments], legend = rownames(shares), args.legend = list(x = 'right', bty='n', inset=c(-0.40,0), xpd = TRUE ) )
+        bars <- graphics::barplot(shares, beside = TRUE, main = "estimated shares", xlab="strategies", ylab="frequency", ylim=c(0,1), col = def.palette[1:num.treatments], legend = rownames(shares), args.legend = list(x = 'right', bty='n', inset=c(-0.40,0), xpd = TRUE ) )
         error.ses(t(bars),c(t(shares)),c(model$shares.se))
-        graphics::par(mar = c(5.1, 4.1, 4.1, 2.1))
       }else{
         shares <- model$shares
         num.strategies <- ncol(shares)
-        bars <- graphics::barplot(shares, beside = T, main = "estimated shares", xlab="strategies", ylab="frequency", ylim=c(0,1), col = def.palette[1:num.strategies] )
+        bars <- graphics::barplot(shares, beside = TRUE, main = "estimated shares", xlab="strategies", ylab="frequency", ylim=c(0,1), col = def.palette[1:num.strategies] )
         error.ses(bars,c(shares),c(model$shares.se))
       }
 

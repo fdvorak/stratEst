@@ -13,6 +13,9 @@
 
 \item{plot.shares}{Logical. If TRUE a barchart of the shares is plotted.}
 }
+\value{
+No return value, prints a summary of the model to the console.
+}
 \description{
 Method dispatch for Generic Function Summary
 }

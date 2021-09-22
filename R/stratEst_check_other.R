@@ -3,64 +3,64 @@
 stratEst.check.other <- function( response , sample.specific , r.probs , r.trembles , select , min.strategies , crit , se , outer.runs , outer.tol , outer.max , inner.runs , inner.tol , inner.max , lcr.runs , lcr.tol , lcr.max , bs.samples , step.size , penalty , verbose , quantiles ){
 
   # check response
-  if ( response %in% c("mixed","pure") == F ){
+  if ( response %in% c("mixed","pure") == FALSE ){
     stop("stratEst error: The input object 'response' has to be one of the following: \"mixed\" or \"pure\". Default is \"mixed\".");
   }
 
 
   # check sample.specific
-  specific_shares = F
-  specific_probs = F
-  specific_trembles = F
-  specific_coefficients = F
-  if( is.null(sample.specific) == F ){
-    if( "character" %in% class( sample.specific ) == F ){
+  specific_shares = FALSE
+  specific_probs = FALSE
+  specific_trembles = FALSE
+  specific_coefficients = FALSE
+  if( is.null(sample.specific) == FALSE ){
+    if( "character" %in% class( sample.specific ) == FALSE ){
       stop("stratEst error: The input object 'sample.specific' has to be a character vector.");
     }
     for( i in 1:length( sample.specific ) ){
-      if ( sample.specific[i] %in% c("shares","probs","trembles","coefficients") == F  ){
+      if ( sample.specific[i] %in% c("shares","probs","trembles","coefficients") == FALSE  ){
         stop("stratEst error: The input object 'sample.specific' should only contain the following characters: \"shares\", \"probs\", \"trembles\" or \"coefficients\".");
       }
     }
-    specific_shares = ifelse( "shares" %in% sample.specific , T , F  )
-    specific_probs = ifelse( "probs" %in% sample.specific , T , F  )
-    specific_trembles = ifelse( "trembles" %in% sample.specific , T , F  )
-    specific_coefficients = ifelse( "coefficients" %in% sample.specific , T , F  )
+    specific_shares = ifelse( "shares" %in% sample.specific , TRUE , FALSE  )
+    specific_probs = ifelse( "probs" %in% sample.specific , TRUE , FALSE  )
+    specific_trembles = ifelse( "trembles" %in% sample.specific , TRUE , FALSE  )
+    specific_coefficients = ifelse( "coefficients" %in% sample.specific , TRUE , FALSE  )
   }
 
   # check r.probs
-  if ( r.probs %in% c("no","strategies","states","global") == F  ){
+  if ( r.probs %in% c("no","strategies","states","global") == FALSE  ){
     stop("stratEst error: The input object 'r.probs' has to be one of the following: \"no\", \"strategies\", \"states\" or \"global\". Default is \"no\".");
   }
 
   # check r.trembles
-  if ( r.trembles %in% c("no","strategies","states","global") == F  ){
+  if ( r.trembles %in% c("no","strategies","states","global") == FALSE  ){
     stop("stratEst error: The input object 'r.trembles' has to be one of the following: \"no\", \"strategies\", \"states\" or \"global\". Default is \"no\".");
   }
 
   # check select
-  select_strategies = F
-  select_probs = F
-  select_trembles = F
+  select_strategies = FALSE
+  select_probs = FALSE
+  select_trembles = FALSE
 
-  if( is.null(select) == F ){
+  if( is.null(select) == FALSE ){
     # check select
-    if( "character" %in% class( select ) == F ){
+    if( "character" %in% class( select ) == FALSE ){
       stop("stratEst error: The input object 'select' has to be a character vector.");
     }
     for( i in 1:length( select ) ){
-      if ( select[i] %in% c("probs","trembles","strategies") == F  ){
+      if ( select[i] %in% c("probs","trembles","strategies") == FALSE  ){
         stop("stratEst error: The input object 'select' should only contain the following characters: \"strategies\", \"probs\" or \"trembles\".");
       }
       else{
         if( select[i] == "strategies" ){
-          select_strategies = T
+          select_strategies = TRUE
         }
         if( select[i] == "probs" ){
-          select_probs = T
+          select_probs = TRUE
         }
         if( select[i] == "trembles" ){
-          select_trembles = T
+          select_trembles = TRUE
         }
       }
     }
@@ -72,12 +72,12 @@ stratEst.check.other <- function( response , sample.specific , r.probs , r.tremb
   }
 
   # check crit
-  if ( crit %in% c("aic","bic","icl") == F ){
+  if ( crit %in% c("aic","bic","icl") == FALSE ){
     stop("stratEst error: The input object 'crit' has to be one of the following: \"aic\", \"bic\", or \"icl\". Default is \"bic\".");
   }
 
   # check se
-  if ( se %in% c("analytic","bootstrap") == F ){
+  if ( se %in% c("analytic","bootstrap") == FALSE ){
     stop("stratEst error: The input object 'se' has to be one of the following: \"analytic\", or \"bootstrap\". Default is \"analytic\".");
   }
 
@@ -138,26 +138,26 @@ stratEst.check.other <- function( response , sample.specific , r.probs , r.tremb
   }
 
   # check penalty
-  if (  is.logical(penalty) == F){
+  if (  is.logical(penalty) == FALSE){
     stop("stratEst error: The function argument 'penalty' must be boolean. Default is FALSE.");
   }
 
   # check verbose
-  if ( "logical" %in% class(verbose) == F ){
+  if ( "logical" %in% class(verbose) == FALSE ){
     stop("stratEst error: The input argument 'verbose' must be a logical.");
   }
   else{
     print.messages = verbose[1]
-    print.summary = F
+    print.summary = FALSE
   }
 
   # check print.summary
-  if (  "logical" %in% class(print.summary) == F ){
+  if (  "logical" %in% class(print.summary) == FALSE ){
     stop("stratEst error: The input argument 'print.summary' must be a logical value.");
   }
 
   # check quantiles
-  if (  "numeric" %in% class(quantiles) == F ){
+  if (  "numeric" %in% class(quantiles) == FALSE ){
     stop("stratEst error: The input argument 'print.summary' must be a logical value.");
   }
   else{

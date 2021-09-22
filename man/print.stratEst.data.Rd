@@ -11,6 +11,9 @@
 
 \item{...}{Further arguments passed to or from other methods.}
 }
+\value{
+Prints a \code(data.frame) object that contains the data.
+}
 \description{
 Print Method for stratEst.data
 }

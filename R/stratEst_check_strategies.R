@@ -10,7 +10,7 @@ stratEst.check.strategies <- function( strategies , input_factor , output_factor
   response_mat_col_index <- NULL
   if( class(strategies) == "numeric" ){
     strategies = as.integer(strategies)
-    integer_strategies = T
+    integer_strategies = TRUE
     num_strats = strategies
     input_has_na <- as.numeric(any( input == 0 ) )
     strategy_states = rep(c(1:(num_unique_inputs + input_has_na)),num_strats)
@@ -25,7 +25,7 @@ stratEst.check.strategies <- function( strategies , input_factor , output_factor
     }
   }
   else if( class(strategies) == "list" ){
-    integer_strategies = F
+    integer_strategies = FALSE
     num_strats = length(strategies)
     state <- NULL
     transition_mat <- NULL
@@ -42,7 +42,7 @@ stratEst.check.strategies <- function( strategies , input_factor , output_factor
     transition_mat_col_index <- matrix(NA,num_strats,num_unique_inputs)
     for( le in 1:num_strats ){
       strategy <- strategies[[le]]
-      if( "stratEst.strategy" %in%  class(strategy) == F & "data.frame" %in% class(strategy) == F ){
+      if( "stratEst.strategy" %in%  class(strategy) == FALSE & "data.frame" %in% class(strategy) == FALSE ){
         stop(paste("stratEst error: Strategy ",le," in the list 'strategies' is not an object of class stratEst.strategy.",sep=""))
       }
       state_strategy <- c(1:nrow(strategy))

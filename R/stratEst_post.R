@@ -5,7 +5,7 @@ stratEst.post <- function( data , cpp.output , stratEst.return , strategies , co
   num_probs_to_est = length(stratEst.return$probs.par)
   num_trembles_to_est = length(stratEst.return$trembles.par)
 
-  if( num_samples == 1 | ( (specific_probs == F | num_probs_to_est == 0) & (specific_trembles == F | num_trembles_to_est == 0) ) ){
+  if( num_samples == 1 | ( (specific_probs == FALSE | num_probs_to_est == 0) & (specific_trembles == F | num_trembles_to_est == 0) ) ){
     # strategies post-processing
     stratEst.return$strategies[ stratEst.return$strategies == -1 ] = NA
     num_strategies = sum(stratEst.return$strategies[,1] == 1)
@@ -30,7 +30,7 @@ stratEst.post <- function( data , cpp.output , stratEst.return , strategies , co
       colnames(transition_mat) <- t_names
       tremble_vec <- cpp.output$trembles
       colnames(tremble_vec) <- "tremble"
-      if( input.is.null == F ){
+      if( input.is.null == FALSE ){
         strategies_mat <- as.data.frame(cbind(prob_mat,tremble_vec,transition_mat))
       }else{
         strategies_mat <- as.data.frame(cbind(prob_mat,tremble_vec))
@@ -67,7 +67,7 @@ stratEst.post <- function( data , cpp.output , stratEst.return , strategies , co
             strategy$tremble[line] = NA
           }
           else{
-            if( is.na(strategy$tremble[line]) == F  ){
+            if( is.na(strategy$tremble[line]) == FALSE  ){
               if( any(prob_mat[line,] != 0  &  prob_mat[line,] != 1)  & strategy$tremble[line] == 0 ){
                 strategy$tremble[line] = NA
               }
@@ -84,7 +84,7 @@ stratEst.post <- function( data , cpp.output , stratEst.return , strategies , co
     }
 
     # create list of strategies
-    if( "list" %in% class(strategies) == F ){
+    if( "list" %in% class(strategies) == FALSE ){
       strategies_list <- list(NULL)
       for( i in 1:num_strategies ){
         strategy <- stratEst.return$strategies[ post_sid == unique_post_sids[i] , ]
@@ -121,7 +121,7 @@ stratEst.post <- function( data , cpp.output , stratEst.return , strategies , co
       colnames(transition_mat) <- t_names
       tremble_vec <- cpp.output$trembles
       colnames(tremble_vec) <- "tremble"
-      if( input.is.null == F ){
+      if( input.is.null == FALSE ){
         strategies_mat <- as.data.frame(cbind(prob_mat,tremble_vec,transition_mat))
       }else{
         strategies_mat <- as.data.frame(cbind(prob_mat,tremble_vec))
@@ -163,7 +163,7 @@ stratEst.post <- function( data , cpp.output , stratEst.return , strategies , co
               strategy$tremble[line] = NA
             }
             else{
-              if( is.na(strategy$tremble[line]) == F ){
+              if( is.na(strategy$tremble[line]) == FALSE ){
                 if( any(prob_mat[line,] != 0  &  prob_mat[line,] != 1)  & strategy$tremble[line] == 0 ){
                   strategy$tremble[line] = NA
                 }
@@ -187,21 +187,21 @@ stratEst.post <- function( data , cpp.output , stratEst.return , strategies , co
   }
 
   # kill tremble iff all trembles are NA
-  all.trembles.na = T
+  all.trembles.na = TRUE
   strategies.clean <- stratEst.return$strategies
   if( "list" %in% class(stratEst.return$strategies[[1]]) ){
     for( i in 1:length(stratEst.return$strategies) ){
       for( j in 1:length(stratEst.return$strategies[[i]])){
-        if( any( is.na(stratEst.return$strategies[[i]][[j]]$tremble ) == F ) ){
-          all.trembles.na = F
+        if( any( is.na(stratEst.return$strategies[[i]][[j]]$tremble ) == FALSE ) ){
+          all.trembles.na = FALSE
         }
         strategies.clean[[i]][[j]] <- stratEst.return$strategies[[i]][[j]][,!colnames(stratEst.return$strategies[[i]][[j]])=="tremble"]
       }
     }
   }else{
     for( i in 1:length(stratEst.return$strategies) ){
-      if( any( is.na(stratEst.return$strategies[[i]]$tremble ) == F ) ){
-        all.trembles.na = F
+      if( any( is.na(stratEst.return$strategies[[i]]$tremble ) == FALSE ) ){
+        all.trembles.na = FALSE
       }
       strategies.clean[[i]] <- stratEst.return$strategies[[i]][,!colnames(stratEst.return$strategies[[i]])=="tremble"]
     }
@@ -227,7 +227,7 @@ stratEst.post <- function( data , cpp.output , stratEst.return , strategies , co
       }
     }
   }
-  if( num_samples == 1 | specific_shares == F ){
+  if( num_samples == 1 | specific_shares == FALSE ){
     frame_shares_sample <- as.data.frame(t(shares_mat[,1]))
     colnames(frame_shares_sample) <- names_of_strategies
     rownames(frame_shares_sample) <- "share"
@@ -248,7 +248,7 @@ stratEst.post <- function( data , cpp.output , stratEst.return , strategies , co
 
   if( length(stratEst.return$shares.par) > 0 ){
     rownames(stratEst.return$shares.indices) = names_of_strategies
-    if( num_samples == 1 | specific_shares == F ){
+    if( num_samples == 1 | specific_shares == FALSE ){
       colnames(stratEst.return$shares.indices) = "shares.par"
     }
     else{
@@ -258,7 +258,7 @@ stratEst.post <- function( data , cpp.output , stratEst.return , strategies , co
 
   if( num_samples > 1 & ( (specific_probs & num_probs_to_est > 0) | (specific_trembles & num_trembles_to_est > 0) ) ){
     # create list of strategies
-    if( "list" %in% class(strategies) == F ){
+    if( "list" %in% class(strategies) == FALSE ){
       strategies_list <- list(NULL)
       for( j in 1:num_samples ){
         strategies_list_sample <- list(NULL)
@@ -375,19 +375,19 @@ stratEst.post <- function( data , cpp.output , stratEst.return , strategies , co
 
   # gammas
   gammas = rep(NA,length(stratEst.return$trembles))
-  indices.ok = (is.na(stratEst.return$trembles) == F & stratEst.return$trembles < 1 & stratEst.return$trembles != -1 )
+  indices.ok = (is.na(stratEst.return$trembles) == FALSE & stratEst.return$trembles < 1 & stratEst.return$trembles != -1 )
   gammas[indices.ok] = -1/log(stratEst.return$trembles[indices.ok]/(1-stratEst.return$trembles[indices.ok]))
   gammas[indices.ok==F] = NA
   stratEst.return$gammas = matrix(gammas,length(gammas),1)
   #gamms.par
   gammas.par = rep(NA,length(stratEst.return$trembles.par))
-  indices.ok = (is.na(stratEst.return$trembles.par) == F & stratEst.return$trembles.par < 1 & stratEst.return$trembles.par != -1)
+  indices.ok = (is.na(stratEst.return$trembles.par) == FALSE & stratEst.return$trembles.par < 1 & stratEst.return$trembles.par != -1)
   gammas.par[indices.ok] = -1/log(stratEst.return$trembles.par[indices.ok]/(1-stratEst.return$trembles.par[indices.ok]))
-  gammas.par[indices.ok==F] = NA
+  gammas.par[indices.ok==FALSE] = NA
   stratEst.return$gammas.par = matrix(gammas.par,length(gammas.par),1)
   # gammas.se
   gammas.se = rep(NA,length(stratEst.return$trembles.se))
-  indices.ok = (is.na(stratEst.return$trembles.se) == F & stratEst.return$trembles.se < 1 & stratEst.return$trembles.se != -1)
+  indices.ok = (is.na(stratEst.return$trembles.se) == FALSE & stratEst.return$trembles.se < 1 & stratEst.return$trembles.se != -1)
   gammas.se[indices.ok] = -1/log(stratEst.return$trembles.se[indices.ok]/(1-stratEst.return$trembles.se[indices.ok]))
   gammas.se[indices.ok==F] = NA
   stratEst.return$gammas.se = matrix(gammas.se,length(gammas.se),1)
@@ -418,9 +418,9 @@ stratEst.post <- function( data , cpp.output , stratEst.return , strategies , co
   convergence_string <- "no parameters estimated"
 
   # add names to strategies list
-  if( "list" %in% class(strategies) == F ){
+  if( "list" %in% class(strategies) == FALSE ){
     stratEst.return$strategies <- strategies_list
-    if( num_samples == 1 | ( (specific_probs == F | num_probs_to_est == 0) & (specific_trembles == F | num_trembles_to_est == 0) ) ){
+    if( num_samples == 1 | ( (specific_probs == FALSE | num_probs_to_est == 0) & (specific_trembles == F | num_trembles_to_est == 0) ) ){
       names(stratEst.return$strategies) <- names_of_strategies
     }else{
       names(stratEst.return$strategies) <- names_of_samples
@@ -428,7 +428,7 @@ stratEst.post <- function( data , cpp.output , stratEst.return , strategies , co
     }
   }
   else{
-    if( num_samples == 1 | ( (specific_probs == F | num_probs_to_est == 0) & (specific_trembles == F | num_trembles_to_est == 0) ) ){
+    if( num_samples == 1 | ( (specific_probs == FALSE | num_probs_to_est == 0) & (specific_trembles == FALSE | num_trembles_to_est == 0) ) ){
       names(stratEst.return$strategies) <- names_of_strategies
     }
     else{

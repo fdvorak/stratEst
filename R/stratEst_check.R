@@ -20,14 +20,14 @@
 #' model.mixture.check <- stratEst.check( model.mixture )
 #' print(model.mixture.check$fit)
 #' @export
-stratEst.check <- function( model, chi.tests = F, bs.samples = 100, verbose = FALSE ){
+stratEst.check <- function( model, chi.tests = FALSE, bs.samples = 100, verbose = FALSE ){
   # check model
-  if( "stratEst.model" %in% class(model) == F ){
+  if( "stratEst.model" %in% class(model) == FALSE ){
     stop("stratEst.check error: The object passed to the argument 'model' must be of class 'stratEst.model'.")
   }
 
   # check test
-  if ( "logical" %in% class(chi.tests) == F ){
+  if ( "logical" %in% class(chi.tests) == FALSE ){
     stop("stratEst.check error: The input argument 'chi.tests' must be a logical.");
   }
 
@@ -37,14 +37,14 @@ stratEst.check <- function( model, chi.tests = F, bs.samples = 100, verbose = FA
   }
 
   # check verbose
-  if ( "logical" %in% class(verbose) == F ){
+  if ( "logical" %in% class(verbose) == FALSE ){
     stop("stratEst.check error: The input argument 'verbose' must be a logical.");
   }
 
   # retrieve info
   data <- model$fit.args$data
   shares <- model$shares
-  LCR = is.null(model$coefficients) == F
+  LCR = is.null(model$coefficients) == FALSE
   if( "list" %in% class(shares) ){
     num.strats <- length(shares[[1]])
   }else{
@@ -102,7 +102,7 @@ stratEst.check <- function( model, chi.tests = F, bs.samples = 100, verbose = FA
 
         #selected shares
         selected.shares <- NULL
-        if( is.null(model$fit.args$shares) == F ){
+        if( is.null(model$fit.args$shares) == FALSE ){
           if( "list" %in% class(model$fit.args$shares) ){
             selected.shares <- list()
             for( sam in 1:length(model$fit.args$shares) ){
@@ -124,7 +124,7 @@ stratEst.check <- function( model, chi.tests = F, bs.samples = 100, verbose = FA
 
         # selected coefficients
         selected.coefficients <- NULL
-        if( is.null(model$fit.args$coefficients) == F & length(model$strategies) > 1 ){
+        if( is.null(model$fit.args$coefficients) == FALSE & length(model$strategies) > 1 ){
           selected.coefficients <- matrix(NA,nrow(model$fit.args$coefficients),length(model$strategies))
           for( strs in 1:length(model$strategies) ){
             selected.coefficients[,strs] <- model$fit.args$coefficients[,names(model$strategies)[strs]]
@@ -134,12 +134,12 @@ stratEst.check <- function( model, chi.tests = F, bs.samples = 100, verbose = FA
         }
 
         selected.covariates <- NULL
-        if( is.null(model$fit.args$covariates) == F & length(model$strategies) > 1 ){
+        if( is.null(model$fit.args$covariates) == FALSE & length(model$strategies) > 1 ){
           selected.covariates <- model$fit.args$covariates
         }
 
         # estimate model
-        sim.model <- stratEst.model( sim.data , selected.strategies , selected.shares , coefficients = selected.coefficients, covariates = selected.covariates, sample.id = model$fit.args$sample.id, response = model$fit.args$response, sample.specific = model$fit.args$sample.specific, r.probs = model$fit.args$r.probs, r.trembles = model$fit.args$r.trembles, select = NULL, min.strategies = model$fit.args$min.strategies, crit = model$fit.args$crit, se = "analytic", outer.runs = model$fit.args$outer.runs, outer.tol = model$fit.args$outer.tol, outer.max = model$fit.args$outer.max, inner.runs = model$fit.args$inner.runs, inner.tol = model$fit.args$inner.tol, inner.max = model$fit.args$inner.max, lcr.runs = model$fit.args$lcr.runs, lcr.tol = model$fit.args$lcr.tol, lcr.max = model$fit.args$lcr.max, step.size = model$fit.args$step.size, penalty = model$fit.args$penalty, verbose = F )
+        sim.model <- stratEst.model( sim.data , selected.strategies , selected.shares , coefficients = selected.coefficients, covariates = selected.covariates, sample.id = model$fit.args$sample.id, response = model$fit.args$response, sample.specific = model$fit.args$sample.specific, r.probs = model$fit.args$r.probs, r.trembles = model$fit.args$r.trembles, select = NULL, min.strategies = model$fit.args$min.strategies, crit = model$fit.args$crit, se = "analytic", outer.runs = model$fit.args$outer.runs, outer.tol = model$fit.args$outer.tol, outer.max = model$fit.args$outer.max, inner.runs = model$fit.args$inner.runs, inner.tol = model$fit.args$inner.tol, inner.max = model$fit.args$inner.max, lcr.runs = model$fit.args$lcr.runs, lcr.tol = model$fit.args$lcr.tol, lcr.max = model$fit.args$lcr.max, step.size = model$fit.args$step.size, penalty = model$fit.args$penalty, verbose = FALSE )
         chi[m] <- sim.model$chi.global
         greater[m] <- sim.model$chi.global > model$chi.global
         chi_local[m,] <- sim.model$chi.local
@@ -153,15 +153,15 @@ stratEst.check <- function( model, chi.tests = F, bs.samples = 100, verbose = FA
      cat("\n")
     }
 
-    p.value <- mean(greater,na.rm = T)
-    p.values.local <- apply(greater_local,2,mean,na.rm = T)
+    p.value <- mean(greater,na.rm = TRUE )
+    p.values.local <- apply(greater_local,2,mean,na.rm = TRUE )
 
-    chi.global.result <- matrix(c(model$chi.global,min(chi,na.rm=T),mean(chi,na.rm=T),max(chi,na.rm=T),p.value),1,5)
+    chi.global.result <- matrix(c(model$chi.global,min(chi, na.rm = TRUE ),mean(chi,na.rm=TRUE),max(chi,na.rm=TRUE),p.value),1,5)
     colnames(chi.global.result) <- c("chi^2","min","mean","max","p.value")
     rownames(chi.global.result) <- as.character(c(substitute(model)))
     stratEst.check.return$chi.global <- chi.global.result
 
-    chi.local.result <- matrix(c(model$chi.local,apply(chi_local,2,min,na.rm=T),apply(chi_local,2,mean,na.rm=T),apply(chi_local,2,max,na.rm=T),p.values.local),num.strats,5)
+    chi.local.result <- matrix(c(model$chi.local,apply(chi_local,2,min,na.rm=TRUE),apply(chi_local,2,mean,na.rm=TRUE),apply(chi_local,2,max,na.rm=TRUE),p.values.local),num.strats,5)
     colnames(chi.local.result) <- c("chi^2","min","mean","max","p.value")
     rownames(chi.local.result) <- colnames(model$post.assignment)
     stratEst.check.return$chi.local <- chi.local.result

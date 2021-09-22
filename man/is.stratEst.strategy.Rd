@@ -9,6 +9,9 @@ is.stratEst.strategy(x)
 \arguments{
 \item{x}{object to be tested.}
 }
+\value{
+\code{is.stratEst.strategy} returns \code{TRUE} if its argument is a \code{stratEst.strategy} object (that is, has "stratEst.strategy" amongst its classes) and \code{FALSE} otherwise.
+}
 \description{
 Checks if an object is of class \code{stratEst.strategy}.
 }

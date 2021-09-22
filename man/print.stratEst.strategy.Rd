@@ -11,6 +11,9 @@
 
 \item{...}{Further arguments passed to or from other methods.}
 }
+\value{
+No return value, prints a summary of the strategy to the console.
+}
 \description{
 Print Method for stratEst.strategy
 }

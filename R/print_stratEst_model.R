@@ -1,12 +1,13 @@
 #' Print Method for stratEst.model
 #' @param x An object of class \code{stratEst.model}.
 #' @param ... Further arguments passed to or from other methods.
+#' @return No return value, prints a summary of the model to the console.
 #' @export
 print.stratEst.model <- function( x , ... ){
 
   stratEst.return <- x
 
-  convergence_string <- ifelse( is.null(stratEst.return$convergence) , "no parameters estimated" , ifelse( max( stratEst.return$convergence[ is.na(stratEst.return$convergence) == F ] ) < 0.001 , "yes" , ifelse( any( stratEst.return$convergence[ is.na(stratEst.return$convergence) == F ] < 0.001 ) , "partial" , "no") ) )
+  convergence_string <- ifelse( is.null(stratEst.return$convergence) , "no parameters estimated" , ifelse( max( stratEst.return$convergence[ is.na(stratEst.return$convergence) == FALSE ] ) < 0.001 , "yes" , ifelse( any( stratEst.return$convergence[ is.na(stratEst.return$convergence) == FALSE ] < 0.001 ) , "partial" , "no") ) )
 
   writeLines("")
   writeLines(paste(deparse(substitute(object)),sep=""))
@@ -25,7 +26,7 @@ print.stratEst.model <- function( x , ... ){
     print(round(stratEst.return$shares,2))
   }
   writeLines("")
-  if( is.null(stratEst.return$coefficients) == F ){
+  if( is.null(stratEst.return$coefficients) == FALSE ){
     writeLines("latent class coefficients")
     writeLines(paste(rep("-",nchar("latent class coefficients")),collapse = ""))
     print(round(stratEst.return$coefficients,2))

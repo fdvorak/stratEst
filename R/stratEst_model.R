@@ -112,7 +112,7 @@
 #' model.mixture <- stratEst.model(data.WXZ2014,strategies.mixture)
 #'
 #' @export
-stratEst.model <- function( data, strategies, shares = NULL, coefficients = NULL, covariates = NULL, sample.id = NULL,  response = "mixed", sample.specific = c("shares","probs","trembles"), r.probs = "no", r.trembles = "global", select = NULL, min.strategies = 1, crit = "bic", se = "analytic", outer.runs = 1, outer.tol = 1e-10, outer.max = 1000, inner.runs = 10, inner.tol = 1e-5, inner.max = 10, lcr.runs = 100, lcr.tol = 1e-10, lcr.max = 1000 , bs.samples = 1000, quantiles = c(0.05,0.5,0.95), step.size = 1, penalty = F, verbose = FALSE ){
+stratEst.model <- function( data, strategies, shares = NULL, coefficients = NULL, covariates = NULL, sample.id = NULL,  response = "mixed", sample.specific = c("shares","probs","trembles"), r.probs = "no", r.trembles = "global", select = NULL, min.strategies = 1, crit = "bic", se = "analytic", outer.runs = 1, outer.tol = 1e-10, outer.max = 1000, inner.runs = 10, inner.tol = 1e-5, inner.max = 10, lcr.runs = 100, lcr.tol = 1e-10, lcr.max = 1000 , bs.samples = 1000, quantiles = c(0.05,0.5,0.95), step.size = 1, penalty = FALSE, verbose = FALSE ){
 
   #fit args
   fit.args = list()
@@ -217,7 +217,7 @@ stratEst.model <- function( data, strategies, shares = NULL, coefficients = NULL
     }
   }else{
     coefficient_mat <- stratEst.check.coefficients( coefficients , covariates , num_strats , names_strategies )
-    if( LCR == F ){
+    if( LCR == FALSE ){
       warning("stratEst warning: No covariates specified. The input object 'coefficients' is ignored.");
     }
   }

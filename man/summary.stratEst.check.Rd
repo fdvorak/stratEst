@@ -11,6 +11,9 @@
 
 \item{...}{additional arguments affecting the summary produced.}
 }
+\value{
+No return value, prints a summary of the model checks to the console.
+}
 \description{
 Method dispatch for Generic Function Summary
 }

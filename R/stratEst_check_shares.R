@@ -7,7 +7,7 @@ stratEst.check.shares <- function( shares , LCR , specific_shares , num_samples 
     warning("stratEst warning: Covariates specified. The input object 'shares' is ignored.");
   }else{
     if( specific_shares & num_samples > 1 ){
-      if( inherits( shares , "list") == F ){
+      if( inherits( shares , "list") == FALSE ){
         stop("stratEst error: If the shares are sample specific, the input object 'shares' has to be a list of numeric vectors with as many elements as there are samples.");
       }
       shares_matrix = matrix( NA , num_strats , num_samples )
@@ -19,7 +19,7 @@ stratEst.check.shares <- function( shares , LCR , specific_shares , num_samples 
           if( length(shares_vec) != num_strats ){
             stop("stratEst error: The elements of the input object 'shares' have to be numeric vectors with as many elements as there are strategies.");
           }
-          if( is.na(shares_vec[i]) == F & is.numeric(shares_vec[i]) == F  ){
+          if( is.na(shares_vec[i]) == FALSE & is.numeric(shares_vec[i]) == FALSE  ){
             stop("stratEst error: The elements of the input object 'shares' have to be numeric vectors. NA values are allowed.");
           }
           shares_matrix[,i] = shares[[expected_string]]
@@ -32,7 +32,7 @@ stratEst.check.shares <- function( shares , LCR , specific_shares , num_samples 
         stop("stratEst error: The input object 'shares' has to be a numeric vector with as many elements as there are strategies.");
       }
       for( i in 1:num_strats ){
-        if( is.na(shares[i]) == F & is.numeric(shares[i]) == F  ){
+        if( is.na(shares[i]) == FALSE & is.numeric(shares[i]) == FALSE  ){
           stop("stratEst error: The input object 'shares' has to be a numeric vector. NA values are allowed.");
         }
       }

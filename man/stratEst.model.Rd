@@ -31,7 +31,7 @@ stratEst.model(
   bs.samples = 1000,
   quantiles = c(0.05, 0.5, 0.95),
   step.size = 1,
-  penalty = F,
+  penalty = FALSE,
   verbose = FALSE
 )
 }

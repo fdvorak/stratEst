@@ -56,7 +56,7 @@ stratEst.data <- function( data, choice = "choice", input = c("input"), input.la
   }
 
   # check choice
-  if( choice %in% colnames(data) == F ) {
+  if( choice %in% colnames(data) == FALSE ) {
     stop(paste("stratEst.data error: The data does not contain the variable '",choice,"'.",sep=""))
   }
   else{
@@ -72,7 +72,7 @@ stratEst.data <- function( data, choice = "choice", input = c("input"), input.la
 
   # check input
   for( i in 1:length(input) ){
-    if( input[i] %in% colnames(data) == F ) {
+    if( input[i] %in% colnames(data) == FALSE ) {
       stop(paste("stratEst.data error: The data does not contain the variable '",input[i],"'.",sep=""))
     }
   }
@@ -150,7 +150,7 @@ stratEst.data <- function( data, choice = "choice", input = c("input"), input.la
   }
 
   # check drop and drop
-  if( is.null(drop) == F ) {
+  if( is.null(drop) == FALSE ) {
     if( class(drop) != "character" ){
       stop("stratEst.data error: Input object 'drop' must be a character vector indicating the variables in 'data' that should be added to the data frame.")
     }
@@ -165,7 +165,7 @@ stratEst.data <- function( data, choice = "choice", input = c("input"), input.la
   }
 
   # check add and add
-  if( is.null(add) == F ) {
+  if( is.null(add) == FALSE ) {
     if( class(add) != "character" ){
       stop("stratEst.data error: Input object 'add' must be a character vector indicating the variables from the global environment that should be added to the data frame.")
     }
@@ -189,16 +189,16 @@ stratEst.data <- function( data, choice = "choice", input = c("input"), input.la
   # GENERATE INPUT VALUE MATRIX
   ###############################################################################################
   input_var <- rep(NA,nrow(data))
-  input_NA_index <- rep(F,nrow(data))
+  input_NA_index <- rep(FALSE,nrow(data))
   for( i in 1:num_input_vars ){
     if( i == 1 ){
       input_var <- input_vars[,i]
-      input_NA_index[ is.na( input_var ) ] = T
+      input_NA_index[ is.na( input_var ) ] = TRUE
       input_var <- as.character( input_var )
     }
     else{
       next_input_var <- input_vars[,i]
-      input_NA_index[ is.na( next_input_var ) ] = T
+      input_NA_index[ is.na( next_input_var ) ] = TRUE
       next_input_var <- as.character( next_input_var )
       input_var <- paste(input_var, next_input_var ,sep= input.sep )
     }

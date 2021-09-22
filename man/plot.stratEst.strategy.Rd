@@ -9,8 +9,8 @@
   y,
   ...,
   title = NULL,
-  show.legend = T,
-  show.title = T,
+  show.legend = TRUE,
+  show.title = TRUE,
   node.fontsize = 25,
   main.fontsize = 40,
   arrow.fontsize = 20,
@@ -61,6 +61,9 @@
 \item{ranksep}{Separation of nodes with the same rank.}
 
 \item{file}{String. A valid path followed by a file name. Should end with .svg. Default is NA and no file is written.}
+}
+\value{
+No return value, called to create a plot.
 }
 \description{
 Plot Method for stratEst.strategy

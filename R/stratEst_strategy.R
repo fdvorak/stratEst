@@ -23,19 +23,19 @@
 stratEst.strategy <- function( choices, inputs = NULL, prob.choices = NULL, tr.inputs = NULL, trembles = NULL, num.states = NULL ){
 
   # check num.states
-  if( is.null(num.states) == F ){
+  if( is.null(num.states) == FALSE ){
     if( class( num.states ) != "numeric" | length( num.states ) != 1 ){
       stop(paste("stratEst.strategy error: The input object 'num.states' must be an integer.",sep=""))
     }
   }
 
   # check inputs
-  if( is.null( inputs ) == F ){
+  if( is.null( inputs ) == FALSE ){
     if( class( inputs ) != "character"  ){
       stop(paste("stratEst.strategy error: The input object 'inputs' must be a character vector.",sep=""))
     }
     input_has_na <- as.numeric( any( is.na( inputs ) ) )
-    num_inputs = length( inputs[ is.na( inputs ) == F ] )
+    num_inputs = length( inputs[ is.na( inputs ) == FALSE ] )
     if( is.null( num.states ) ){
       num.states = num_inputs + input_has_na
     }
@@ -46,7 +46,7 @@ stratEst.strategy <- function( choices, inputs = NULL, prob.choices = NULL, tr.i
     transition_mat <- t(transition_mat)
 
     # check tr.inputs
-    if( is.null( tr.inputs) == F ){
+    if( is.null( tr.inputs) == FALSE ){
       if( class( tr.inputs ) != "numeric" ){
         stop(paste("stratEst.strategy error: tr.inputs must be numeric.",sep=""))
       }
@@ -84,12 +84,12 @@ stratEst.strategy <- function( choices, inputs = NULL, prob.choices = NULL, tr.i
   tremble_vec <- rep( NA , nrow(response_mat) )
 
   # check prob.choices
-  if( is.null( prob.choices ) == F ){
-    if( all( is.na( prob.choices ) ) == F ){
+  if( is.null( prob.choices ) == FALSE ){
+    if( all( is.na( prob.choices ) ) == FALSE ){
       if( class( prob.choices ) != "numeric" & class( prob.choices ) != "integer" ){
         stop(paste("stratEst.strategy error: prob.choices must be numeric.",sep=""))
       }
-      if( any( is.na(prob.choices) == F & ( prob.choices < 0 | prob.choices > 1 ) ) ){
+      if( any( is.na(prob.choices) == FALSE & ( prob.choices < 0 | prob.choices > 1 ) ) ){
         stop(paste("stratEst.strategy error: prob.choices must be values between zero and one.",sep=""))
       }
       response_mat <- t(response_mat)
@@ -111,12 +111,12 @@ stratEst.strategy <- function( choices, inputs = NULL, prob.choices = NULL, tr.i
   }
 
   # check trembles
-  if( is.null( trembles ) == F ){
-    if( all( is.na( trembles ) ) == F ){
+  if( is.null( trembles ) == FALSE ){
+    if( all( is.na( trembles ) ) == FALSE ){
       if( class( trembles ) != "numeric" ){
         stop(paste("stratEst.strategy error: trembles must be numeric.",sep=""))
       }
-      if( any( is.na(trembles) == F & ( trembles < 0 | trembles > 1 ) ) ){
+      if( any( is.na(trembles) == FALSE & ( trembles < 0 | trembles > 1 ) ) ){
         stop(paste("stratEst.strategy error: trembles must be values between zero and one.",sep=""))
       }
       if( length(trembles) > length(tremble_vec)  ){
@@ -129,18 +129,18 @@ stratEst.strategy <- function( choices, inputs = NULL, prob.choices = NULL, tr.i
     }
   }
 
-  include_tremble = F
-  if( is.null( prob.choices ) == F ){
-    include_tremble = any( prob.choices[ is.na(prob.choices) == F ] == 0 )
+  include_tremble = FALSE
+  if( is.null( prob.choices ) == FALSE ){
+    include_tremble = any( prob.choices[ is.na(prob.choices) == FALSE ] == 0 )
   }
 
-  if( is.null(inputs) == F & include_tremble == T ){
+  if( is.null(inputs) == FALSE & include_tremble == TRUE ){
     strategy <- as.data.frame(cbind(response_mat,tremble_vec,transition_mat))
   }
-  else if( is.null(inputs) == T & include_tremble == T ){
+  else if( is.null(inputs) == TRUE & include_tremble == TRUE ){
     strategy <- as.data.frame(cbind(response_mat,tremble_vec))
   }
-  else if( is.null(inputs) == F & include_tremble == F ){
+  else if( is.null(inputs) == FALSE & include_tremble == FALSE ){
     strategy <- as.data.frame(cbind(response_mat,transition_mat))
   }
   else{
@@ -149,16 +149,16 @@ stratEst.strategy <- function( choices, inputs = NULL, prob.choices = NULL, tr.i
 
   # column names
   output_names <- paste( "prob." , choices , sep ="" )
-  if( is.null(inputs) == F ){
-    input_names <- paste( "tr(" , inputs[ is.na( inputs ) == F ] , ")" , sep ="" )
+  if( is.null(inputs) == FALSE ){
+    input_names <- paste( "tr(" , inputs[ is.na( inputs ) == FALSE ] , ")" , sep ="" )
   }
-  if( is.null(inputs) == F & include_tremble == T ){
+  if( is.null(inputs) == FALSE & include_tremble == TRUE ){
     colnames(strategy) <- c(output_names,"tremble",input_names)
   }
-  else if( is.null(inputs) == T & include_tremble == T ){
+  else if( is.null(inputs) == TRUE & include_tremble == TRUE ){
     colnames(strategy) <- c(output_names,"tremble")
   }
-  else if( is.null(inputs) == F & include_tremble == F ){
+  else if( is.null(inputs) == FALSE & include_tremble == FALSE ){
     colnames(strategy) <- c(output_names,input_names)
   }
   else{
