@@ -71,6 +71,8 @@ summary.stratEst.model <- function( object , ..., plot.shares = TRUE ){
         old.mar <- graphics::par("mar", no.readonly = FALSE)
         on.exit(graphics::par(old.mar))
         graphics::par(mar = c(5,4,4,10))
+        old.xpd <- graphics::par("xpd", no.readonly = FALSE)
+        on.exit(graphics::par(old.xpd))
         bars <- graphics::barplot(shares, beside = TRUE, main = "estimated shares", xlab="strategies", ylab="frequency", ylim=c(0,1), col = def.palette[1:num.treatments], legend = rownames(shares), args.legend = list(x = 'right', bty='n', inset=c(-0.40,0), xpd = TRUE ) )
         error.ses(t(bars),c(t(shares)),c(model$shares.se))
       }else{

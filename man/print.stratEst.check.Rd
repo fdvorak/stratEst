@@ -12,7 +12,7 @@
 \item{...}{Further arguments passed to or from other methods.}
 }
 \value{
-Prints a \code(matrix) that contains the log-likelihood, the number of free model parameters, and the values of three information criteria in columns.
+Prints a \code{matrix} that contains the log-likelihood, the number of free model parameters, and the values of three information criteria in columns.
 }
 \description{
 Print Method for stratEst.check

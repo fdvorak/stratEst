@@ -1,13 +1,17 @@
 ---
 title: "NEWS"
 author: "Fabian Dvorak"
-date: "September 21 2021"
+date: "September 22 2021"
 output: html_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+# stratEst 1.1.4
+* uses TRUE and FALSE instead of T and F
+* adds \value to .Rd files
+* calls on.exit() to reset settings
 
 # stratEst 1.1.3
 * next try to fix UBSAN errors
