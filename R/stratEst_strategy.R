@@ -24,14 +24,14 @@ stratEst.strategy <- function( choices, inputs = NULL, prob.choices = NULL, tr.i
 
   # check num.states
   if( is.null(num.states) == FALSE ){
-    if( class( num.states ) != "numeric" | length( num.states ) != 1 ){
+    if( inherits(num.states, "numeric") == FALSE | length( num.states ) != 1 ){
       stop(paste("stratEst.strategy error: The input object 'num.states' must be an integer.",sep=""))
     }
   }
 
   # check inputs
   if( is.null( inputs ) == FALSE ){
-    if( class( inputs ) != "character"  ){
+    if( inherits( inputs , "character" ) == FALSE  ){
       stop(paste("stratEst.strategy error: The input object 'inputs' must be a character vector.",sep=""))
     }
     input_has_na <- as.numeric( any( is.na( inputs ) ) )
@@ -47,7 +47,7 @@ stratEst.strategy <- function( choices, inputs = NULL, prob.choices = NULL, tr.i
 
     # check tr.inputs
     if( is.null( tr.inputs) == FALSE ){
-      if( class( tr.inputs ) != "numeric" ){
+      if( inherits( tr.inputs , "numeric") == FALSE ){
         stop(paste("stratEst.strategy error: tr.inputs must be numeric.",sep=""))
       }
       if( any( tr.inputs < 0 ) | any( tr.inputs > num.states )  ){
@@ -74,7 +74,7 @@ stratEst.strategy <- function( choices, inputs = NULL, prob.choices = NULL, tr.i
     stop(paste("stratEst.strategy error: The input object 'choices' is missing.",sep=""))
   }
   else{
-    if( class( choices ) != "character"  ){
+    if( inherits( choices , "character") == FALSE  ){
       stop(paste("stratEst.strategy error: The input object 'choices' must be a character vector.",sep=""))
     }
   }
@@ -86,7 +86,7 @@ stratEst.strategy <- function( choices, inputs = NULL, prob.choices = NULL, tr.i
   # check prob.choices
   if( is.null( prob.choices ) == FALSE ){
     if( all( is.na( prob.choices ) ) == FALSE ){
-      if( class( prob.choices ) != "numeric" & class( prob.choices ) != "integer" ){
+      if( inherits( prob.choices, "numeric") == FALSE & inherits( prob.choices , "integer") == FALSE ){
         stop(paste("stratEst.strategy error: prob.choices must be numeric.",sep=""))
       }
       if( any( is.na(prob.choices) == FALSE & ( prob.choices < 0 | prob.choices > 1 ) ) ){
@@ -113,7 +113,7 @@ stratEst.strategy <- function( choices, inputs = NULL, prob.choices = NULL, tr.i
   # check trembles
   if( is.null( trembles ) == FALSE ){
     if( all( is.na( trembles ) ) == FALSE ){
-      if( class( trembles ) != "numeric" ){
+      if( inherits( trembles , "numeric") == FALSE ){
         stop(paste("stratEst.strategy error: trembles must be numeric.",sep=""))
       }
       if( any( is.na(trembles) == FALSE & ( trembles < 0 | trembles > 1 ) ) ){

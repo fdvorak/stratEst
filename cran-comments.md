@@ -1,18 +1,16 @@
 ---
 title: "cran-comments"
 author: "Fabian Dvorak"
-date: "September 22 2021"
+date: "November 09 2022"
 output: html_document
 ---
 
-Thanks for your time. This is version 1.1.4:
+Thanks for your time. This is version 1.1.5:
 
-* uses TRUE and FALSE instead of T and F
-* adds \value to .Rd files
-* calls on.exit() to reset settings
+* fixes bug if input is NA in later periods
 
 ## Test environments
-* windows 10 pro install, R 4.1.1                (local)
+* windows 10 pro install, R 4.2.2                (local)
 * windows server, x86_64, r-release, R 4.1.0     (with github actions)
 * windows server, x86_64, r-oldrel, R 4.0.5      (with github actions)
 * mac OS X	10.15.7, x86_64, r-release, R 4.1.0  (with github actions)
@@ -23,7 +21,7 @@ Thanks for your time. This is version 1.1.4:
 * ubuntu 18.04.5 LTS, x86_64, r-release, R 4.1.0 (with github actions)
 
 ## R CMD check results
-* windows 10 pro install, R 4.1.1                (local)
+* windows 10 pro install, R 4.2.2                (local)
 * windows server, x86_64, r-release, R 4.1.0     (with github actions)
 * windows server, x86_64, r-oldrel, R 4.0.5      (with github actions)
 * mac OS X	10.15.7, x86_64, r-release, R 4.1.0  (with github actions)

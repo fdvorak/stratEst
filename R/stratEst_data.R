@@ -35,13 +35,13 @@ stratEst.data <- function( data, choice = "choice", input = c("input"), input.la
     stop("stratEst.data error: Mandatory input object 'data' is missing.")
   }
   else{
-    if( class(data) != "data.frame" ){
+    if( inherits(data, "data.frame") == FALSE ){
       stop("stratEst.data error: Input object 'data' must be a data frame.")
     }
   }
 
   # check id
-  if( class(id) != "character" ){
+  if( inherits(id, "character") == FALSE ){
     stop("stratEst.data error: Input object 'id' must be a character indicating the variable in 'data' which identifies the individuals.")
   }
   if( length(id) != 1 ){
@@ -61,7 +61,7 @@ stratEst.data <- function( data, choice = "choice", input = c("input"), input.la
   }
   else{
     output <- choice
-    if( class(output) != "character" ){
+    if( inherits(output, "character") == FALSE ){
       stop("stratEst.data error: Input object 'output' must be a character indicating the variable in 'data' which identifies the output.")
     }
     if( length(output) != 1 ){
@@ -76,7 +76,7 @@ stratEst.data <- function( data, choice = "choice", input = c("input"), input.la
       stop(paste("stratEst.data error: The data does not contain the variable '",input[i],"'.",sep=""))
     }
   }
-  if( class(input) != "character" ){
+  if( inherits(input, "character") == FALSE ){
     stop("stratEst.data error: Input object 'input' must be a character vector indicating the variables in 'data' which generate the input.")
   }
   num_input_vars <- length(input)
@@ -93,12 +93,12 @@ stratEst.data <- function( data, choice = "choice", input = c("input"), input.la
 
 
   # # check input.levels
-  # if( class(input.levels) != "character" ){
+  # if( inherits(input.levels, "character") == FALSE ){
   #   stop("stratEst.data error: Input object 'input.levels' must be a character vector.")
   # }
 
   # check input.lag
-  if( class(input.lag) != "numeric" ){
+  if( inherits(input.lag, "numeric") == FALSE ){
     stop("stratEst.data error: Input object 'input.lag' must be numeric.")
   }
   if ( input.lag < 0 | input.lag%%1 != 0 ){
@@ -111,7 +111,7 @@ stratEst.data <- function( data, choice = "choice", input = c("input"), input.la
 
 
   # check game
-  if( class(game) != "character" ){
+  if( inherits(game, "character") == FALSE ){
     stop("stratEst.data error: Input object 'game' must be a character indicating the variable in 'data' which identifies the game.")
   }
   if( length(game) != 1 ){
@@ -124,7 +124,7 @@ stratEst.data <- function( data, choice = "choice", input = c("input"), input.la
   }
 
   # check period
-  if( class(period) != "character" ){
+  if( inherits(period, "character") == FALSE ){
     stop("stratEst.data error: Input object 'period' must be a character indicating the variable in 'data' which identifies the period.")
   }
   if( length(period) != 1 ){
@@ -151,7 +151,7 @@ stratEst.data <- function( data, choice = "choice", input = c("input"), input.la
 
   # check drop and drop
   if( is.null(drop) == FALSE ) {
-    if( class(drop) != "character" ){
+    if( inherits(drop, "character") == FALSE ){
       stop("stratEst.data error: Input object 'drop' must be a character vector indicating the variables in 'data' that should be added to the data frame.")
     }
     num_vars_to_drop <- length(drop)
@@ -166,7 +166,7 @@ stratEst.data <- function( data, choice = "choice", input = c("input"), input.la
 
   # check add and add
   if( is.null(add) == FALSE ) {
-    if( class(add) != "character" ){
+    if( inherits(add, "character") == FALSE ){
       stop("stratEst.data error: Input object 'add' must be a character vector indicating the variables from the global environment that should be added to the data frame.")
     }
     num_vars_to_add <- length(add)
