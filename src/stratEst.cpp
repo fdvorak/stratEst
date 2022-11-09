@@ -1755,15 +1755,15 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec sid , arma::ma
     arma::mat strategy = strategies.rows( find( complete_strat_id == (i+1) ) );
     response_cube( arma::span( 0 , ( strategy.n_rows - 1 ) ) , arma::span( 0 , (num_non_zero_outputs-1) ) , arma::span( i , i ) ) = strategy.cols( 1 , num_non_zero_outputs );
     for (int j = 0; j < rows_data; j++) {
-      if( period(j) == 1){
-        if( input(j) != 0 ){
+      if( input(j) != 0 ){
+        if( period(j) == 1){
           state_mat(j,i) = strategy( 0 , ( num_non_zero_outputs + input(j) ) );
         }
-      }
-      else{
-        int state_mat_int = state_mat( j-1 , i );
-        int input_int = input(j);
-        state_mat(j,i) = strategy( state_mat_int - 1 , ( num_non_zero_outputs + input_int ) ); //
+        else{
+          int state_mat_int = state_mat( j-1 , i );
+          int input_int = input(j);
+          state_mat(j,i) = strategy( state_mat_int - 1 , ( num_non_zero_outputs + input_int ) ); //
+        }
       }
     }
   }
