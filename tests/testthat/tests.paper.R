@@ -1,6 +1,93 @@
 library(stratEst)
 
-test_that("Introductory example paper" , {
+test_that("Example paper" , {
+  skip_on_cran()
+  set.seed(1)
+
+  # Strategies
+  print(strategies.DF2011$TFT)
+  plot(strategies.DF2011$TFT, title = "TFT")
+
+  # Data
+  data.DF2011 <- stratEst.data(data = DF2011, choice = "choice",
+                               input = c("choice","other.choice"),
+                               input.lag = 1)
+  head(data.DF2011)
+
+  # Model fitting
+  model.DF2011 <- stratEst.model(data = data.DF2011,
+                                 strategies = strategies.DF2011,
+                                 sample.id = "treatment")
+  summary(model.DF2011)
+  round(model.DF2011$shares$treatment.D5R32, digits = 2)
+  model.DF2011$strategies$treatment.D5R32$TFT
+
+  # Adaptation
+  SGRIM <- stratEst.strategy(choices= c("d","c"),
+                             inputs = c("cc","cd","dc","dd"),
+                             prob.choices = c(0,1,NA,NA,1,0),
+                             tr.inputs = rep(c(1,2,2,3), 3),
+                             num.states = 3)
+  print(SGRIM)
+  plot(SGRIM)
+
+  # Adjust candidate set
+  my.strategies <- c(strategies.DF2011[c("ALLD","ALLC","GRIM","TFT")],
+                     list("SGRIM" = SGRIM))
+  my.model <- stratEst.model(data = data.DF2011,
+                             strategies = my.strategies,
+                             sample.id = "treatment")
+
+  # Select strategies
+  select.model <- stratEst.model(data = data.DF2011,
+                                 strategies = my.strategies,
+                                 select = "strategies", crit = "bic",
+                                 sample.id = "treatment")
+
+  # Pooled model
+  pooled.model <- stratEst.model(data = data.DF2011,
+                                 strategies = my.strategies,
+                                 sample.id = "treatment",
+                                 sample.specific = "trembles")
+
+  # Fix model parameters
+  my.strategies$TFT$tremble <- c(0.1,0.2)
+  my.strategies$SGRIM$prob.c <- c(0.95,1/3,0.05)
+  my.strategies$SGRIM$prob.d <- 1 - c(0.95,1/3,0.05)
+  fixed.shares <- c(0.3,0.1,0.1,0.2,0.3)
+  model.fixed <- stratEst.model(data = data.DF2011,
+                                strategies = my.strategies,
+                                shares = fixed.shares)
+
+  # Second mover data
+  second.mover.data <- stratEst.data(data = DF2011, choice = "choice",
+                                     input = c("choice","other.choice"),
+                                     input.lag = c(1,0))
+  second.mover.model <- stratEst.model(data = second.mover.data,
+                                       strategies = strategies.DF2011)
+
+
+  # Generate Figure 4 (stratEst workflow)
+  strategies.workflow <- strategies.DF2011[c("ALLD","ALLC","GRIM","TFT")]
+  for(s in 1:4){strategies.workflow[[s]]$tremble = 0.2}
+  simulated.data <- stratEst.simulate(strategies = strategies.workflow,
+                                      shares = c(0.1,0.2,0.3,0.4))
+  model.workflow <- stratEst.model(data = simulated.data,
+                                   strategies = strategies.workflow)
+
+  # first panel: automata
+  lapply(strategies.workflow, plot, title = "", show.legend = FALSE)
+  # 2nd panel: tests
+  stratEst.test(model.workflow, par = c("shares"), values = c(0.1,0.2,0.3,0.4))
+  # 3rd panel: shares and fitted TFT
+  summary(model.workflow)
+  plot(model.workflow$strategies$TFT, title = "", show.legend = FALSE)
+
+})
+
+
+
+test_that("Example vignette" , {
   skip_on_cran()
   set.seed(1)
   rps = c("r", "p", "s")

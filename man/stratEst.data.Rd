@@ -24,7 +24,7 @@ stratEst.data(
 
 \item{input}{a character string. The names of the input generating variables in \code{data}. At least one input generating variable has to be specified. Default is \code{c("input")}.}
 
-\item{input.lag}{a numeric vector. The time lag in periods of the input generating variables. The vector must have as many elements as variables specified in the object \code{input}. Default is zero.}
+\item{input.lag}{a numeric vector. The time lag in periods of the input generating variables. An integer or a vector of integers with as many elements as variables specified in the object \code{input}. Default is zero.}
 
 \item{input.sep}{a character string. Separates the input generating variables. Default is \code{""}.}
 

@@ -9,6 +9,7 @@ stratEst.test(
   par = c("shares", "probs", "trembles", "coefficients"),
   values = NA,
   alternative = "two.sided",
+  coverage = 0.95,
   digits = 4,
   plot.tests = TRUE
 )
@@ -21,6 +22,8 @@ stratEst.test(
 \item{values}{a numeric vector. The values the parameter estimates are compared to. Default is NA which means zero.}
 
 \item{alternative}{a character string. The alternative hypothesis. Options are \code{"two.sided"}, \code{"greater"} or \code{"less"}. Default is \code{"two.sided"}.}
+
+\item{coverage}{a probability. The coverage of the plotted confidence intervals. Default is 0.95.}
 
 \item{digits}{an integer. The number of digits of the result.}
 

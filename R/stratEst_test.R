@@ -5,6 +5,7 @@
 #' @param par a character vector. The class of model parameters to be tested. Default is \code{c("shares","probs","trembles", "coefficients")}.
 #' @param values a numeric vector. The values the parameter estimates are compared to. Default is NA which means zero.
 #' @param alternative  a character string. The alternative hypothesis. Options are \code{"two.sided"}, \code{"greater"} or \code{"less"}. Default is \code{"two.sided"}.
+#' @param coverage  a probability. The coverage of the plotted confidence intervals. Default is 0.95.
 #' @param digits an integer. The number of digits of the result.
 #' @param plot.tests a logical. Plots tests if \code{TRUE}.
 #' @export
@@ -25,7 +26,7 @@
 #' t.probs <- stratEst.test(model = model.mixed, par = "probs", values = 1/3)
 #' print(t.probs)
 #' @export
-stratEst.test <- function( model, par = c("shares","probs","trembles","coefficients"), values = NA, alternative = "two.sided", digits = 4, plot.tests = TRUE ){
+stratEst.test <- function( model, par = c("shares","probs","trembles","coefficients"), values = NA, alternative = "two.sided", coverage = 0.95, digits = 4, plot.tests = TRUE ){
 
   # checks
   if( "stratEst.model" %in% class(model) == FALSE ){
@@ -112,16 +113,19 @@ stratEst.test <- function( model, par = c("shares","probs","trembles","coefficie
         stop("vectors must be same length")
       graphics::segments( xx-lower , yy  , xx + upper , yy ,  lty = 1, lwd = 1.2 , col = color, lend = 2  )
     }
-    graphics::dotchart( rev(est), labels = rev(row_names), main = "parameter tests", lcolor = "transparent", bty = 'n', pt.cex = 1.3)
+    if( "coefficients" %in% par == FALSE ){
+      graphics::dotchart( rev(est), xlim = c(0,1), labels = rev(row_names), main = "parameter tests", lcolor = "transparent", bty = 'n', pt.cex = 1.3)
+    }else{
+      graphics::dotchart( rev(est), labels = rev(row_names), main = "parameter tests", lcolor = "transparent", bty = 'n', pt.cex = 1.3)
+    }
     if( length(values) == 1 ){
       values = rep(values,length(est))
     }
     graphics::points(rev(values),c(1:length(est)),col = "red")
-    error.ses(rev(est),c(1:length(est)),stats::qt(p=.05/2, df=rep(model$res.degrees, length(est)), lower.tail=FALSE)*rev(se))
+    error.ses(rev(est),c(1:length(est)),stats::qt(p=(1-coverage)/2, df=rep(model$res.degrees, length(est)), lower.tail=FALSE)*rev(se))
     old.xpd <- graphics::par("xpd", no.readonly = FALSE)
-    on.exit(graphics::par(old.xpd))
-    par(xpd=T)
-    graphics::legend("bottom", inset=c(0,-0.55), legend=c("estimate","value","CI"), pch=c(1,1,NA), lty = c(NA,NA,1), col = c("black","red"),bty="n",ncol = 3, pt.cex = c(1.3,1,0))
+    graphics::legend("bottom", xpd = TRUE, inset=c(0,-0.35), legend=c("estimate","value","CI"), pch=c(1,1,NA), lty = c(NA,NA,1), col = c("black","red"),bty="n",ncol = 3, pt.cex = c(1.3,1,0))
+    on.exit(graphics::par(xpd=old.xpd))
   }
 
   return(par_data)

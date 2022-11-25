@@ -69,16 +69,22 @@ summary.stratEst.model <- function( object , ..., plot.shares = TRUE ){
         num.strategies <- ncol(shares)
         num.treatments <- nrow(shares)
         old.mar <- graphics::par("mar", no.readonly = FALSE)
-        on.exit(graphics::par(old.mar))
-        graphics::par(mar = c(5,4,4,10))
         old.xpd <- graphics::par("xpd", no.readonly = FALSE)
-        on.exit(graphics::par(old.xpd))
-        bars <- graphics::barplot(shares, beside = TRUE, main = "estimated shares", xlab="strategies", ylab="frequency", ylim=c(0,1), col = def.palette[1:num.treatments], legend = rownames(shares), args.legend = list(x = 'right', bty='n', inset=c(-0.40,0), xpd = TRUE ) )
+        plot_width <- length(shares) + nrow(shares)
+        bars <- graphics::barplot(shares, xlim = c(0, plot_width*1.4),
+                                  beside = TRUE, main = "estimated shares",
+                                  xlab=NULL, ylab="frequency", ylim=c(0,1),
+                                  col = def.palette[1:num.treatments], legend = rownames(shares),
+                                  args.legend=list(x=(plot_width+1), y=1,
+                                                   bty = "n", xpd=TRUE,
+                                                   cex = 0.8, xjust=0))
         error.ses(t(bars),c(t(shares)),c(model$shares.se))
+        on.exit(graphics::par(xpd = old.xpd))
+        on.exit(graphics::par(mar = old.mar))
       }else{
         shares <- model$shares
         num.strategies <- ncol(shares)
-        bars <- graphics::barplot(shares, beside = TRUE, main = "estimated shares", xlab="strategies", ylab="frequency", ylim=c(0,1), col = def.palette[1:num.strategies] )
+        bars <- graphics::barplot(shares, beside = TRUE, main = "estimated shares", xlab=NULL, ylab="frequency", ylim=c(0,1), col = def.palette[1:num.strategies] )
         error.ses(bars,c(shares),c(model$shares.se))
       }
 

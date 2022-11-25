@@ -4,7 +4,7 @@
 #' @param data a \code{data.frame} in the long format.
 #' @param choice a character string. The variable in \code{data} which contains the discrete choices. Default is \code{"choice"}.
 #' @param input a character string. The names of the input generating variables in \code{data}. At least one input generating variable has to be specified. Default is \code{c("input")}.
-#' @param input.lag a numeric vector. The time lag in periods of the input generating variables. The vector must have as many elements as variables specified in the object \code{input}. Default is zero.
+#' @param input.lag a numeric vector. The time lag in periods of the input generating variables. An integer or a vector of integers with as many elements as variables specified in the object \code{input}. Default is zero.
 #' @param input.sep a character string. Separates the input generating variables. Default is \code{""}.
 #' @param id a character string. The name of the variable in \code{data} that identifies observations of the same individual. Default is \code{"id"}.
 #' @param game a character string. The name of the variable in \code{data} that identifies observations of the same game. Default is \code{"game"}.
@@ -91,24 +91,32 @@ stratEst.data <- function( data, choice = "choice", input = c("input"), input.la
     norm_input_vars[,i] <- match(input_vars[,i],sort(unique(input_vars[,i])))
   }
 
-
-  # # check input.levels
-  # if( inherits(input.levels, "character") == FALSE ){
-  #   stop("stratEst.data error: Input object 'input.levels' must be a character vector.")
-  # }
-
   # check input.lag
   if( inherits(input.lag, "numeric") == FALSE ){
-    stop("stratEst.data error: Input object 'input.lag' must be numeric.")
+    stop("stratEst.data error: Elements of the input object 'input.lag' must be numeric.")
   }
-  if ( input.lag < 0 | input.lag%%1 != 0 ){
-    stop("stratEst error: Input object 'input.lag' must be a positive integer. Default is zero.");
+  if ( any(input.lag < 0) | any(input.lag%%1 != 0) ){
+    stop("stratEst error: Elements of the input object 'input.lag' must be positive integers. Default is zero.");
   }
-  if( length(input.lag) != 1 ){
-    stop("stratEst.data error: Input object 'input.lag' cannot have more than one element.")
+  if( length(input.lag) != 1 & length(input.lag) != length(input) ){
+    stop("stratEst.data error: The input object 'input.lag' must be an integer or a vector of integers with as many elements as variables specified in the object 'input'}.")
+  }
+  if( length(input.lag) == 1 ){
+    input.lag = rep(input.lag, length(input))
   }
   input_lag <- as.integer(input.lag)
 
+  # # OLD: check input.lag
+  # if( inherits(input.lag, "numeric") == FALSE ){
+  #   stop("stratEst.data error: Input object 'input.lag' must be numeric.")
+  # }
+  # if ( input.lag < 0 | input.lag%%1 != 0 ){
+  #   stop("stratEst error: Input object 'input.lag' must be a positive integer. Default is zero.");
+  # }
+  # if( length(input.lag) != 1 ){
+  #   stop("stratEst.data error: Input object 'input.lag' cannot have more than one element.")
+  # }
+  # input_lag <- as.integer(input.lag)
 
   # check game
   if( inherits(game, "character") == FALSE ){
@@ -191,32 +199,56 @@ stratEst.data <- function( data, choice = "choice", input = c("input"), input.la
   input_var <- rep(NA,nrow(data))
   input_NA_index <- rep(FALSE,nrow(data))
   for( i in 1:num_input_vars ){
+    next_input_var <- as.factor(input_vars[,i])
+    if( input.lag[i] > 0 ){
+        numeric_input_var <- as.numeric(next_input_var)
+        lagged_input_var <- rep(NA,length(numeric_input_var))
+        lagged_input_var <- stratEst_data_cpp( norm_id , norm_game , norm_period , numeric_input_var , lagged_input_var, input_lag[i] , num_ids )
+        lagged_input_var <- as.factor(lagged_input_var)
+        levels(lagged_input_var) <- levels(next_input_var)
+        next_input_var <- lagged_input_var
+    }
+    input_NA_index[ is.na( next_input_var ) ] = TRUE
     if( i == 1 ){
-      input_var <- input_vars[,i]
-      input_NA_index[ is.na( input_var ) ] = TRUE
-      input_var <- as.character( input_var )
+      input_var <- next_input_var
     }
     else{
-      next_input_var <- input_vars[,i]
-      input_NA_index[ is.na( next_input_var ) ] = TRUE
-      next_input_var <- as.character( next_input_var )
-      input_var <- paste(input_var, next_input_var ,sep= input.sep )
+      input_var <- paste(input_var, next_input_var ,sep = input.sep )
     }
   }
   input_var[ input_NA_index ] = NA
   input_var <- as.factor(input_var)
 
-  if( input.lag > 0 ){
-    numeric_input_var <- as.numeric(input_var)
-
-    #generate lag
-    lagged_input_var <- rep(NA,length(numeric_input_var))
-    lagged_input_var <- stratEst_data_cpp( norm_id , norm_game , norm_period , numeric_input_var , lagged_input_var, input_lag , num_ids )
-
-    lagged_input_var <- as.factor(lagged_input_var)
-    levels(lagged_input_var) <- levels(input_var)
-    input_var <- lagged_input_var
-  }
+  # OLD input generating code
+  # input_var <- rep(NA,nrow(data))
+  # input_NA_index <- rep(FALSE,nrow(data))
+  # for( i in 1:num_input_vars ){
+  #   if( i == 1 ){
+  #     input_var <- input_vars[,i]
+  #     input_NA_index[ is.na( input_var ) ] = TRUE
+  #     input_var <- as.character( input_var )
+  #   }
+  #   else{
+  #     next_input_var <- input_vars[,i]
+  #     input_NA_index[ is.na( next_input_var ) ] = TRUE
+  #     next_input_var <- as.character( next_input_var )
+  #     input_var <- paste(input_var, next_input_var ,sep= input.sep )
+  #   }
+  # }
+  # input_var[ input_NA_index ] = NA
+  # input_var <- as.factor(input_var)
+  #
+  # if( input.lag > 0 ){
+  #   numeric_input_var <- as.numeric(input_var)
+  #
+  #   #generate lag
+  #   lagged_input_var <- rep(NA,length(numeric_input_var))
+  #   lagged_input_var <- stratEst_data_cpp( norm_id , norm_game , norm_period , numeric_input_var , lagged_input_var, input_lag , num_ids )
+#
+#     lagged_input_var <- as.factor(lagged_input_var)
+#     levels(lagged_input_var) <- levels(input_var)
+#     input_var <- lagged_input_var
+#   }
 
   # if( length(input.levels) != length(unique(input_var))){
   #   warning("stratEst.data warning: The number of supplied input.levels is not equal the number of levels of the generated input.")
