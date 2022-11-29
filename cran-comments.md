@@ -1,13 +1,13 @@
 ---
 title: "cran-comments"
 author: "Fabian Dvorak"
-date: "November 09 2022"
+date: "November 29 2022"
 output: html_document
 ---
 
-Thanks for your time. This is version 1.1.5:
+Thanks for your time. This is version 1.1.6:
 
-* fixes bug if input is NA in later periods
+* fixes bug if input.lag is vector
 
 ## Test environments
 * windows 10 pro install, R 4.2.2                (local)
@@ -15,7 +15,6 @@ Thanks for your time. This is version 1.1.5:
 * windows server, x86_64, r-oldrel, R 4.1.3      (with github actions)
 * mac OS X	10.16, x86_64, r-release, R 4.2.2    (with github actions)
 * mac OS X	10.16, x86_64, r-devel 2022-11-08    (with github actions)
-* mac OS X	10.16, x86_64, r-oldrel, R 4.1.3     (with github actions)
 * ubuntu 18.04.6 LTS, x86_64, r-devel 2022-11-08 (with github actions)
 * ubuntu 18.04.6 LTS, x86_64, r-oldrel, R 4.1.3  (with github actions)
 * ubuntu 18.04.6 LTS, x86_64, r-release, R 4.2.2 (with github actions)
@@ -26,7 +25,6 @@ Thanks for your time. This is version 1.1.5:
 * windows server, x86_64, r-oldrel, R 4.1.3      (with github actions)
 * mac OS X	10.16, x86_64, r-release, R 4.2.2    (with github actions)
 * mac OS X	10.16, x86_64, r-devel 2022-11-08    (with github actions)
-* mac OS X	10.16, x86_64, r-oldrel, R 4.1.3     (with github actions)
 
 0 errors | 0 warnings | 0 notes
 

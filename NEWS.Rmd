@@ -1,13 +1,16 @@
 ---
 title: "NEWS"
 author: "Fabian Dvorak"
-date: "November 09 2022"
+date: "November 29 2022"
 output: html_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+# stratEst 1.1.6
+* fixes bug if input.lag is vector
+
 # stratEst 1.1.5
 * fixes bug if input is NA in later periods
 
