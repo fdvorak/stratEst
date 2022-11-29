@@ -1,6 +1,6 @@
 library(stratEst)
 
-test_that("Example paper" , {
+test_that("R code JESA paper" , {
   skip_on_cran()
   set.seed(1)
 
@@ -20,7 +20,7 @@ test_that("Example paper" , {
                                  sample.id = "treatment")
   summary(model.DF2011)
   round(model.DF2011$shares$treatment.D5R32, digits = 2)
-  model.DF2011$strategies$treatment.D5R32$TFT
+  print(model.DF2011$strategies$treatment.D5R32$TFT)
 
   # Adaptation
   SGRIM <- stratEst.strategy(choices= c("d","c"),
@@ -67,20 +67,27 @@ test_that("Example paper" , {
                                        strategies = strategies.DF2011)
 
 
-  # Generate Figure 4 (stratEst workflow)
+  # workflow
   strategies.workflow <- strategies.DF2011[c("ALLD","ALLC","GRIM","TFT")]
+  lapply(strategies.workflow, plot, title = "", show.legend = FALSE)
   for(s in 1:4){strategies.workflow[[s]]$tremble = 0.2}
   simulated.data <- stratEst.simulate(strategies = strategies.workflow,
                                       shares = c(0.1,0.2,0.3,0.4))
   model.workflow <- stratEst.model(data = simulated.data,
                                    strategies = strategies.workflow)
 
-  # first panel: automata
-  lapply(strategies.workflow, plot, title = "", show.legend = FALSE)
-  # 2nd panel: tests
   stratEst.test(model.workflow, par = c("shares"), values = c(0.1,0.2,0.3,0.4))
-  # 3rd panel: shares and fitted TFT
-  summary(model.workflow)
+  summary(model.workflow, legend = FALSE)
+  plot(model.workflow$strategies$TFT, title = "", show.legend = FALSE)
+
+  # Figure 4
+  summary(model.workflow, legend = FALSE)
+  stratEst.test(model.workflow, par = c("shares"), values = c(0.1,0.2,0.3,0.4))
+  strategies.workflow <- strategies.DF2011[c("ALLD","ALLC","GRIM","TFT")]
+  plot(strategies.workflow[[1]], title = "", show.legend = FALSE)
+  plot(strategies.workflow[[2]], title = "", show.legend = FALSE)
+  plot(strategies.workflow[[3]], title = "", show.legend = FALSE)
+  plot(strategies.workflow[[4]], title = "", show.legend = FALSE)
   plot(model.workflow$strategies$TFT, title = "", show.legend = FALSE)
 
 })
