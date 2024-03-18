@@ -22,6 +22,11 @@ Curtin 2016). The package contains additional functions for data
 processing and simulation, strategy generation, parameter tests, model
 checking, and model selection.
 
+## Terms of use
+Non-commercial use of stratEst is free of charge. The author kindly asks all users of the package to cite the following article in the Journal of the Economic Science Association in publications or presentations of their research: 
+
+Dvorak, F. stratEst: a software package for strategy frequency estimation. J Econ Sci Assoc 9, 337–349 (2023). https://doi.org/10.1007/s40881-023-00141-7
+
 ## Installation
 
 The most recent CRAN version of stratEst is installed by executing the
