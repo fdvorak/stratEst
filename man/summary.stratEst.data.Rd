@@ -12,7 +12,7 @@
 \item{...}{additional arguments affecting the result.}
 }
 \value{
-No return value, prints a summary of the datas to the console.
+No return value, prints a summary of the data to the console.
 }
 \description{
 Method dispatch for Generic Function summary

@@ -1,7 +1,7 @@
 #' Method dispatch for Generic Function Summary
 #' @param object An object returned by the estimation function\code{stratEst.model()}. An object of class \code{stratEst.model}.
 #' @param ... additional arguments affecting the summary produced.
-#' @param plot.shares Logical. If TRUE a barchart of the shares is plotted.
+#' @param plot.shares Logical. If TRUE a bar chart of the shares is plotted.
 #' @return No return value, prints a summary of the model to the console.
 #' @export
 

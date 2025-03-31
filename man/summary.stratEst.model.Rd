@@ -11,7 +11,7 @@
 
 \item{...}{additional arguments affecting the summary produced.}
 
-\item{plot.shares}{Logical. If TRUE a barchart of the shares is plotted.}
+\item{plot.shares}{Logical. If TRUE a bar chart of the shares is plotted.}
 }
 \value{
 No return value, prints a summary of the model to the console.

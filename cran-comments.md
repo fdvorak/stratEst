@@ -1,13 +1,13 @@
 ---
 title: "cran-comments"
 author: "Fabian Dvorak"
-date: "November 29 2022"
+date: "March 30 2025"
 output: html_document
 ---
 
-Thanks for your time. This is version 1.1.6:
+Thanks for your time. This is version 1.1.7:
 
-* fixes bug if input.lag is vector
+* fixes CRAN NOTE possible bashisms in config.ac
 
 ## Test environments
 * windows 10 pro install, R 4.2.2                (local)

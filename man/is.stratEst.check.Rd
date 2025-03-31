@@ -10,7 +10,7 @@ is.stratEst.check(x)
 \item{x}{object to be tested.}
 }
 \value{
-\code{is.stratEst.check} returns \code{TRUE} if its argument is a \code{stratEst.check} object (that is, has "stratEst.check" amongst its classes) and \code{FALSE} otherwise.
+\code{is.stratEst.check} returns \code{TRUE} if its argument is a \code{stratEst.check} object (that is, has "stratEst.check" among its classes) and \code{FALSE} otherwise.
 }
 \description{
 Checks if an object is of class \code{stratEst.check}.
