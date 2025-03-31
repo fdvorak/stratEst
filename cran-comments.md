@@ -1,7 +1,7 @@
 ---
 title: "cran-comments"
 author: "Fabian Dvorak"
-date: "March 30 2025"
+date: "March 31 2025"
 output: html_document
 ---
 
@@ -10,36 +10,24 @@ Thanks for your time. This is version 1.1.7:
 * fixes CRAN NOTE possible bashisms in config.ac
 
 ## Test environments
-* windows 10 pro install, R 4.2.2                (local)
-* windows server, x86_64, r-release, R 4.2.2     (with github actions)
-* windows server, x86_64, r-oldrel, R 4.1.3      (with github actions)
-* mac OS X	10.16, x86_64, r-release, R 4.2.2    (with github actions)
-* mac OS X	10.16, x86_64, r-devel 2022-11-08    (with github actions)
-* ubuntu 18.04.6 LTS, x86_64, r-devel 2022-11-08 (with github actions)
-* ubuntu 18.04.6 LTS, x86_64, r-oldrel, R 4.1.3  (with github actions)
-* ubuntu 18.04.6 LTS, x86_64, r-release, R 4.2.2 (with github actions)
+* windows 10 pro install, R 4.4.3                (local)
+* windows server, x86_64, r-release, 4.4.3       (with github actions)
+* windows server, x86_64, r-devel, 2025-03-29    (with github actions)
+* windows server, x86_64, r-oldrel, 4.3.3        (with github actions)
+* mac OS 14.7.4, x86_64, r-release, 4.4.3        (with github actions)
+* mac OS 14.7.4, x86_64, r-devel, 2025-03-31     (with github actions)
+* mac OS 14.7.4, x86_64, r-oldrel, 4.3.3         (with github actions)
 
 ## R CMD check results
-* windows 10 pro install, R 4.2.2                (local)
-* windows server, x86_64, r-release, R 4.2.2     (with github actions)
-* windows server, x86_64, r-oldrel, R 4.1.3      (with github actions)
-* mac OS X	10.16, x86_64, r-release, R 4.2.2    (with github actions)
-* mac OS X	10.16, x86_64, r-devel 2022-11-08    (with github actions)
+* windows 10 pro install, R 4.4.3                (local)
+* windows server, x86_64, r-release, 4.4.3       (with github actions)
+* windows server, x86_64, r-devel, 2025-03-29    (with github actions)
+* windows server, x86_64, r-oldrel, 4.3.3        (with github actions)
+* mac OS 14.7.4, x86_64, r-release, 4.4.3        (with github actions)
+* mac OS 14.7.4, x86_64, r-devel, 2025-03-31     (with github actions)
+* mac OS 14.7.4, x86_64, r-oldrel, 4.3.3         (with github actions)
 
 0 errors | 0 warnings | 0 notes
-
-* ubuntu 18.04.6 LTS, x86_64, r-devel 2022-11-08 (with github actions)
-* ubuntu 18.04.6 LTS, x86_64, r-oldrel, R 4.1.3  (with github actions)
-* ubuntu 18.04.6 LTS, x86_64, r-release, R 4.2.2 (with github actions)
-
-0 errors ✔ | 0 warnings ✔ | 1 note ✖
-
-❯ checking installed package size ... NOTE
-    installed size is 10.1Mb
-    sub-directories of 1Mb or more:
-      libs   8.7Mb
-
-My understanding is that the inflation of the libs subdirectory is due to the use of Rcpp. The main functions of the stratEst package have been written in C++ using Rcpp and RcppArmadillo.
 
 
 ## Downstream dependencies
