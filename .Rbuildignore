@@ -17,3 +17,4 @@
 ^tests_i386$
 ^tests_x64$
 ^\.github$
+^CRAN-SUBMISSION$
