@@ -352,7 +352,7 @@ arma::field<arma::mat> stratEst_EM(arma::cube& output_cube, arma::cube& sum_outp
     // check overshooting and calculate eps for tolerance
     if (eval > eval_pre+1 ) { eps_now = (1 - (new_ll_val(0) / ll_val(0))); }          // current epsilon
     if ( new_ll_val(0) == 0 ){ eps_now = 0; }
-    if ( new_ll_val.is_finite() ){  eps = eps_now; }                                  // only continue if no overshoot
+    if ( std::isfinite(new_ll_val(0)) ){  eps = eps_now; }                                  // only continue if no overshoot
     else { eps = arma::datum::nan; }                                                  // if overshooting occured report results from last eval
 
   } // end while
@@ -360,7 +360,7 @@ arma::field<arma::mat> stratEst_EM(arma::cube& output_cube, arma::cube& sum_outp
   // update new_shares
   for (int i = 0; i < num_shares_to_est; i++) {
     arma::vec updated_share = new_share_mat( find( indices_shares.t() == i+1 ) );
-    if( updated_share.is_finite() ){
+    if( std::isfinite(updated_share) ){
       arma::vec unique_updates_share = unique( updated_share );
       new_shares(i) = updated_share(0);
     }
@@ -906,14 +906,14 @@ arma::field<arma::mat> stratEst_LCR_EM(arma::cube& output_cube, arma::cube& sum_
       if (eval > eval_pre+1 ) { eps_now = (1 - (new_ll_val(0) / ll_val(0))); }          // current epsilon
       //if ( eps_now < tol_eval ){ eps_now = tol_eval; }
       if ( new_ll_val(0) == 0 ){ eps_now = 0; }
-      if ( new_ll_val.is_finite() ){  eps = eps_now; }                                  // only continue if no overshoot
+      if ( std::isfinite(new_ll_val(0)) ){  eps = eps_now; }                                  // only continue if no overshoot
       else { eps = arma::datum::nan; }
     }
     else{
       if (eval > eval_pre+1 ) { eps_now = (1 - (new_ll_val(0) / ll_val(0))); }          // current epsilon
       // if ( eps_now < tol_eval ){ eps_now = tol_eval; }
       if ( new_ll_val(0) == 0 ){ eps_now = 0; }
-      if ( new_ll_val.is_finite() ){  eps = eps_now; }                                  // only continue if no overshoot
+      if ( std::isfinite(new_ll_val(0)) ){  eps = eps_now; }                                  // only continue if no overshoot
       else { eps = arma::datum::nan; }
     }                                                                                   // if overshooting occured report results from last eval
 
@@ -1111,7 +1111,7 @@ arma::field<arma::mat> stratEst_SE(arma::cube& output_cube, arma::cube& sum_outp
       score_responses_slice = entity_slice % ( output_cube.slice(i) - ( response_mat_id % sum_outputs_cube.slice(i) ) );
       for (int j = 0; j < num_responses_to_est ; j++) {
         double contrib = accu( score_responses_slice( find( indices_responses_cube.slice( sample_of_ids_responses_int - 1 ) == j+1 ) ) );
-        if( arma::is_finite(contrib) ){
+        if( std::isfinite((contrib) ){
           score_contribution_responses(j) += contrib;
         }
       }
@@ -1128,7 +1128,7 @@ arma::field<arma::mat> stratEst_SE(arma::cube& output_cube, arma::cube& sum_outp
       score_trembles_slice =  entity_slice % tremble_weight_mat % ( output_cube.slice(i)  /  pr_mat  ) ;
       for (int j = 0; j < num_trembles_to_est ; j++) {
         double contrib = accu( score_trembles_slice( find( indices_trembles_cube.slice( sample_of_ids_trembles_int - 1 ) == j+1 ) ) );
-        if( arma::is_finite(contrib) ){
+        if( std::isfinite((contrib) ){
           score_contribution_trembles(j) += contrib;
         }
       }
@@ -2821,7 +2821,7 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec sid , arma::ma
           if( LCR == false ){
             R_NO_LCR_BS = stratEst_EM( output_cube_BS_sample, sum_outputs_cube_BS_sample, strat_id, R(0,0), empty_responses, empty_trembles, R(3,0), R(4,0), R(5,0), indices_shares, indices_responses_zero, indices_trembles_zero, responses_to_sum, response, 0, outer_tol_eval, outer_max_eval, sample_of_ids_shares_BS, num_ids_sample_shares_BS, sample_of_ids_responses_BS, num_ids_sample_responses_BS, sample_of_ids_trembles_BS, num_ids_sample_trembles_BS );
             estimated_shares_BS = R_NO_LCR_BS(0,0);
-            if( estimated_shares_BS.is_finite() && estimated_shares_BS.n_elem > 0 ){
+            if( std::isfinite(estimated_shares_BS) && estimated_shares_BS.n_elem > 0 ){
               BS_shares_SE_mat( arma::span::all , i ) = estimated_shares_BS;
               BS_shares_SE += ( ( estimated_shares_BS - estimated_shares) % (estimated_shares_BS - estimated_shares ) );
             }
@@ -2835,7 +2835,7 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec sid , arma::ma
             R_LCR_BS = stratEst_LCR_EM( output_cube_BS_sample, sum_outputs_cube_BS_sample, strat_id, covariate_mat_BS_sample, R(0,0), empty_responses, empty_trembles, R(14,0), R(3,0), R(4,0), R(5,0), R(15,0), shares_to_est, indices_responses_zero, indices_trembles_zero, indices_coefficients, true, coefficients_to_est_bs, responses_to_sum, response, 0 , outer_tol_eval, outer_max_eval, newton_stepsize, true, sample_of_ids_shares_BS, num_ids_sample_shares_BS, sample_of_ids_responses_BS, num_ids_sample_responses_BS, sample_of_ids_trembles_BS, num_ids_sample_trembles_BS );
             estimated_coefficients_BS = R_LCR_BS(14,0);
             estimated_shares_BS = R_LCR_BS(3,0);
-            if( estimated_shares_BS.is_finite() && estimated_coefficients_BS.is_finite() ){
+            if( std::isfinite(estimated_shares_BS) && std::isfinite(estimated_coefficients_BS) ){
               BS_shares_SE_mat( arma::span::all , i ) = estimated_shares_BS( shares_to_est );
               BS_coefficients_SE_mat( arma::span::all , i ) = estimated_coefficients_BS( coefficients_to_est_bs );
               BS_shares_SE += ( ( estimated_shares_BS( shares_to_est ) - estimated_shares( shares_to_est )) % (estimated_shares_BS( shares_to_est ) - estimated_shares( shares_to_est ) ) );
@@ -2880,7 +2880,7 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec sid , arma::ma
               estimated_responses_BS( find( indices_ones == 1 ) ) = response_estimate_BS;
             }
           }
-          if( estimated_responses_BS.is_finite() ){
+          if( std::isfinite(estimated_responses_BS) ){
             BS_responses_SE_mat( arma::span::all , i ) = estimated_responses_BS;
             BS_responses_SE += ( (estimated_responses_BS - estimated_responses) % (estimated_responses_BS - estimated_responses ) );
           }
@@ -2914,7 +2914,7 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec sid , arma::ma
             }
           }
         }
-        if( estimated_trembles_BS.is_finite() ){
+        if( std::isfinite(estimated_trembles_BS) ){
           BS_trembles_SE_mat( arma::span::all , i ) = estimated_trembles_BS;
           BS_trembles_SE += ( (estimated_trembles_BS - estimated_trembles) % (estimated_trembles_BS - estimated_trembles ) );
         }
@@ -3083,7 +3083,7 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec sid , arma::ma
   if( num_non_zero > 0 ){
     chi = accu(((observed(non_zero) - expected(non_zero)) % (observed(non_zero) - expected(non_zero)))/expected(non_zero) );
   }
-  if( arma::is_finite(chi) ){
+  if( std::isfinite(chi) ){
     chi_mat(0,0) = chi;
   }
 
@@ -3108,7 +3108,7 @@ List stratEst_cpp(arma::mat data, arma::mat strategies, arma::vec sid , arma::ma
     if( num_non_zero_id > 0 ){
       chi_id = accu(((observed_id(non_zero_id) - expected_id(non_zero_id)) % (observed_id(non_zero_id) - expected_id(non_zero_id)))/expected_id(non_zero_id) );
     }
-    if( k_id > 0 && arma::is_finite(chi_id) ){
+    if( k_id > 0 && std::isfinite(chi_id) ){
       chi_local(k_id-1) += chi_id;
     }
   }
