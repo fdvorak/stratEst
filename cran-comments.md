@@ -1,13 +1,13 @@
 ---
 title: "cran-comments"
 author: "Fabian Dvorak"
-date: "March 31 2025"
+date: "October 20 2025"
 output: html_document
 ---
 
-Thanks for your time. This is version 1.1.7:
+Thanks for your time. This is version 1.1.8:
 
-* fixes CRAN NOTE possible bashisms in config.ac
+* fixes WARNING about deprecated function arma::is_finite(val)
 
 ## Test environments
 * windows 10 pro install, R 4.4.3                (local)
